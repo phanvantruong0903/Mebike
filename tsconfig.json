@@ -4,10 +4,16 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/Mebike-e2e"
+      "path": "./apps/api-gateway-e2e"
     },
     {
-      "path": "./apps/Mebike"
+      "path": "./apps/api-gateway"
+    },
+    {
+      "path": "./apps/user-service-e2e"
+    },
+    {
+      "path": "./apps/user-service"
     }
   ]
 }
