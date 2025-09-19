@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { GrpcExceptionFilter } from '../../../libs/common/src/filters/grpc-exception.filter';
+import { GrpcExceptionFilter } from '@mebike/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { config as dotenvConfig } from 'dotenv';

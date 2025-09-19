@@ -3,12 +3,13 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { GRPC_PACKAGE } from '@mebike/common';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'USER_PACKAGE',
+        name: GRPC_PACKAGE.USER,
         transport: Transport.GRPC,
         options: {
           package: 'user',
