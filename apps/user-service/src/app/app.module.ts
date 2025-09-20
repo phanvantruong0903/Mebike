@@ -1,26 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { join } from 'path';
-import { AuthModule } from '../modules/auth/auth.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { UserModule } from '../modules/users/user.module';
+import { ConsulService } from '../consul/consul.service';
+import { HealthController } from '../health/health.controller';
 
 @Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: 'user',
-        transport: Transport.GRPC,
-        options: {
-          package: 'user',
-          protoPath: join(
-            process.cwd(),
-            'apps/api-gateway/src/proto/user.proto'
-          ),
-
-          url: '0.0.0.0:50051',
-        },
-      },
-    ]),
-    AuthModule,
-  ],
+  imports: [UserModule],
+  controllers: [AppController, HealthController],
+  providers: [AppService, ConsulService],
 })
 export class AppModule {}

@@ -14,8 +14,8 @@ async function bootstrap() {
       options: {
         package: ['user', 'grpc.health.v1'],
         protoPath: [
-          join(__dirname, '../proto/user.proto'),
-          join(__dirname, '../proto/health.proto'),
+          join(__dirname, '../../../common/src/lib/proto/user.proto'),
+          join(__dirname, '../../../common/src/lib/proto/health.proto'),
         ],
         url: '127.0.0.1:50051',
       },

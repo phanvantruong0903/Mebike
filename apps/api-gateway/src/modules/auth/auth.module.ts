@@ -15,7 +15,7 @@ import { GRPC_PACKAGE } from '@mebike/common';
           package: 'user',
           protoPath: join(
             process.cwd(),
-            'apps/user-service/src/proto/user.proto'
+            'common/src/lib/proto/user.proto'
           ),
           url: '0.0.0.0:50051',
         },
