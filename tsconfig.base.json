@@ -19,6 +19,7 @@
     "customConditions": ["@mebike/source"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "esModuleInterop": true
   }
 }
