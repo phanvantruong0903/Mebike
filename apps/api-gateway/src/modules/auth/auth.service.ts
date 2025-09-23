@@ -21,7 +21,9 @@ export class AuthService implements OnModuleInit {
   constructor(@Inject(GRPC_PACKAGE.USER) private client: ClientGrpc) {}
 
   onModuleInit() {
-    this.userService = this.client.getService<UserServiceClient>(GRPC_SERVICES.USER);
+    this.userService = this.client.getService<UserServiceClient>(
+      GRPC_SERVICES.USER
+    );
   }
 
   async login(data: LoginUserDto) {
@@ -41,6 +43,8 @@ export class AuthService implements OnModuleInit {
   }
 
   async getAllUser() {
-    return await lastValueFrom(this.userService.GetAllUsers({}));
+    const res = await lastValueFrom(this.userService.GetAllUsers({}));
+    console.log('GetAllUsers response:', res);
+    return res;
   }
 }
