@@ -5,3 +5,4 @@ export * from './lib/interfaces/api-response';
 export * from './lib/utils';
 export * from './lib/abstract';
 export * from './lib/graphql';
+export * from './lib/consul';

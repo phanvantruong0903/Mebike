@@ -2,26 +2,37 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AuthService } from './auth.service';
-import { GRPC_PACKAGE } from '@mebike/common';
+import {
+  ConsuleModule,
+  ConsulService,
+  CONSULT_SERVICE_ID,
+  GRPC_PACKAGE,
+} from '@mebike/common';
 import { AuthResolver } from './auth.resolver';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConsuleModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
         name: GRPC_PACKAGE.USER,
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.GRPC,
-          options: {
-            package: 'user',
-            protoPath: join(process.cwd(), 'common/src/lib/proto/user.proto'),
-            url: configService.get<string>('USER_SERVICE_URL'),
-          },
-        }),
+        imports: [ConsuleModule],
+        inject: [ConsulService],
+        useFactory: async (consulService: ConsulService) => {
+          const userService = await consulService.discoverService(
+            CONSULT_SERVICE_ID.USER
+          );
+          return {
+            transport: Transport.GRPC,
+            options: {
+              package: 'user',
+              protoPath: join(process.cwd(), 'common/src/lib/proto/user.proto'),
+              url: `${userService.address}:${userService.port}`,
+            },
+          };
+        },
       },
     ]),
   ],

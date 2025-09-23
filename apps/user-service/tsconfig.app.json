@@ -11,7 +11,7 @@
     "declaration": true,
     "declarationMap": false
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "../../common/src/lib/consul/consul.module.ts"],
   "exclude": [
     "out-tsc",
     "dist",
