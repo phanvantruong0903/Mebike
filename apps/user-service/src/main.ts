@@ -7,6 +7,7 @@ import { join } from 'path';
 import { config as dotenvConfig } from 'dotenv';
 async function bootstrap() {
   dotenvConfig();
+  console.log(process.env.USER_SERVICE_PORT);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
@@ -17,7 +18,7 @@ async function bootstrap() {
           join(__dirname, '../../../common/src/lib/proto/user.proto'),
           join(__dirname, '../../../common/src/lib/proto/health.proto'),
         ],
-        url: '127.0.0.1:50051',
+        url: `0.0.0.0:${process.env.USER_SERVICE_PORT}`,
       },
     }
   );
