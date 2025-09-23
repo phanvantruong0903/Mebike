@@ -11,7 +11,7 @@ interface UserServiceClient {
   CreateUser(data: CreateUserDto): Observable<any>;
   UpdateUser(request: { id: string } & UpdateUserDto): Observable<any>;
   GetUser(request: { id: string }): Observable<any>;
-  GetAllUsers(data: {}): Observable<any>;
+  GetAllUsers(data: object): Observable<any>;
 }
 
 @Injectable()

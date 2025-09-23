@@ -66,7 +66,7 @@ export class UsersGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_ALL)
-  async getAllUsers(_: {}) {
+  async getAllUsers(_data: object) {
     const result = await this.baseHandler.getAllLogic();
     return grpcResponse(result, USER_MESSAGES.GET_ALL_SUCCESS);
   }
