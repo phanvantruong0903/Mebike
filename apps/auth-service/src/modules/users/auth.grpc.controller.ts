@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
-import { UserService } from './users.service';
+import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/CreateUserDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { BaseGrpcHandler, throwGrpcError } from '@Mebike/common';
@@ -12,22 +12,22 @@ import { GRPC_SERVICES, USER_METHODS } from '@Mebike/common';
 import * as bcrypt from 'bcrypt';
 
 @Controller()
-export class UsersGrpcController {
+export class AuthGrpcController {
   private readonly baseHandler: BaseGrpcHandler<
     User,
     CreateUserDto,
     UpdateUserDto
   >;
 
-  constructor(private readonly userService: UserService) {
+  constructor(private readonly authService: AuthService) {
     this.baseHandler = new BaseGrpcHandler(
-      this.userService,
+      this.authService,
       CreateUserDto,
       UpdateUserDto
     );
   }
 
-  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.CREATE)
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.CREATE)
   async createUser(data: CreateUserDto) {
     try {
       const hashPassword = bcrypt.hashSync(data.password, 10);
@@ -42,7 +42,7 @@ export class UsersGrpcController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_ONE)
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.GET_ONE)
   async getUser({ id }: { id: string }) {
     const result = await this.baseHandler.getOneById(id);
     if (!result) {
@@ -52,7 +52,7 @@ export class UsersGrpcController {
     return grpcResponse(result, USER_MESSAGES.GET_DETAIL_SUCCESS);
   }
 
-  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.UPDATE)
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.UPDATE)
   async updateUser(data: UpdateUserDto & { id: string }) {
     const { id, ...updateData } = data;
 
@@ -65,15 +65,15 @@ export class UsersGrpcController {
     return grpcResponse(result, USER_MESSAGES.UPDATE_SUCCESS);
   }
 
-  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_ALL)
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.GET_ALL)
   async getAllUsers(_data: object) {
     const result = await this.baseHandler.getAllLogic();
     return grpcResponse(result, USER_MESSAGES.GET_ALL_SUCCESS);
   }
 
-  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.LOGIN)
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.LOGIN)
   async login(data: LoginUserDto) {
-    const result = await this.userService.validateUser(data);
+    const result = await this.authService.validateUser(data);
     return grpcResponse(result, USER_MESSAGES.LOGIN_SUCCESS);
   }
 }

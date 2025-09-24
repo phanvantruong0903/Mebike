@@ -21,4 +21,5 @@ export const SERVER_MESSAGE = {
   UNIQUE_CONSTRAINT_FAILED: 'Unique constraint failed',
   UNEXPECTED_ERROR: 'Unexpected Error',
   RCP_EXCEPTION: 'Rcp Exception',
+  NOT_FOUND: 'Not Found',
 };

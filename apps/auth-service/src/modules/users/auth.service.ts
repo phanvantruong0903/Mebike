@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { BaseService } from '@Mebike/common';
+import { BaseService, SERVER_MESSAGE } from '@Mebike/common';
 import { CreateUserDto } from './dto/CreateUserDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { prisma } from '@Mebike/common';
@@ -12,7 +12,7 @@ import { throwGrpcError } from '@Mebike/common';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UserService extends BaseService<
+export class AuthService extends BaseService<
   User,
   CreateUserDto,
   UpdateUserDto
@@ -31,7 +31,7 @@ export class UserService extends BaseService<
         });
 
         if (!findUser) {
-          throwGrpcError('Not Found', [USER_MESSAGES.NOT_FOUND]);
+          throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
         }
 
         const isMatch = await bcrypt.compare(
@@ -40,11 +40,13 @@ export class UserService extends BaseService<
         );
 
         if (!isMatch) {
-          throwGrpcError('Not Found', [USER_MESSAGES.VALIDATION_FAILED]);
+          throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [
+            USER_MESSAGES.VALIDATION_FAILED,
+          ]);
         }
       } catch (error: unknown) {
         const err = error as Error;
-        throwGrpcError('Internal Server Error', [err?.message]);
+        throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
       }
     }
   }

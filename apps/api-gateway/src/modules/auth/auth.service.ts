@@ -6,7 +6,7 @@ import { CreateUserDto } from './dto/CreateUserDto';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { GRPC_PACKAGE, GRPC_SERVICES } from '@mebike/common';
 
-interface UserServiceClient {
+interface AuthServiceClient {
   LoginUser(data: LoginUserDto): Observable<any>;
   CreateUser(data: CreateUserDto): Observable<any>;
   UpdateUser(request: { id: string } & UpdateUserDto): Observable<any>;
@@ -16,13 +16,13 @@ interface UserServiceClient {
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  private userService!: UserServiceClient;
+  private userService!: AuthServiceClient;
 
-  constructor(@Inject(GRPC_PACKAGE.USER) private client: ClientGrpc) {}
+  constructor(@Inject(GRPC_PACKAGE.AUTH) private client: ClientGrpc) {}
 
   onModuleInit() {
-    this.userService = this.client.getService<UserServiceClient>(
-      GRPC_SERVICES.USER
+    this.userService = this.client.getService<AuthServiceClient>(
+      GRPC_SERVICES.AUTH
     );
   }
 
@@ -44,7 +44,6 @@ export class AuthService implements OnModuleInit {
 
   async getAllUser() {
     const res = await lastValueFrom(this.userService.GetAllUsers({}));
-    console.log('GetAllUsers response:', res);
     return res;
   }
 }

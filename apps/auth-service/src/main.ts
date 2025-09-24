@@ -7,18 +7,17 @@ import { join } from 'path';
 import { config as dotenvConfig } from 'dotenv';
 async function bootstrap() {
   dotenvConfig();
-  console.log(process.env.USER_SERVICE_PORT);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.GRPC,
       options: {
-        package: ['user', 'grpc.health.v1'],
+        package: ['auth', 'grpc.health.v1'],
         protoPath: [
-          join(__dirname, '../../../common/src/lib/proto/user.proto'),
+          join(__dirname, '../../../common/src/lib/proto/auth.proto'),
           join(__dirname, '../../../common/src/lib/proto/health.proto'),
         ],
-        url: `0.0.0.0:${process.env.USER_SERVICE_PORT}`,
+        url: `0.0.0.0:${process.env.AUTH_SERVICE_PORT}`,
       },
     }
   );

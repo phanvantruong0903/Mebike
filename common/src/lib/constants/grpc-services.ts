@@ -1,9 +1,9 @@
 export const GRPC_SERVICES = {
-  USER: 'UserService',
+  AUTH: 'AuthService',
 } as const;
 
 export const GRPC_PACKAGE = {
-  USER: 'USER_PACKAGE',
+  AUTH: 'AUTH_PACKAGE',
 };
 
 export const USER_METHODS = {

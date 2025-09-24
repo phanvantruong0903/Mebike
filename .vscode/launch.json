@@ -40,9 +40,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @mebike/user-service with Nx",
+      "name": "Debug @mebike/auth-service with Nx",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["nx", "serve", "@mebike/user-service"],
+      "runtimeArgs": ["nx", "serve", "@mebike/auth-service"],
       "env": {
         "NODE_OPTIONS": "--inspect=9231"
       },
@@ -51,7 +51,7 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/apps/user-service/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/apps/auth-service/dist/**/*.(m|c|)js",
         "!**/node_modules/**"
       ]
     }
