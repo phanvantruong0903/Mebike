@@ -1,5 +1,5 @@
 {
-  "name": "@mebike/user-service",
+  "name": "@mebike/auth-service",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -11,7 +11,7 @@
           "args": [
             "--node-env=production"
           ],
-          "cwd": "apps/user-service"
+          "cwd": "apps/auth-service"
         },
         "configurations": {
           "development": {
@@ -28,8 +28,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/apps/user-service/dist/package.json",
-          "{workspaceRoot}/apps/user-service/dist/package-lock.json"
+          "{workspaceRoot}/apps/auth-service/dist/package.json",
+          "{workspaceRoot}/apps/auth-service/dist/package-lock.json"
         ],
         "options": {
           "buildTarget": "build"
@@ -41,7 +41,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/apps/user-service/dist/workspace_modules"
+          "{workspaceRoot}/apps/auth-service/dist/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {
@@ -63,15 +63,15 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@mebike/user-service:build",
+          "buildTarget": "@mebike/auth-service:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@mebike/user-service:build:development"
+            "buildTarget": "@mebike/auth-service:build:development"
           },
           "production": {
-            "buildTarget": "@mebike/user-service:build:production"
+            "buildTarget": "@mebike/auth-service:build:production"
           }
         }
       },

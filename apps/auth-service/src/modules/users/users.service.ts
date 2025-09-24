@@ -36,14 +36,14 @@ export class UserService extends BaseService<
 
         const isMatch = await bcrypt.compare(
           dtoInstance.password,
-          findUser?.password,
+          findUser?.password
         );
 
         if (!isMatch) {
           throwGrpcError('Not Found', [USER_MESSAGES.VALIDATION_FAILED]);
         }
       } catch (error: unknown) {
-        const err = error as Error
+        const err = error as Error;
         throwGrpcError('Internal Server Error', [err?.message]);
       }
     }
