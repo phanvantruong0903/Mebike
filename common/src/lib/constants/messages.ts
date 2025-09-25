@@ -10,6 +10,11 @@ export const USER_MESSAGES = {
   VALIDATION_FAILED: 'Username or Password incorrect',
   LOGIN_SUCCESS: 'User Login Successfully',
   EMAIL_EXISTED: 'Email has been used',
+  INVALID_DATA: 'Invalid Data',
+  INVALID_REFRESH_TOKEN: 'Invalid Refresh Token',
+  INVALID_TOKEN_PAYLOAD: 'Invalid Token Payload',
+  REFRESH_TOKEN_REQUIRED: 'Refresh Token is required',
+  REFRESH_TOKEN_SUCCESSFULLY: 'Refresh Token successfully',
 };
 
 export const SERVER_MESSAGE = {
@@ -22,4 +27,8 @@ export const SERVER_MESSAGE = {
   UNEXPECTED_ERROR: 'Unexpected Error',
   RCP_EXCEPTION: 'Rcp Exception',
   NOT_FOUND: 'Not Found',
+  UNSUPPORTED_OPERATION: 'Unsupported Operation',
+  UPDATED_NOT_IMPLEMENTED: 'Update method is not implemented',
+  BAD_REQUEST: 'Bad Request',
+  UNAUTHORIZED: 'Unauthorized',
 };

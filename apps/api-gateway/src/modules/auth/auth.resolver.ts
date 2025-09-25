@@ -1,9 +1,17 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { UserListResponse, UserResponse } from './graphql/UserResponse';
+import {
+  LoginResponse,
+  ResfreshTokenResponse,
+  UserListResponse,
+  UserResponse,
+} from './graphql/UserResponse';
 import { GRAPHQL_NAME } from '@mebike/common';
 import { CreateUserInput } from './graphql/CreateUserInput';
 import { UpdateUserInput } from './graphql/UpdateUserInput';
+import { AuthPayload } from './graphql/AuthPayload';
+import { LoginInput } from './graphql/Login';
+import { Body } from '@nestjs/common';
 
 @Resolver()
 export class AuthResolver {
@@ -30,5 +38,17 @@ export class AuthResolver {
     @Args('body') body: UpdateUserInput
   ): Promise<UserResponse> {
     return this.authService.updateUser(id, body);
+  }
+
+  @Mutation(() => LoginResponse, { name: GRAPHQL_NAME.LOGIN })
+  async login(@Args('body') body: LoginInput): Promise<LoginResponse> {
+    return this.authService.login(body);
+  }
+
+  @Mutation(() => ResfreshTokenResponse, { name: GRAPHQL_NAME.REFRESH_TOKEN })
+  async refreshToken(
+    @Args('refreshToken') refreshToken: string
+  ): Promise<ResfreshTokenResponse> {
+    return this.authService.refreshToken(refreshToken);
   }
 }

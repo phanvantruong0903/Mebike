@@ -2,8 +2,11 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/CreateUserDto';
-import { UpdateUserDto } from './dto/UpdateUserDto';
-import { BaseGrpcHandler, throwGrpcError } from '@Mebike/common';
+import {
+  BaseGrpcHandler,
+  SERVER_MESSAGE,
+  throwGrpcError,
+} from '@Mebike/common';
 import { grpcResponse } from '@Mebike/common';
 import { User } from '@prisma/client';
 import { USER_MESSAGES } from '@Mebike/common';
@@ -13,18 +16,10 @@ import * as bcrypt from 'bcrypt';
 
 @Controller()
 export class AuthGrpcController {
-  private readonly baseHandler: BaseGrpcHandler<
-    User,
-    CreateUserDto,
-    UpdateUserDto
-  >;
+  private readonly baseHandler: BaseGrpcHandler<User, CreateUserDto, never>;
 
   constructor(private readonly authService: AuthService) {
-    this.baseHandler = new BaseGrpcHandler(
-      this.authService,
-      CreateUserDto,
-      UpdateUserDto
-    );
+    this.baseHandler = new BaseGrpcHandler(this.authService, CreateUserDto);
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.CREATE)
@@ -42,38 +37,31 @@ export class AuthGrpcController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.GET_ONE)
-  async getUser({ id }: { id: string }) {
-    const result = await this.baseHandler.getOneById(id);
-    if (!result) {
-      throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
-    }
-
-    return grpcResponse(result, USER_MESSAGES.GET_DETAIL_SUCCESS);
-  }
-
-  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.UPDATE)
-  async updateUser(data: UpdateUserDto & { id: string }) {
-    const { id, ...updateData } = data;
-
-    const findUser = await this.baseHandler.getOneById(id);
-    if (!findUser) {
-      throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
-    }
-
-    const result = await this.baseHandler.updateLogic(id, updateData);
-    return grpcResponse(result, USER_MESSAGES.UPDATE_SUCCESS);
-  }
-
-  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.GET_ALL)
-  async getAllUsers(_data: object) {
-    const result = await this.baseHandler.getAllLogic();
-    return grpcResponse(result, USER_MESSAGES.GET_ALL_SUCCESS);
-  }
-
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.LOGIN)
   async login(data: LoginUserDto) {
     const result = await this.authService.validateUser(data);
-    return grpcResponse(result, USER_MESSAGES.LOGIN_SUCCESS);
+
+    const { accessToken, refreshToken } = await this.authService.generateToken(
+      result
+    );
+
+    return grpcResponse(
+      { accessToken, refreshToken },
+      USER_MESSAGES.LOGIN_SUCCESS
+    );
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REFRESH_TOKEN)
+  async refreshToken(data: { refreshToken: string }) {
+    const { refreshToken } = data;
+
+    if (!refreshToken) {
+      throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [
+        USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
+      ]);
+    }
+
+    const result = await this.authService.refreshToken(refreshToken);
+    return grpcResponse(result, USER_MESSAGES.REFRESH_TOKEN_SUCCESSFULLY);
   }
 }

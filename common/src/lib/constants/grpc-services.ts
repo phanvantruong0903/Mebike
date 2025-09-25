@@ -12,4 +12,5 @@ export const USER_METHODS = {
   UPDATE: 'UpdateUser',
   GET_ALL: 'GetAllUsers',
   LOGIN: 'LoginUser',
+  REFRESH_TOKEN: 'RefreshToken',
 } as const;

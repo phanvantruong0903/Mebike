@@ -21,6 +21,11 @@ message CreateUserRequest {
   int32 YOB = 4;
 }
 
+message Token {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
 message UpdateUserRequest {
   string id = 1;
   optional string email = 2;
@@ -36,7 +41,7 @@ message GetUserRequest {
 message LoginUserResponse{
   bool success = 1;
   string message = 2;
-  User data = 3;
+  Token data = 3;
   repeated string errors = 4;
 }
 
@@ -66,12 +71,28 @@ message UsersResponse {
   repeated User data = 3; 
 }
 
+message RefreshTokenRequest {
+  string refreshToken = 1;
+}
+
+message RefreshToken{
+  string accessToken = 1;
+}
+
+message ResfreshTokenResponse {
+  bool success = 1;
+  string message = 2;
+  RefreshToken data = 3;
+  repeated string errors = 4;
+}
+
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
   rpc GetAllUsers(Empty) returns (UsersResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (ResfreshTokenResponse);
 }
 
 message Empty {}
