@@ -5,8 +5,33 @@ export abstract class BaseService<T, CreateDto = never, UpdateDto = never> {
     return this.model.create({ data: dto });
   }
 
-  findAll(): Promise<T[]> {
-    return this.model.findMany();
+  async findAll(
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: T[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.model.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.model.count(),
+    ]);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   findOne(id: string): Promise<T | null> {

@@ -17,6 +17,11 @@ message UpdateUserRequest {
   optional int32 YOB = 5;
 }
 
+message GetAllUserRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
 message GetUserRequest {
   string id = 1;
 }
@@ -40,10 +45,16 @@ message UsersResponse {
   repeated User data = 3; 
 }
 
-service AuthService {
-  rpc GetUser(GetUserRequest) returns (UserDetailResponse);
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
-  rpc GetAllUsers(Empty) returns (UsersResponse);
+message GetAllUserResponse {
+  repeated User data = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  int32 totalPages = 5;
 }
 
-message Empty {}
+service UserService {
+  rpc GetUser(GetUserRequest) returns (UserDetailResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc GetAllUsers(GetAllUserRequest) returns (GetAllUserResponse);
+}
