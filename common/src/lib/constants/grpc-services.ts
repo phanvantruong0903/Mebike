@@ -14,4 +14,5 @@ export const USER_METHODS = {
   GET_ALL: 'GetAllUsers',
   LOGIN: 'LoginUser',
   REFRESH_TOKEN: 'RefreshToken',
+  CHANGE_PASSWORD: 'ChangePassword',
 } as const;

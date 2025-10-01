@@ -37,7 +37,6 @@ export class AuthService implements OnModuleInit {
   }
 
   async refreshToken(refreshToken: string) {
-    console.log(refreshToken);
     return await lastValueFrom(this.userService.RefreshToken({ refreshToken }));
   }
 }

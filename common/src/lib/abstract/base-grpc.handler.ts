@@ -102,7 +102,6 @@ export class BaseGrpcHandler<
         const messages: string[] = (errors as any[]).flatMap((err) =>
           Object.values(err.constraints ?? {}),
         );
-        console.log(messages);
         throwGrpcError(SERVER_MESSAGE.VALIDATION_FAILED, messages);
       }
     }

@@ -13,3 +13,24 @@ export function grpcResponse<T>(data: T, message = 'Success') {
     data,
   };
 }
+
+export function grpcPaginateResponse<T>(
+  result: {
+    data: T[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  },
+  message = 'Success',
+) {
+  return {
+    success: true,
+    message,
+    data: result.data,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+    totalPages: result.totalPages,
+  };
+}

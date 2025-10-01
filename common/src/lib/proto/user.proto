@@ -7,7 +7,10 @@ message User {
   string email = 2;
   string name = 3;
   int32 YOB = 4;
+  string password = 5;
+  int32 verify = 6;
 }
+
 
 message UpdateUserRequest {
   string id = 1;
@@ -18,8 +21,8 @@ message UpdateUserRequest {
 }
 
 message GetAllUserRequest {
-  int32 page = 1;
-  int32 limit = 2;
+  optional int32 page = 1;
+  optional int32 limit = 2;
 }
 
 message GetUserRequest {
@@ -46,12 +49,15 @@ message UsersResponse {
 }
 
 message GetAllUserResponse {
-  repeated User data = 1;
-  int32 total = 2;
-  int32 page = 3;
-  int32 limit = 4;
-  int32 totalPages = 5;
+  bool success = 1;
+  string message = 2;
+  repeated User data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
 }
+
 
 service UserService {
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);

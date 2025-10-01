@@ -21,21 +21,4 @@ export class AuthController {
   async register(@Body() body: CreateUserDto) {
     return this.authService.register(body);
   }
-
-  @Get(':id')
-  async detailUser(@Param('id') id: string) {
-    return this.authService.userDetail(id);
-  }
-
-  @Put(':id')
-  @ApiBody({ type: UpdateUserDto })
-  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    console.log(body);
-    return this.authService.updateUser(id, body);
-  }
-
-  @Get()
-  async getAllUser() {
-    return this.authService.getAllUser();
-  }
 }
