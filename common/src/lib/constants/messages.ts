@@ -17,6 +17,9 @@ export const USER_MESSAGES = {
   INVALID_TOKEN_PAYLOAD: 'Invalid Token Payload',
   REFRESH_TOKEN_REQUIRED: 'Refresh Token is required',
   REFRESH_TOKEN_SUCCESSFULLY: 'Refresh Token successfully',
+  PASSWORD_REQUIRED: 'Password is required',
+  ID_REQUIRED: 'User ID is required',
+  PASSWORRD_NOT_CHANGED: 'Password must be changed',
 };
 
 export const SERVER_MESSAGE = {

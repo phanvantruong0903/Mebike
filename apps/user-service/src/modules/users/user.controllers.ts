@@ -5,6 +5,7 @@ import {
   GRPC_SERVICES,
   grpcPaginateResponse,
   grpcResponse,
+  SERVER_MESSAGE,
   throwGrpcError,
   USER_MESSAGES,
   USER_METHODS,
@@ -12,6 +13,7 @@ import {
 import { User } from '@prisma/client';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UserService } from './user.services';
+import * as bcrypt from 'bcrypt';
 
 @Controller()
 export class UserController {
@@ -75,12 +77,33 @@ export class UserController {
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.CHANGE_PASSWORD)
   async changePassword(data: { password: string; id: string }) {
     try {
+      if (!data?.id) {
+        throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [USER_MESSAGES.ID_REQUIRED]);
+      }
+
+      if (!data?.password) {
+        throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [
+          USER_MESSAGES.PASSWORD_REQUIRED,
+        ]);
+      }
+
       const findUser = await this.baseHandler.getOneById(data.id);
       if (!findUser) {
         throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
       }
 
-      const result = this.userService.updatePassword(data.id, data.password);
+      if (findUser.password.match(data?.password)) {
+        throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [
+          USER_MESSAGES.PASSWORRD_NOT_CHANGED,
+        ]);
+      }
+
+      const hashPassword = bcrypt.hashSync(data.password, 10);
+      const result = await this.userService.updatePassword(
+        data.id,
+        hashPassword,
+      );
+
       return grpcResponse(result, USER_MESSAGES.UPDATE_SUCCESS);
     } catch (error) {
       const err = error as Error;

@@ -36,7 +36,7 @@ export class AuthService extends BaseService<User, CreateUserDto, never> {
 
         const isMatch = await bcrypt.compare(
           dtoInstance.password,
-          findUser?.password
+          findUser?.password,
         );
 
         if (!isMatch) {
