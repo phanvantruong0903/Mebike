@@ -8,7 +8,7 @@ export class ConsulService {
 
   constructor() {
     this.consul = new Consul({
-      host: process.env.CONSUL_HOST || '127.0.0.1',
+      host: process.env.CONSUL_HOST || 'consul',
       port: process.env.CONSUL_PORT || '8500',
       promisify: true,
     } as any);

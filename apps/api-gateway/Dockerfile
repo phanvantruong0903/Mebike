@@ -17,8 +17,14 @@ COPY --from=builder /app/apps/api-gateway/dist ./dist
 COPY package*.json ./
 COPY common/package.json ./common/
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/common ./common
 
 RUN npm pkg delete scripts.prepare && npm install --omit=dev
+
+WORKDIR /app/common
+RUN npm install --omit=dev
+
+WORKDIR /app
 
 RUN npx prisma generate
 
@@ -26,4 +32,4 @@ ENV NODE_ENV=development
 ENV PORT=3000
 
 EXPOSE 3000
-RUN ["node","dist/main.js"]
+CMD ["node","dist/main.js"]

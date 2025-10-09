@@ -15,7 +15,7 @@ services:
       dockerfile: ./apps/api-gateway/Dockerfile
     container_name: api-gateway
     depends_on:
-      - consul
+      - auth-service
     ports:
       - "${PORT}:${PORT}"
     env_file:

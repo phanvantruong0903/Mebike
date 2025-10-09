@@ -14,19 +14,19 @@ async function bootstrap() {
       options: {
         package: ['auth', 'grpc.health.v1'],
         protoPath: [
-          join(__dirname, '../../../common/src/lib/proto/auth.proto'),
-          join(__dirname, '../../../common/src/lib/proto/health.proto'),
+          join(process.cwd(), 'common/src/lib/proto/auth.proto'),
+          join(process.cwd(), 'common/src/lib/proto/health.proto'),
         ],
         url: `0.0.0.0:${process.env.AUTH_SERVICE_PORT}`,
       },
-    }
+    },
   );
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    })
+    }),
   );
   app.useGlobalFilters(new GrpcExceptionFilter());
   await app.listen();
