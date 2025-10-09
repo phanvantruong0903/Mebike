@@ -5,14 +5,14 @@ import {
   JwtServiceCustom,
   SERVER_MESSAGE,
   TokenPayload,
-} from '@Mebike/common';
+} from '@mebike/common';
 import { CreateUserDto } from './dto/CreateUserDto';
-import { prisma } from '@Mebike/common';
+import { prisma } from '@mebike/common';
 import { LoginUserDto } from './dto/LoginUserDto';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-import { USER_MESSAGES } from '@Mebike/common';
-import { throwGrpcError } from '@Mebike/common';
+import { USER_MESSAGES } from '@mebike/common';
+import { throwGrpcError } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
 

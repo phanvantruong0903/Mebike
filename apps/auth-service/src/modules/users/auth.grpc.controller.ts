@@ -6,12 +6,12 @@ import {
   BaseGrpcHandler,
   SERVER_MESSAGE,
   throwGrpcError,
-} from '@Mebike/common';
-import { grpcResponse } from '@Mebike/common';
+} from '@mebike/common';
+import { grpcResponse } from '@mebike/common';
 import { User } from '@prisma/client';
-import { USER_MESSAGES } from '@Mebike/common';
+import { USER_MESSAGES } from '@mebike/common';
 import { LoginUserDto } from './dto/LoginUserDto';
-import { GRPC_SERVICES, USER_METHODS } from '@Mebike/common';
+import { GRPC_SERVICES, USER_METHODS } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 
 @Controller()
@@ -42,12 +42,12 @@ export class AuthGrpcController {
     const result = await this.authService.validateUser(data);
 
     const { accessToken, refreshToken } = await this.authService.generateToken(
-      result
+      result,
     );
 
     return grpcResponse(
       { accessToken, refreshToken },
-      USER_MESSAGES.LOGIN_SUCCESS
+      USER_MESSAGES.LOGIN_SUCCESS,
     );
   }
 
