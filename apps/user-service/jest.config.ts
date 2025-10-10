@@ -1,4 +1,3 @@
- 
 import { readFileSync } from 'fs';
 
 // Reading the SWC compilation config for the spec files
@@ -11,7 +10,7 @@ swcJestConfig.swcrc = false;
 
 export default {
   displayName: '@mebike/user-service',
-  preset: '../../jest.preset.js',
+  preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['@swc/jest', swcJestConfig],
