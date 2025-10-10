@@ -1,9 +1,8 @@
-version: '3.9'
 services:
   consul: 
     image: hashicorp/consul:1.16
     container_name: consul
-    restart: "no"
+    restart: "unless-stopped"
     ports:
       - "8500:8500"
     command: "agent -dev -client=0.0.0.0"
@@ -12,7 +11,7 @@ services:
   postgres-db:
     image: postgres:16-alpine
     container_name: postgres-db
-    restart: "no"
+    restart: "unless-stopped"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: truongdz002 
@@ -23,15 +22,30 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - mebike-network
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx
+    restart: "unless-stopped"
+    ports:
+      - "80:80"   
+      # - "443:443" 
+    volumes:
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
+      # - ./nginx/ssl:/etc/nginx/ssl
+    env_file:
+      - ./.env
+    depends_on:
+      - api-gateway
+    networks:
+      - mebike-network
   api-gateway:
     build: 
       context: .
       dockerfile: ./apps/api-gateway/Dockerfile
     container_name: api-gateway
+    restart: "unless-stopped"
     depends_on:
       - auth-service
-    ports:
-      - "${PORT}:${PORT}"
     env_file:
       - ./apps/api-gateway/.env
     networks:
@@ -41,13 +55,12 @@ services:
       context: .
       dockerfile: ./apps/auth-service/Dockerfile
     container_name: auth-service
+    restart: "unless-stopped"
     depends_on:
       - consul
       - postgres-db
-    ports:
-      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=${DATABASE_URL}  
     env_file:
       - ./apps/auth-service/.env
     networks:
