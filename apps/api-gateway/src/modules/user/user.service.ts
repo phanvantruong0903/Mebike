@@ -1,27 +1,25 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, lastValueFrom } from 'rxjs';
-import { CreateUserDto } from './dto/CreateUserDto';
 import { GRPC_PACKAGE, GRPC_SERVICES } from '@mebike/common';
-import { LoginInput } from './graphql/Login';
-import {
-  LoginResponse,
-  ResfreshTokenResponse,
-  UserResponse,
-} from './graphql/UserResponse';
+import { UserListResponse, UserResponse } from '../auth/graphql/UserResponse';
 import { UpdateUserDto } from '../auth/dto/UpdateUserDto';
 
 interface AuthServiceClient {
-  GetUser(data: { page?: 1; limit?: 10 }): Observable<LoginResponse>;
-  UpdateUser(data: UpdateUserDto): Observable<UserResponse>;
-  RefreshToken(refreshToken: object): Observable<ResfreshTokenResponse>;
+  GetAllUsers(data: { page?: 1; limit?: 10 }): Observable<UserListResponse>;
+  GetUser(data: { id: string }): Observable<UserResponse>;
+  UpdateUser(data: { id: string } & UpdateUserDto): Observable<UserResponse>;
+  ChangePassword(data: {
+    id: string;
+    password: string;
+  }): Observable<UserResponse>;
 }
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private userService!: AuthServiceClient;
 
-  constructor(@Inject(GRPC_PACKAGE.AUTH) private client: ClientGrpc) {}
+  constructor(@Inject(GRPC_PACKAGE.AUTH) private readonly client: ClientGrpc) {}
 
   onModuleInit() {
     this.userService = this.client.getService<AuthServiceClient>(
@@ -29,15 +27,21 @@ export class AuthService implements OnModuleInit {
     );
   }
 
-  async login(data: LoginInput) {
-    return await lastValueFrom(this.userService.LoginUser(data));
+  async getAllUser(data: { page?: 1; limit?: 10 }) {
+    return await lastValueFrom(this.userService.GetAllUsers(data));
   }
 
-  async register(data: CreateUserDto) {
-    return await lastValueFrom(this.userService.CreateUser(data));
+  async getUserDetail(id: string) {
+    return await lastValueFrom(this.userService.GetUser({ id }));
   }
 
-  async refreshToken(refreshToken: string) {
-    return await lastValueFrom(this.userService.RefreshToken({ refreshToken }));
+  async updateUser(id: string, data: UpdateUserDto) {
+    const payload = { id, ...data };
+    return await lastValueFrom(this.userService.UpdateUser(payload));
+  }
+
+  async changePassword(id: string, password: string) {
+    const payload = { id, password };
+    return await lastValueFrom(this.userService.ChangePassword(payload));
   }
 }
