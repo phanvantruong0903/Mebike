@@ -7,19 +7,10 @@ message User {
   string email = 2;
   string name = 3;
   int32 YOB = 4;
+  string password = 5;
+  int32 verify = 6;
 }
 
-message LoginUserRequest{
-  string email = 1;
-  string password = 2;
-}
-
-message CreateUserRequest {
-  string email = 1;
-  string name = 2;
-  string password = 3;
-  int32 YOB = 4;
-}
 
 message UpdateUserRequest {
   string id = 1;
@@ -29,22 +20,18 @@ message UpdateUserRequest {
   optional int32 YOB = 5;
 }
 
+message GetAllUserRequest {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+}
+
 message GetUserRequest {
   string id = 1;
 }
 
-message LoginUserResponse{
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  repeated string errors = 4;
-}
-
-message CreateUserResponse {
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  repeated string errors = 4;
+message ChangePasswordRequest {
+  string id = 1;
+  string password = 2;
 }
 
 message UpdateUserResponse {
@@ -66,12 +53,20 @@ message UsersResponse {
   repeated User data = 3; 
 }
 
-service UserService {
-  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc GetUser(GetUserRequest) returns (UserDetailResponse);
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
-  rpc GetAllUsers(Empty) returns (UsersResponse);
-  rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
+message GetAllUserResponse {
+  bool success = 1;
+  string message = 2;
+  repeated User data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
 }
 
-message Empty {}
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (UserDetailResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc GetAllUsers(GetAllUserRequest) returns (GetAllUserResponse);
+  rpc ChangePassword(ChangePasswordRequest) returns (UserDetailResponse);
+}

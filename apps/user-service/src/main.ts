@@ -7,7 +7,6 @@ import { join } from 'path';
 import { config as dotenvConfig } from 'dotenv';
 async function bootstrap() {
   dotenvConfig();
-  console.log(process.env.USER_SERVICE_PORT);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
@@ -20,14 +19,14 @@ async function bootstrap() {
         ],
         url: `0.0.0.0:${process.env.USER_SERVICE_PORT}`,
       },
-    }
+    },
   );
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    })
+    }),
   );
   app.useGlobalFilters(new GrpcExceptionFilter());
   await app.listen();

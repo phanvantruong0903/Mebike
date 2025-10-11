@@ -1,32 +1,34 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, lastValueFrom } from 'rxjs';
-import { LoginUserDto } from './dto/LoginUserDto';
 import { CreateUserDto } from './dto/CreateUserDto';
-import { UpdateUserDto } from './dto/UpdateUserDto';
 import { GRPC_PACKAGE, GRPC_SERVICES } from '@mebike/common';
+import { LoginInput } from './graphql/Login';
+import {
+  LoginResponse,
+  ResfreshTokenResponse,
+  UserResponse,
+} from './graphql/UserResponse';
 
-interface UserServiceClient {
-  LoginUser(data: LoginUserDto): Observable<any>;
-  CreateUser(data: CreateUserDto): Observable<any>;
-  UpdateUser(request: { id: string } & UpdateUserDto): Observable<any>;
-  GetUser(request: { id: string }): Observable<any>;
-  GetAllUsers(data: object): Observable<any>;
+interface AuthServiceClient {
+  LoginUser(data: LoginInput): Observable<LoginResponse>;
+  CreateUser(data: CreateUserDto): Observable<UserResponse>;
+  RefreshToken(refreshToken: object): Observable<ResfreshTokenResponse>;
 }
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  private userService!: UserServiceClient;
+  private userService!: AuthServiceClient;
 
-  constructor(@Inject(GRPC_PACKAGE.USER) private client: ClientGrpc) {}
+  constructor(@Inject(GRPC_PACKAGE.AUTH) private client: ClientGrpc) {}
 
   onModuleInit() {
-    this.userService = this.client.getService<UserServiceClient>(
-      GRPC_SERVICES.USER
+    this.userService = this.client.getService<AuthServiceClient>(
+      GRPC_SERVICES.AUTH,
     );
   }
 
-  async login(data: LoginUserDto) {
+  async login(data: LoginInput) {
     return await lastValueFrom(this.userService.LoginUser(data));
   }
 
@@ -34,17 +36,7 @@ export class AuthService implements OnModuleInit {
     return await lastValueFrom(this.userService.CreateUser(data));
   }
 
-  async updateUser(id: string, data: UpdateUserDto) {
-    return await lastValueFrom(this.userService.UpdateUser({ id, ...data }));
-  }
-
-  async userDetail(id: string) {
-    return await lastValueFrom(this.userService.GetUser({ id }));
-  }
-
-  async getAllUser() {
-    const res = await lastValueFrom(this.userService.GetAllUsers({}));
-    console.log('GetAllUsers response:', res);
-    return res;
+  async refreshToken(refreshToken: string) {
+    return await lastValueFrom(this.userService.RefreshToken({ refreshToken }));
   }
 }

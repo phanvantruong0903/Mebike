@@ -6,16 +6,23 @@ import { SERVER_MESSAGE, USER_MESSAGES } from '../constants/messages';
 
 export class BaseGrpcHandler<
   T,
-  CreateDto extends object,
-  UpdateDto extends object
+  CreateDto extends object | never = never,
+  UpdateDto extends object | never = never,
 > {
   constructor(
     protected readonly service: BaseService<T, CreateDto, UpdateDto>,
     private readonly createDtoClass?: new () => CreateDto,
-    private readonly updateDtoClass?: new () => UpdateDto
+    private readonly updateDtoClass?: new () => UpdateDto,
   ) {}
 
   async createLogic(dto: CreateDto): Promise<T> {
+    // Check if the create method is implemented in the service
+    if (!this.service.create) {
+      throwGrpcError(SERVER_MESSAGE.UNSUPPORTED_OPERATION, [
+        'Create method is not implemented.',
+      ]);
+    }
+
     if (this.createDtoClass) {
       const dtoInstance = plainToInstance(this.createDtoClass, dto as object);
 
@@ -23,7 +30,7 @@ export class BaseGrpcHandler<
         await validateOrReject(dtoInstance);
       } catch (errors) {
         const messages: string[] = (errors as any[]).flatMap((err) =>
-          Object.values(err.constraints ?? {})
+          Object.values(err.constraints ?? {}),
         );
         throwGrpcError(SERVER_MESSAGE.VALIDATION_FAILED, messages);
       }
@@ -61,8 +68,17 @@ export class BaseGrpcHandler<
     }
   }
 
-  async getAllLogic(): Promise<T[]> {
-    return await this.service.findAll();
+  async getAllLogic(
+    page = 1,
+    limit = 10,
+  ): Promise<{
+    data: T[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    return await this.service.findAll(page, limit);
   }
 
   async getOneById(id: string): Promise<T | null> {
@@ -70,6 +86,13 @@ export class BaseGrpcHandler<
   }
 
   async updateLogic(id: string, dto: UpdateDto): Promise<T> {
+    // Check if the update method is implemented in the service
+    if (!this.service.update) {
+      throwGrpcError(SERVER_MESSAGE.UNSUPPORTED_OPERATION, [
+        SERVER_MESSAGE.UPDATED_NOT_IMPLEMENTED,
+      ]);
+    }
+
     if (this.updateDtoClass) {
       const dtoInstance = plainToInstance(this.updateDtoClass, dto);
 
@@ -77,9 +100,8 @@ export class BaseGrpcHandler<
         await validateOrReject(dtoInstance);
       } catch (errors: any) {
         const messages: string[] = (errors as any[]).flatMap((err) =>
-          Object.values(err.constraints ?? {})
+          Object.values(err.constraints ?? {}),
         );
-        console.log(messages);
         throwGrpcError(SERVER_MESSAGE.VALIDATION_FAILED, messages);
       }
     }

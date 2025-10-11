@@ -8,8 +8,8 @@ export class ConsulService {
 
   constructor() {
     this.consul = new Consul({
-      host: '127.0.0.1',
-      port: 8500,
+      host: process.env.CONSUL_HOST || 'consul',
+      port: process.env.CONSUL_PORT || '8500',
       promisify: true,
     } as any);
   }
@@ -18,7 +18,7 @@ export class ConsulService {
     serviceId: string,
     name: string,
     address: string,
-    port: number
+    port: number,
   ) {
     try {
       await this.consul.agent.service.register({
@@ -42,7 +42,7 @@ export class ConsulService {
   }
 
   async discoverService(
-    name: string
+    name: string,
   ): Promise<{ address: string; port: number }> {
     const services = await this.consul.catalog.service.nodes(name);
     if (!services || services.length === 0) {

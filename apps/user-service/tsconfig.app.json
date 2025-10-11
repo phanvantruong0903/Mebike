@@ -7,11 +7,9 @@
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "target": "es2021",
-    "declaration": true,
-    "declarationMap": false
+    "target": "es2021"
   },
-  "include": ["src/**/*.ts", "../../common/src/lib/consul/consul.module.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "out-tsc",
     "dist",
