@@ -21,6 +21,13 @@ message CreateUserRequest {
   string role = 5;
 }
 
+message RegisterRequest {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+  int32 YOB = 4;
+}
+
 message Token {
   string accessToken = 1;
   string refreshToken = 2;
@@ -79,6 +86,7 @@ service AuthService {
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (ResfreshTokenResponse);
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc RegisterUser(RegisterRequest) returns (CreateUserResponse);
 }
 
 message Empty {}

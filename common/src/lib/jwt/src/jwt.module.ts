@@ -8,7 +8,7 @@ import { JwtServiceCustom } from './jwt.service';
   imports: [
     JwtModule.register({
       secret: JWT_CONSTANTS.ACCESS_SECRET,
-      signOptions: { expiresIn: JWT_CONSTANTS.ACCESS_EXPIRATION_TIME },
+      signOptions: { expiresIn: JWT_CONSTANTS.ACCESS_EXPIRATION_TIME as any },
     }),
   ],
   providers: [JwtServiceCustom],
