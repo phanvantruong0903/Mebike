@@ -1,5 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { Role, UserVerifyStatus, UserStatus } from '@loginex/common';
+import { Role, UserVerifyStatus, UserStatus } from '@mebike/common';
 
 registerEnumType(Role, {
   name: 'Role',

@@ -11,7 +11,7 @@ import {
   UserResponse,
   GetUsersInput,
   ChangeUserStatusInput,
-} from '@loginex/common';
+} from '@mebike/common';
 
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';

@@ -8,7 +8,7 @@ services:
     command: 'agent -dev -client=0.0.0.0'
     networks:
       - loginex-network
-  
+
   auth-db:
     image: postgres:16-alpine
     container_name: auth-db
@@ -21,21 +21,6 @@ services:
       - '5433:5432'
     volumes:
       - auth_data:/var/lib/postgresql/data
-    networks:
-      - loginex-network
-
-  inventory-db:
-    image: postgres:16-alpine
-    container_name: inventory-db
-    restart: 'unless-stopped'
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${INVENTORY_DB_NAME}
-    ports:
-      - '5435:5432'
-    volumes:
-      - inventory_data:/var/lib/postgresql/data
     networks:
       - loginex-network
 
@@ -59,8 +44,8 @@ services:
     container_name: traefik
     restart: 'unless-stopped'
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     environment:
       - CF_API_EMAIL=${CF_API_EMAIL}
       - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
@@ -71,21 +56,21 @@ services:
       - './traefik/acme.json:/acme.json'
       - './traefik/logs:/var/log/traefik'
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-loginex.local}`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
-      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
-      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-loginex.local}`)'
+      - 'traefik.http.routers.traefik-dashboard.entrypoints=websecure'
+      - 'traefik.http.routers.traefik-dashboard.service=api@internal'
+      - 'traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth'
+      - 'traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}'
     networks:
       - loginex-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
-      - "9092:9092"
-      - "29092:29092"
+      - '9092:9092'
+      - '29092:29092'
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: 'broker,controller'
@@ -102,15 +87,22 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_NUM_PARTITIONS: 3
-      KAFKAJS_NO_PARTITIONER_WARNING: "1"
+      KAFKAJS_NO_PARTITIONER_WARNING: '1'
 
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     volumes:
       - kafka_data:/var/lib/kafka
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      test:
+        [
+          'CMD',
+          'kafka-topics',
+          '--bootstrap-server',
+          'localhost:9092',
+          '--list',
+        ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -122,7 +114,7 @@ services:
     container_name: kafka-ui
     restart: 'unless-stopped'
     ports:
-      - "8080:8080"
+      - '8080:8080'
     environment:
       KAFKA_CLUSTERS_0_NAME: LogiNex-Cluster
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
@@ -133,7 +125,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.kafka-ui.rule=Host(`kafka.localhost`) || Host(`kafka.${DOMAIN:-loginex.local}`)'
       - 'traefik.http.routers.kafka-ui.entrypoints=web'
-      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
+      - 'traefik.http.services.kafka-ui.loadbalancer.server.port=8080'
     networks:
       - loginex-network
 
@@ -150,8 +142,7 @@ services:
         condition: service_healthy
       user-service:
         condition: service_healthy
-      inventory-service:
-        condition: service_healthy
+
       kafka:
         condition: service_healthy
     environment:
@@ -170,11 +161,11 @@ services:
 
       - 'traefik.http.routers.api-gateway.middlewares=my-cors,api-ratelimit,api-compress,api-retry'
 
-      - "traefik.http.middlewares.my-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
-      - "traefik.http.middlewares.my-cors.headers.accesscontrolallowheaders=*"
-      - "traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=https://${DOMAIN:-loginex.local},http://localhost:${PORT:-3000},https://studio.apollographql.com,${FRONTEND_URL:-loginex.local}"
-      - "traefik.http.middlewares.my-cors.headers.accesscontrolmaxage=100"
-      - "traefik.http.middlewares.my-cors.headers.addvaryheader=true"
+      - 'traefik.http.middlewares.my-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS'
+      - 'traefik.http.middlewares.my-cors.headers.accesscontrolallowheaders=*'
+      - 'traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=https://${DOMAIN:-loginex.local},http://localhost:${PORT:-3000},https://studio.apollographql.com,${FRONTEND_URL:-loginex.local}'
+      - 'traefik.http.middlewares.my-cors.headers.accesscontrolmaxage=100'
+      - 'traefik.http.middlewares.my-cors.headers.addvaryheader=true'
 
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.average=100'
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.burst=50'
@@ -242,34 +233,6 @@ services:
     networks:
       - loginex-network
 
-  inventory-service:
-    build:
-      context: .
-      dockerfile: apps/inventory-service/Dockerfile
-    container_name: inventory-service
-    restart: 'unless-stopped'
-    depends_on:
-      consul:
-        condition: service_started
-      inventory-db:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-    environment:
-      - CONSUL_HOST=consul
-      - CONSUL_PORT=8500
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@inventory-db:5432/${INVENTORY_DB_NAME}?schema=public
-      - INVENTORY_SERVICE_PORT=50053
-      - KAFKA_BROKERS=kafka:29092
-    healthcheck:
-      test: ['CMD', 'nc', '-z', '127.0.0.1', '50053']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    networks:
-      - loginex-network
-
 networks:
   loginex-network:
     driver: bridge
@@ -277,5 +240,5 @@ networks:
 volumes:
   auth_data:
   user_data:
-  inventory_data:
+
   kafka_data:

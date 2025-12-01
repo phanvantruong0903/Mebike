@@ -1,5 +1,5 @@
 {
-  "name": "@loginex/common",
+  "name": "@mebike/common",
   "version": "0.0.1",
   "private": true,
   "main": "./src/index.ts",
@@ -16,9 +16,9 @@
     "targets": {
       "typecheck": {
         "dependsOn": [
-          "@loginex/auth-service:prisma:generate",
-          "@loginex/user-service:prisma:generate",
-          "@loginex/inventory-service:prisma:generate"
+          "@mebike/auth-service:prisma:generate",
+          "@mebike/user-service:prisma:generate",
+          "@mebike/inventory-service:prisma:generate"
         ]
       }
     }

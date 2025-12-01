@@ -9,7 +9,7 @@ const swcJestConfig = JSON.parse(
 swcJestConfig.swcrc = false;
 
 export default {
-  displayName: '@loginex/auth-service',
+  displayName: '@mebike/auth-service',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
   transform: {

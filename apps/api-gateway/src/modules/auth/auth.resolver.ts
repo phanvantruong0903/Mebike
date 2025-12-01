@@ -13,8 +13,8 @@ import {
   ChangePasswordResponse,
   ChangePasswordInput,
   Role,
-} from '@loginex/common';
-import type { UserProfile } from '@loginex/common';
+} from '@mebike/common';
+import type { UserProfile } from '@mebike/common';
 import { RoleGuard } from './role.guard';
 import { Roles } from './role.decorator';
 

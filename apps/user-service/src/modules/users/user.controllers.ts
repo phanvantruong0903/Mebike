@@ -21,7 +21,7 @@ import {
   KAFKA_TOPIC,
   ChangeUserStatusDto,
   SERVER_MESSAGE,
-} from '@loginex/common';
+} from '@mebike/common';
 import { UserService } from './user.services';
 
 @Controller()

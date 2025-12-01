@@ -1,5 +1,5 @@
 {
-  "name": "@loginex/api-gateway",
+  "name": "@mebike/api-gateway",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -64,15 +64,15 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@loginex/api-gateway:build",
+          "buildTarget": "@mebike/api-gateway:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@loginex/api-gateway:build:development"
+            "buildTarget": "@mebike/api-gateway:build:development"
           },
           "production": {
-            "buildTarget": "@loginex/api-gateway:build:production"
+            "buildTarget": "@mebike/api-gateway:build:production"
           }
         }
       },

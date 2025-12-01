@@ -16,7 +16,7 @@ import {
   User,
   ChangePasswordDto,
   UserStatus,
-} from '@loginex/common';
+} from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';

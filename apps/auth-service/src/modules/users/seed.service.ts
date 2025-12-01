@@ -6,7 +6,7 @@ import {
   KAFKA_CLIENT_ID,
   KAFKA_GROUP_ID,
   CreateProfileDto,
-} from '@loginex/common';
+} from '@mebike/common';
 import { ClientKafka } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
 

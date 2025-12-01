@@ -6,7 +6,7 @@ import {
   CONSULT_SERVICE_ID,
   GrpcExceptionFilter,
   KAFKA_GROUP_ID,
-} from '@loginex/common';
+} from '@mebike/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import { config as dotenvConfig } from 'dotenv';

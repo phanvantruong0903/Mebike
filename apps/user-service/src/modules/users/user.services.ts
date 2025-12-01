@@ -5,7 +5,7 @@ import {
   UpdateProfileDto,
   prismaUser,
   Profile,
-} from '@loginex/common';
+} from '@mebike/common';
 
 @Injectable()
 export class UserService extends BaseService<

@@ -1,5 +1,5 @@
 {
-  "name": "@loginex/auth-service",
+  "name": "@mebike/auth-service",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -77,15 +77,15 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@loginex/auth-service:build",
+          "buildTarget": "@mebike/auth-service:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@loginex/auth-service:build:development"
+            "buildTarget": "@mebike/auth-service:build:development"
           },
           "production": {
-            "buildTarget": "@loginex/auth-service:build:production"
+            "buildTarget": "@mebike/auth-service:build:production"
           }
         }
       },

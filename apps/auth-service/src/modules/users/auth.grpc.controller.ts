@@ -17,7 +17,7 @@ import {
   ChangePasswordDto,
   KAFKA_SERVICE,
   KAFKA_TOPIC,
-} from '@loginex/common';
+} from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 
 @Controller()

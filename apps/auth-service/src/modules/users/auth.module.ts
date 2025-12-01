@@ -9,7 +9,7 @@ import {
   KAFKA_CLIENT_ID,
   KAFKA_GROUP_ID,
   KAFKA_SERVICE,
-} from '@loginex/common';
+} from '@mebike/common';
 import { AuthService } from './auth.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
