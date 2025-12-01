@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package inventory;
+
+import "inventory-shared.proto";
+
+service BinService {
+  rpc CreateBin (CreateBinDto) returns (BinResponse);
+  rpc UpdateBin (UpdateBinDto) returns (BinResponse);
+  rpc DeleteBin (DeleteBinDto) returns (DeleteResponse);
+  rpc ListBins (ListBinsDto) returns (ListBinsResponse);
+}
+
+message Bin {
+  string id = 1;
+  string rackId = 2;
+  string code = 3;
+  int32 xCoord = 4;
+  int32 yCoord = 5;
+  double maxWeight = 6;
+  double maxVolume = 7;
+  double currWeight = 8;
+  double currVolume = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+}
+
+message CreateBinDto {
+  string rackId = 1;
+  string code = 2;
+  int32 xCoord = 3;
+  int32 yCoord = 4;
+  double maxWeight = 5;
+  double maxVolume = 6;
+}
+
+message UpdateBinDto {
+  string id = 1;
+  string code = 2;
+  int32 xCoord = 3;
+  int32 yCoord = 4;
+  double maxWeight = 5;
+  double maxVolume = 6;
+}
+
+message DeleteBinDto {
+  string id = 1;
+}
+
+message BinResponse {
+  bool success = 1;
+  string message = 2;
+  Bin data = 3;
+  repeated string errors = 4;
+}
+
+message ListBinsDto {
+  string rackId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message ListBinsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Bin data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  repeated string errors = 8;
+}

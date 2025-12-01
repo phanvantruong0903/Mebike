@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package inventory;
+
+service ProductService {
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+  rpc GetAllProducts(GetAllProductsRequest) returns (GetAllProductsResponse);
+  rpc GetProductDetail(GetProductDetailRequest) returns (GetProductResponse);
+  rpc ChangeStatus(ChangeProductStatusRequest) returns (ChangeProductStatusResponse);
+}
+
+message Product {
+  string id = 1;
+  string sku = 2;
+  string name = 3;
+  double width = 4;
+  double height = 5;
+  double length = 6;
+  double weight = 7;
+  bool isFragile = 8;
+  bool hasBattery = 9;
+  bool isHighValue = 10;
+  string status = 11;
+  string createdAt = 12;
+  string updatedAt = 13;
+}
+
+message CreateProductRequest {
+  string sku = 1;
+  string name = 2;
+  double width = 3;
+  double height = 4;
+  double length = 5;
+  double weight = 6;
+  bool isFragile = 7;
+  bool hasBattery = 8;
+  bool isHighValue = 9;
+}
+
+message CreateProductResponse {
+  bool success = 1;
+  string message = 2;
+  Product data = 3;
+  repeated string errors = 4;
+}
+
+message UpdateProductRequest {
+  string id = 1;
+  optional string sku = 2;
+  optional string name = 3;
+  optional double width = 4;
+  optional double height = 5;
+  optional double length = 6;
+  optional double weight = 7;
+  optional bool isFragile = 8;
+  optional bool hasBattery = 9;
+  optional bool isHighValue = 10;
+}
+
+message UpdateProductResponse {
+  bool success = 1;
+  string message = 2;
+  Product data = 3;
+  repeated string errors = 4;
+}
+
+message GetProductDetailRequest {
+  string id = 1;
+}
+
+message GetProductResponse {
+  bool success = 1;
+  string message = 2;
+  Product data = 3;
+  repeated string errors = 4;
+}
+
+message GetAllProductsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message GetAllProductsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Product data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  repeated string errors = 8;
+}
+
+message ChangeProductStatusRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message ChangeProductStatusResponse {
+  bool success = 1;
+  string message = 2;
+  Product data = 3;
+  repeated string errors = 4;
+}

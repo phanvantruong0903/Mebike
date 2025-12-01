@@ -1,0 +1,27 @@
+{
+  "name": "@loginex/inventory-service-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "name": "inventory-service-e2e",
+    "implicitDependencies": [
+      "inventory-service"
+    ],
+    "targets": {
+      "e2e": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{projectRoot}/test-output/jest/coverage"
+        ],
+        "options": {
+          "jestConfig": "apps/inventory-service-e2e/jest.config.ts",
+          "passWithNoTests": true
+        },
+        "dependsOn": [
+          "inventory-service:build",
+          "inventory-service:serve"
+        ]
+      }
+    }
+  }
+}

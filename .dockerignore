@@ -1,0 +1,21 @@
+# Ignore heavy and irrelevant stuff
+node_modules
+dist
+tmp
+.cache
+.git
+.gitignore
+.nx
+Dockerfile
+docker-compose.yaml
+nx-cache
+*.log
+coverage
+
+# Optional: ignore VSCode, OS stuff
+.vscode
+.DS_Store
+
+# Nx cache folders
+nx-cache
+apps/api-gateway/dist

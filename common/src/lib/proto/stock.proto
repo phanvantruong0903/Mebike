@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package inventory;
+
+import "inventory-shared.proto";
+
+service StockService {
+  rpc GetStockLevel (GetStockLevelDto) returns (StockLevelResponse);
+  rpc AdjustStock (AdjustStockDto) returns (StockLevelResponse);
+}
+
+message GetStockLevelDto {
+  string productId = 1;
+  string warehouseId = 2; // Optional, if empty check all
+}
+
+message StockLevelResponse {
+  bool success = 1;
+  string message = 2;
+  StockLevelData data = 3;
+  repeated string errors = 4;
+}
+
+message StockLevelData {
+  string productId = 1;
+  int32 totalQuantity = 2;
+  repeated BinItemDetail details = 3;
+}
+
+message BinItemDetail {
+  string binId = 1;
+  string binCode = 2;
+  int32 quantity = 3;
+}
+
+message AdjustStockDto {
+  string binId = 1;
+  string productId = 2;
+  int32 quantityChange = 3; // Positive to add, negative to remove
+  string reason = 4;
+}

@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package inventory;
+
+import "inventory-shared.proto";
+
+service RackService {
+  rpc CreateRack (CreateRackDto) returns (RackResponse);
+  rpc UpdateRack (UpdateRackDto) returns (RackResponse);
+  rpc DeleteRack (DeleteRackDto) returns (DeleteResponse);
+  rpc ListRacks (ListRacksDto) returns (ListRacksResponse);
+}
+
+message Rack {
+  string id = 1;
+  string zoneId = 2;
+  string code = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+}
+
+message CreateRackDto {
+  string zoneId = 1;
+  string code = 2;
+}
+
+message UpdateRackDto {
+  string id = 1;
+  string code = 2;
+}
+
+message DeleteRackDto {
+  string id = 1;
+}
+
+message RackResponse {
+  bool success = 1;
+  string message = 2;
+  Rack data = 3;
+  repeated string errors = 4;
+}
+
+message ListRacksDto {
+  string zoneId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message ListRacksResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Rack data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  repeated string errors = 8;
+}

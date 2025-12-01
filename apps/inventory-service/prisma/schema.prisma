@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../../../common/src/lib/prisma/inventory/generated"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  sku         String   @unique
+  name        String
+
+  width       Float
+  height      Float
+  length      Float
+  weight      Float
+  volume      Float
+
+  isFragile   Boolean @default(false)
+  hasBattery  Boolean @default(false)
+  isHighValue Boolean @default(false)
+
+  binItems    BinItem[]
+  status      ProductStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("products")
+}
+
+model WareHouse {
+  id          String   @id @default(uuid())
+  name        String
+  location    String
+
+  status      WarehouseStatus @default(ACTIVE)
+  zones       Zone[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("warehouses")
+}
+
+enum WarehouseStatus {
+  ACTIVE
+  INACTIVE
+} 
+
+model Zone {
+  id          String   @id @default(uuid())
+  wareHouseId String
+  name        String
+  type        ZoneType @default(STANDARD)
+
+  wareHouse   WareHouse @relation(fields: [wareHouseId], references: [id]) 
+  racks       Rack[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("zones")
+}
+
+// Kệ hàng
+model Rack {
+  id          String   @id @default(uuid())
+  zoneId      String
+  code        String
+
+  Zone        Zone @relation(fields: [zoneId], references: [id])
+  bins        Bin[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("racks")
+}
+
+// Ô chứa
+model Bin {
+  id          String   @id @default(uuid())
+  rackId      String
+  code        String  @unique
+
+  xCoord      Int    
+  yCoord      Int
+
+  maxWeight   Float  
+  maxVolume   Float
+
+  currWeight  Float @default(0) 
+  currVolume  Float @default(0)
+
+  Rack        Rack @relation(fields: [rackId], references: [id])
+  items       BinItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("bins")
+}
+
+model BinItem {
+  id        String  @id @default(uuid())
+  binId     String
+  productId String
+  quantity  Int
+  
+  bin       Bin     @relation(fields: [binId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([binId, productId])
+  @@map("bin_items")
+}
+
+enum ZoneType {
+  STANDARD
+  SECURE
+  HAZARD
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+

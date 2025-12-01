@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package inventory;
+
+import "inventory-shared.proto";
+
+service WarehouseService {
+  rpc CreateWarehouse (CreateWarehouseDto) returns (WarehouseResponse);
+  rpc UpdateWarehouse (UpdateWarehouseDto) returns (WarehouseResponse);
+  rpc GetWarehouse (GetWarehouseDto) returns (WarehouseResponse);
+  rpc ListWarehouses (ListWarehousesDto) returns (ListWarehousesResponse);
+  rpc DeleteWarehouse (DeleteWarehouseDto) returns (DeleteResponse);
+  rpc InactivateWarehouse (InactivateWarehouseDto) returns (WarehouseResponse);
+  rpc ActivateWarehouse (ActivateWarehouseDto) returns (WarehouseResponse);
+}
+
+message Warehouse {
+  string id = 1;
+  string name = 2;
+  string location = 3;
+  string createdAt = 4;
+  string updatedAt = 5;
+  string status = 6;
+}
+
+message CreateWarehouseDto {
+  string name = 1;
+  string location = 2;
+  optional string status = 3;
+}
+
+message UpdateWarehouseDto {
+  string id = 1;
+  string name = 2;
+  string location = 3;
+  optional string status = 4;
+}
+
+message GetWarehouseDto {
+  string id = 1;
+}
+
+message DeleteWarehouseDto {
+  string id = 1;
+}
+
+message InactivateWarehouseDto {
+  string id = 1;
+}
+
+message ActivateWarehouseDto {
+  string id = 1;
+}
+
+message WarehouseResponse {
+  bool success = 1;
+  string message = 2;
+  Warehouse data = 3;
+  repeated string errors = 4;
+}
+
+message ListWarehousesDto {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+}
+
+message ListWarehousesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Warehouse data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  repeated string errors = 8;
+}

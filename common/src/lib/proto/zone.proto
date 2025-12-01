@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package inventory;
+
+import "inventory-shared.proto";
+
+service ZoneService {
+  rpc CreateZone (CreateZoneDto) returns (ZoneResponse);
+  rpc UpdateZone (UpdateZoneDto) returns (ZoneResponse);
+  rpc DeleteZone (DeleteZoneDto) returns (DeleteResponse);
+  rpc ListZones (ListZonesDto) returns (ListZonesResponse);
+}
+
+message Zone {
+  string id = 1;
+  string wareHouseId = 2;
+  string name = 3;
+  string type = 4; // STANDARD, SECURE, HAZARD
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message CreateZoneDto {
+  string wareHouseId = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message UpdateZoneDto {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message DeleteZoneDto {
+  string id = 1;
+}
+
+message ZoneResponse {
+  bool success = 1;
+  string message = 2;
+  Zone data = 3;
+  repeated string errors = 4;
+}
+
+message ListZonesDto {
+  string wareHouseId = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message ListZonesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Zone data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  repeated string errors = 8;
+}
