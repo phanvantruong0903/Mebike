@@ -42,7 +42,7 @@ export class AuthGrpcController {
     return this._handleCreateUserLogic(data, data.role);
   }
 
-  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REGISER)
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REGISTER)
   async register(data: RegisterDto): Promise<ReturnType<typeof grpcResponse>> {
     return this._handleCreateUserLogic(data, Role.USER);
   }

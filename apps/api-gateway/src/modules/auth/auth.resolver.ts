@@ -13,6 +13,7 @@ import {
   ChangePasswordResponse,
   ChangePasswordInput,
   Role,
+  RegisterInput,
 } from '@mebike/common';
 import type { UserProfile } from '@mebike/common';
 import { RoleGuard } from './role.guard';
@@ -25,10 +26,17 @@ export class AuthResolver {
   @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.CREATE })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
-  async register(
-    @Args('body') body: CreateUserInput,
+  async createUser(
+    @Args('body', { type: () => CreateUserInput }) body: CreateUserInput,
   ): Promise<RegisterResponse> {
-    return this.authService.register(body);
+    return this.authService.createUser(body);
+  }
+
+  @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.REGISTER })
+  async registerUser(
+    @Args('body', { type: () => RegisterInput }) body: RegisterInput,
+  ): Promise<RegisterResponse> {
+    return this.authService.registerUser(body);
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.LOGIN })
