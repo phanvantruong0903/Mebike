@@ -9,6 +9,7 @@ export const GRPC_PACKAGE = {
 };
 
 export const USER_METHODS = {
+  REGISER: 'RegisterUser',
   CREATE: 'CreateUser',
   GET_ONE: 'GetUser',
   UPDATE: 'UpdateUser',
