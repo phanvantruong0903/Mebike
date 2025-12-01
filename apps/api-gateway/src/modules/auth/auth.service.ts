@@ -11,6 +11,7 @@ import {
   LoginInput,
   ChangePasswordInput,
   ChangePasswordResponse,
+  RegisterInput,
 } from '@mebike/common';
 
 interface AuthServiceClient {
@@ -20,6 +21,7 @@ interface AuthServiceClient {
   ChangePassword(
     data: ChangePasswordInput & { accountId: string },
   ): Observable<ChangePasswordResponse>;
+  RegisterUser(data: RegisterInput): Observable<RegisterResponse>;
 }
 
 @Injectable()
@@ -38,8 +40,12 @@ export class AuthService implements OnModuleInit {
     return await firstValueFrom(this.userService.LoginUser(data));
   }
 
-  async register(data: CreateUserDto) {
+  async createUser(data: CreateUserDto) {
     return await firstValueFrom(this.userService.CreateUser(data));
+  }
+
+  async registerUser(data: RegisterInput) {
+    return await firstValueFrom(this.userService.RegisterUser(data));
   }
 
   async refreshToken(refreshToken: string) {
