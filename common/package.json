@@ -17,8 +17,7 @@
       "typecheck": {
         "dependsOn": [
           "@mebike/auth-service:prisma:generate",
-          "@mebike/user-service:prisma:generate",
-          "@mebike/inventory-service:prisma:generate"
+          "@mebike/user-service:prisma:generate"
         ]
       }
     }
