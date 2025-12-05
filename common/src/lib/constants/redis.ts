@@ -8,4 +8,6 @@ export const REDIS_CONSTANTS = {
 export const REDIS_KEY_PREFIX = {
   USER_SESSION: 'user_session:',
   PASSWORD_RESET: 'reset_otp:',
+  ACCESS_TOKEN: 'access_token:',
+  REFRESH_TOKEN: 'refresh_token:',
 };

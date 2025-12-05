@@ -16,11 +16,14 @@ import {
   User,
   ChangePasswordDto,
   UserStatus,
+  REDIS_CONSTANTS,
+  REDIS_KEY_PREFIX,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
+import { Redis } from 'ioredis';
 
 interface UserServiceClient {
   GetUser(data: { id: string }): Observable<UserResponse>;
@@ -35,6 +38,7 @@ export class AuthService
   constructor(
     private readonly jwtService: JwtServiceCustom,
     @Inject(GRPC_PACKAGE.USER) private readonly client: ClientGrpc,
+    @Inject(REDIS_CONSTANTS.REDIS_CLIENT) private readonly redisClient: Redis,
   ) {
     super(prismaAuth.user);
   }
@@ -113,11 +117,35 @@ export class AuthService
       this.signRefreshToken(payload),
     ]);
 
+    await Promise.all([
+      this.redisClient.set(
+        `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+        payload.user_id,
+        'EX',
+        Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
+      ),
+      this.redisClient.set(
+        `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+        payload.user_id,
+        'EX',
+        Number(process.env.JWT_REFRESH_EXPIRATION_TIME) || 604800,
+      ),
+    ]);
+
     return { accessToken, refreshToken };
   }
 
   async refreshToken(refreshToken: string) {
     try {
+      const token = await this.redisClient.get(
+        `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+      );
+      if (!token) {
+        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+          USER_MESSAGES.INVALID_REFRESH_TOKEN,
+        ]);
+      }
+
       const decoded = await this.jwtService.verifyToken(refreshToken);
       if (!decoded) {
         throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
@@ -144,6 +172,14 @@ export class AuthService
         verify,
         role,
       });
+
+      await this.redisClient.set(
+        `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+        user_id,
+        'EX',
+        Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
+      );
+
       return { accessToken };
     } catch (error: unknown) {
       if (error instanceof RpcException) {
