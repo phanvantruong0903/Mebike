@@ -19,10 +19,11 @@ import {
   KAFKA_TOPIC,
   RegisterUserDto,
   Role,
-  ResetPasswordDto,
+  ResetPasswordRequestDto,
   Account,
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
+  ResetPasswordDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
@@ -101,8 +102,8 @@ export class AuthGrpcController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.RESET_PASSWORD)
-  async resetPassword(data: ResetPasswordDto) {
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.RESET_PASSWORD_REQUEST)
+  async resetPasswordRequest(data: ResetPasswordRequestDto) {
     const user = await this.authService.getUserByEmail(data);
 
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -154,11 +155,13 @@ export class AuthGrpcController {
         `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${email}`,
       );
 
-      const verify = this.authService.verifyOtpSuccess(email);
+      const verifyResult = this.authService.verifyOtpSuccess(email);
 
-      await Promise.all([deleted, verify]);
-
-      return grpcResponse(null, USER_MESSAGES.OTP_VERIFIED_SUCCESS);
+      const [_, finalResult] = await Promise.all([deleted, verifyResult]);
+      return grpcResponse(
+        finalResult.resetToken,
+        USER_MESSAGES.OTP_VERIFIED_SUCCESS,
+      );
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
@@ -166,6 +169,12 @@ export class AuthGrpcController {
       const err = error as Error;
       throw new RpcException(err?.message);
     }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.RESET_PASSWORD)
+  async resetPassword(data: ResetPasswordDto) {
+    const user = await this.authService.resetPassword(data);
+    return grpcResponse(user, USER_MESSAGES.RESET_PASSWORD_SUCCESS);
   }
 
   private async _handleCreateUserLogic(

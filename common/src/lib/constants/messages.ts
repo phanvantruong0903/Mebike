@@ -32,6 +32,7 @@ export const USER_MESSAGES = {
   INVALID_OTP: 'Invalid OTP code',
   PASSWORD_RESET_SUCCESS: 'Password reset successfully',
   OTP_VERIFIED_SUCCESS: 'OTP verified successfully',
+  INVALID_RESET_TOKEN: 'Invalid reset token',
 };
 
 export const SERVER_MESSAGE = {

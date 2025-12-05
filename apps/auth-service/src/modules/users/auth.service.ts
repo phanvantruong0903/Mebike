@@ -18,6 +18,7 @@ import {
   UserStatus,
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
+  ResetPasswordDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
@@ -289,6 +290,55 @@ export class AuthService
     }
   }
 
+  async resetPassword(data: ResetPasswordDto) {
+    try {
+      const storedToken = await this.redisClient.get(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${data.resetToken}`,
+      );
+
+      if (!storedToken) {
+        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+          USER_MESSAGES.INVALID_RESET_TOKEN,
+        ]);
+      }
+
+      const decoded = await this.jwtService.verifyToken(data.resetToken);
+      if (!decoded) {
+        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+          USER_MESSAGES.INVALID_RESET_TOKEN,
+        ]);
+      }
+
+      const { user_id } = decoded as TokenPayload;
+      const newHashedPassword = await bcrypt.hash(data.newPassword, 10);
+
+      const user = prismaAuth.user.update({
+        where: { id: user_id },
+        data: {
+          password: newHashedPassword,
+        },
+      });
+
+      const deletedToken = this.redisClient.del(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${data.resetToken}`,
+      );
+
+      await Promise.all([user, deletedToken]);
+
+      return user;
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
+        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
+  }
+
   async verifyOtpSuccess(email: string) {
     try {
       const user = await this.getUserByEmail({ email });
@@ -303,6 +353,20 @@ export class AuthService
           isFirstLogin: false,
         },
       });
+
+      const resetToken = await this.jwtService.signToken(
+        { user_id: user.id } as TokenPayload,
+        { expiresIn: '5m' },
+      );
+
+      await this.redisClient.set(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${resetToken}`,
+        user.email,
+        'EX',
+        300,
+      );
+
+      return { resetToken };
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;

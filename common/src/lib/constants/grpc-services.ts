@@ -21,6 +21,7 @@ export const USER_METHODS = {
   CREATE_PROFILE: 'CreateProfile',
   CHANGE_STATUS: 'ChangeStatus',
   REGISTER: 'Register',
+  RESET_PASSWORD_REQUEST: 'ResetPasswordRequest',
   RESET_PASSWORD: 'ResetPassword',
   VERIFY_OTP: 'VerifyOtp',
 } as const;
