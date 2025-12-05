@@ -9,13 +9,15 @@ import {
   ResfreshTokenResponse,
   GRAPHQL_NAME_USER,
   CreateUserInput,
+  RegisterUserInput,
   LoginInput,
   ChangePasswordResponse,
   ChangePasswordInput,
   Role,
-  RegisterInput,
+  UserResponse,
+  VerifyOtpInput,
+  UserProfile,
 } from '@mebike/common';
-import type { UserProfile } from '@mebike/common';
 import { RoleGuard } from './role.guard';
 import { Roles } from './role.decorator';
 
@@ -27,16 +29,16 @@ export class AuthResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async createUser(
-    @Args('body', { type: () => CreateUserInput }) body: CreateUserInput,
+    @Args('body') body: CreateUserInput,
   ): Promise<RegisterResponse> {
     return this.authService.createUser(body);
   }
 
   @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.REGISTER })
-  async registerUser(
-    @Args('body', { type: () => RegisterInput }) body: RegisterInput,
+  async register(
+    @Args('body') body: RegisterUserInput,
   ): Promise<RegisterResponse> {
-    return this.authService.registerUser(body);
+    return this.authService.register(body);
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.LOGIN })
@@ -65,6 +67,22 @@ export class AuthResolver {
       accountId: user.accountId,
       ...body,
     });
+  }
+
+  @Mutation(() => UserResponse, {
+    name: GRAPHQL_NAME_USER.RESET_PASSWORD,
+  })
+  async resetPassword(@Args('email') email: string): Promise<UserResponse> {
+    return this.authService.resetPassword(email);
+  }
+
+  @Mutation(() => UserResponse, {
+    name: GRAPHQL_NAME_USER.VERIFY_OTP,
+  })
+  async verifyOtp(
+    @Args('data', { type: () => VerifyOtpInput }) data: VerifyOtpInput,
+  ): Promise<UserResponse> {
+    return this.authService.verifyOtp(data);
   }
 
   @Query(() => String)

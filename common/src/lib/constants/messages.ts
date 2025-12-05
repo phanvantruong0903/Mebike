@@ -26,6 +26,12 @@ export const USER_MESSAGES = {
   CHANGE_PASSWORD_SUCCESS: 'Change password successfully',
   PASSWORD_SAME: 'Password same',
   USER_STATUS_INVALID: 'User status invalid',
+  USER_FIRST_LOGIN: 'User must change password first time login',
+  RESET_PASSWORD_SUCCESS: 'Email was sent successfully',
+  RESET_PASSWORD_OTP_SENT: 'OTP code sent to email successfully',
+  INVALID_OTP: 'Invalid OTP code',
+  PASSWORD_RESET_SUCCESS: 'Password reset successfully',
+  OTP_VERIFIED_SUCCESS: 'OTP verified successfully',
 };
 
 export const SERVER_MESSAGE = {

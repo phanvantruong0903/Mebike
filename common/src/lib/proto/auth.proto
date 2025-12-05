@@ -21,13 +21,6 @@ message CreateUserRequest {
   string role = 5;
 }
 
-message RegisterRequest {
-  string email = 1;
-  string name = 2;
-  string password = 3;
-  int32 YOB = 4;
-}
-
 message Token {
   string accessToken = 1;
   string refreshToken = 2;
@@ -81,12 +74,44 @@ message ChangePasswordResponse {
   repeated string errors = 4;
 }
 
+message RegisterUserRequest {
+  string email = 1;
+  string name = 2;
+  string password = 3;
+  int32 YOB = 4;  
+}
+
+message RegisterUserResponse {
+  bool success = 1;
+  string message = 2;
+  User data = 3;
+  repeated string errors = 4;
+}
+
+message ResetPasswordRequest {
+  string email = 1;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+  string message = 2;
+  User data = 3;
+  repeated string errors = 4;
+}
+
+message VerifyOtpRequest {
+  string email = 1;
+  string otp = 2;
+}
+
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
   rpc RefreshToken(RefreshTokenRequest) returns (ResfreshTokenResponse);
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
-  rpc RegisterUser(RegisterRequest) returns (CreateUserResponse);
+  rpc Register(RegisterUserRequest) returns (RegisterUserResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  rpc VerifyOtp(VerifyOtpRequest) returns (ResetPasswordResponse);
 }
 
 message Empty {}

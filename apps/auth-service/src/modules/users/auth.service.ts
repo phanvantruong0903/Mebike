@@ -52,6 +52,7 @@ export class AuthService
         select: {
           id: true,
           password: true,
+          isFirstLogin: true,
         },
       });
 
@@ -71,6 +72,12 @@ export class AuthService
       if (!isMatch) {
         throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [
           USER_MESSAGES.VALIDATION_FAILED,
+        ]);
+      }
+
+      if (findUser.isFirstLogin === true) {
+        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.USER_FIRST_LOGIN,
         ]);
       }
 
@@ -147,6 +154,27 @@ export class AuthService
     }
   }
 
+  async getUserByEmail(data: { email: string }): Promise<User> {
+    try {
+      const { email } = data;
+      const result = await prismaAuth.user.findUnique({
+        where: { email },
+      });
+
+      if (!result) {
+        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+
+      return result;
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || USER_MESSAGES.GET_ALL_FAILED);
+    }
+  }
+
   private async signAcessToken(payload: TokenPayload) {
     return this.jwtService.signToken(payload);
   }
@@ -216,6 +244,29 @@ export class AuthService
       });
 
       return user;
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
+  }
+
+  async verifyOtpSuccess(email: string) {
+    try {
+      const user = await this.getUserByEmail({ email });
+
+      if (!user) {
+        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+
+      await prismaAuth.user.update({
+        where: { id: user.id },
+        data: {
+          isFirstLogin: false,
+        },
+      });
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;

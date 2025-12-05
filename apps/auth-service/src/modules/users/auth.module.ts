@@ -9,6 +9,7 @@ import {
   KAFKA_CLIENT_ID,
   KAFKA_GROUP_ID,
   KAFKA_SERVICE,
+  RedisModule,
 } from '@mebike/common';
 import { AuthService } from './auth.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -18,6 +19,7 @@ import { join } from 'node:path';
 @Module({
   imports: [
     ConsuleModule,
+    RedisModule,
     JwtSharedModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([

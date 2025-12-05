@@ -1,0 +1,11 @@
+export const REDIS_CONSTANTS = {
+  REDIS_HOST: 'REDIS_HOST',
+  REDIS_PORT: 'REDIS_PORT',
+  REDIS_PASSWORD: 'REDIS_PASSWORD',
+  REDIS_CLIENT: 'REDIS_CLIENT',
+};
+
+export const REDIS_KEY_PREFIX = {
+  USER_SESSION: 'user_session:',
+  PASSWORD_RESET: 'reset_otp:',
+};

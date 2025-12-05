@@ -1,6 +1,11 @@
 import { PartialType, PickType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './CreateUserDto';
+import { IsBoolean, IsOptional } from 'class-validator';
+import { RegisterUserDto } from './RegisterUserDto';
 
 export class UserDto extends PartialType(
-  PickType(CreateUserDto, ['email', 'password'] as const),
-) {}
+  PickType(RegisterUserDto, ['email', 'password'] as const),
+) {
+  @IsBoolean()
+  @IsOptional()
+  isFirstLogin?: boolean;
+}

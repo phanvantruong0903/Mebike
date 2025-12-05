@@ -6,7 +6,7 @@ export function throwGrpcError(message: string, errors?: string[]): never {
   throw new RpcException(errorResponse);
 }
 
-export function grpcResponse<T>(data: T, message = 'Success') {
+export function grpcResponse<T>(data: T | T[], message = 'Success') {
   return {
     success: true,
     message,
