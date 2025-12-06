@@ -3,3 +3,4 @@ export * from './Login';
 export * from './RefreshToken';
 export * from './AuthResponse';
 export * from './Account';
+export * from './VerifyOtp';

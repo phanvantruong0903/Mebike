@@ -5,3 +5,5 @@ export * from './GetUserInput';
 export * from './UpdateUserInput';
 export * from './ChangeStatusInput';
 export * from './VerifyOtpInput';
+export * from './ResetPasswordInput';
+export * from './ResetPasswordRequestInput';

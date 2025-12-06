@@ -17,6 +17,8 @@ import {
   UserResponse,
   VerifyOtpInput,
   UserProfile,
+  VerifyOtpResponse,
+  ResetPasswordInput,
 } from '@mebike/common';
 import { RoleGuard } from './role.guard';
 import { Roles } from './role.decorator';
@@ -70,19 +72,30 @@ export class AuthResolver {
   }
 
   @Mutation(() => UserResponse, {
-    name: GRAPHQL_NAME_USER.RESET_PASSWORD,
+    name: GRAPHQL_NAME_USER.RESET_PASSWORD_REQUEST,
   })
-  async resetPassword(@Args('email') email: string): Promise<UserResponse> {
-    return this.authService.resetPassword(email);
+  async resetPasswordRequest(
+    @Args('email') email: string,
+  ): Promise<UserResponse> {
+    return this.authService.resetPasswordRequest(email);
   }
 
-  @Mutation(() => UserResponse, {
+  @Mutation(() => VerifyOtpResponse, {
     name: GRAPHQL_NAME_USER.VERIFY_OTP,
   })
   async verifyOtp(
     @Args('data', { type: () => VerifyOtpInput }) data: VerifyOtpInput,
-  ): Promise<UserResponse> {
+  ): Promise<VerifyOtpResponse> {
     return this.authService.verifyOtp(data);
+  }
+
+  @Mutation(() => RegisterResponse, {
+    name: GRAPHQL_NAME_USER.RESET_PASSWORD,
+  })
+  async resetPassword(
+    @Args('data', { type: () => ResetPasswordInput }) data: ResetPasswordInput,
+  ): Promise<RegisterResponse> {
+    return this.authService.resetPassword(data);
   }
 
   @Query(() => String)
