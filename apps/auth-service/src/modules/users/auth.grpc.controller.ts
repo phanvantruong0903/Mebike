@@ -159,7 +159,7 @@ export class AuthGrpcController {
 
       const [_, finalResult] = await Promise.all([deleted, verifyResult]);
       return grpcResponse(
-        finalResult.resetToken,
+        { resetToken: finalResult },
         USER_MESSAGES.OTP_VERIFIED_SUCCESS,
       );
     } catch (error) {

@@ -97,7 +97,7 @@ message ResetPasswordDto {
   string newPassword = 2;
 }
 
-message ResetPasswordResponse {
+message ResetPasswordRequestResponse {
   bool success = 1;
   string message = 2;
   User data = 3;
@@ -112,8 +112,19 @@ message VerifyOtpRequest {
 message VerifyOtpResponse {
   bool success = 1;
   string message = 2;
-  string data = 3;
+  ResetToken data = 3;
   repeated string errors = 4;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+  string message = 2;
+  User data = 3;
+  repeated string errors = 4;
+}
+
+message ResetToken {
+  string resetToken = 1;
 }
 
 service AuthService {
@@ -122,7 +133,7 @@ service AuthService {
   rpc RefreshTokenRequest(RefreshTokenRequest) returns (ResfreshTokenResponse);
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
   rpc Register(RegisterUserRequest) returns (RegisterUserResponse);
-  rpc ResetPasswordRequest(ResetPasswordRequest) returns (ResetPasswordResponse);
+  rpc ResetPasswordRequest(ResetPasswordRequest) returns (ResetPasswordRequestResponse);
   rpc VerifyOtp(VerifyOtpRequest) returns (VerifyOtpResponse);
   rpc ResetPassword(ResetPasswordDto) returns (ResetPasswordResponse);
 }

@@ -366,7 +366,7 @@ export class AuthService
         300,
       );
 
-      return { resetToken };
+      return resetToken;
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
