@@ -32,12 +32,14 @@ RUN npm pkg delete scripts.postinstall && \
   consul axios bcrypt passport passport-jwt \
   rxjs reflect-metadata @nestjs/jwt dotenv \
   @apollo/server ioredis@5.8.2 kafkajs@2.2.4 \
+  @nestjs-modules/mailer@2.0.2 \
   --legacy-peer-deps
 
 COPY --from=builder /app/apps/notification-service/dist/main.js ./
 
 COPY --from=builder /app/common ./common
 COPY --from=builder /app/common ./apps/notification-service/common
+COPY --from=builder /app/apps/notification-service/src/templates ./templates
 
 EXPOSE 50054
 

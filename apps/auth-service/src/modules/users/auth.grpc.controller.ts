@@ -174,7 +174,7 @@ export class AuthGrpcController {
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.RESET_PASSWORD)
   async resetPassword(data: ResetPasswordDto) {
     const user = await this.authService.resetPassword(data);
-    return grpcResponse(user, USER_MESSAGES.RESET_PASSWORD_SUCCESS);
+    return grpcResponse(user, USER_MESSAGES.PASSWORD_RESET_SUCCESS);
   }
 
   private async _handleCreateUserLogic(
