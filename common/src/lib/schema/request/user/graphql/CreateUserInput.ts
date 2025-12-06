@@ -9,9 +9,6 @@ export class CreateUserInput {
   @Field()
   name!: string;
 
-  @Field()
-  password!: string;
-
   @Field(() => Int)
   YOB!: number;
 

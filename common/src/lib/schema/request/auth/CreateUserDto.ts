@@ -1,11 +1,4 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  MinLength,
-  Min,
-  Max,
-  IsNotIn,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, Min, Max, IsNotIn } from 'class-validator';
 import { Role } from '../../../prisma/index';
 
 export class CreateUserDto {
@@ -15,10 +8,6 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   name!: string;
-
-  @MinLength(6)
-  @IsNotEmpty()
-  password!: string;
 
   @IsNotEmpty()
   @Min(1900, { message: 'YOB must be greater than 1900' })

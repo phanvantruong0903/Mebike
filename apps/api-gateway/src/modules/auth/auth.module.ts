@@ -7,6 +7,7 @@ import {
   ConsulService,
   CONSULT_SERVICE_ID,
   GRPC_PACKAGE,
+  RedisModule,
 } from '@mebike/common';
 import { AuthResolver } from './auth.resolver';
 import { ConfigModule } from '@nestjs/config';
@@ -17,6 +18,7 @@ import { UserModule } from '../user/user.module';
   imports: [
     UserModule,
     ConsuleModule,
+    RedisModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {

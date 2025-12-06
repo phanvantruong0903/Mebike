@@ -1,15 +1,16 @@
 export const GRPC_SERVICES = {
   AUTH: 'AuthService',
   USER: 'UserService',
+  NOTIFICATION: 'NotificationService',
 } as const;
 
 export const GRPC_PACKAGE = {
   AUTH: 'AUTH_PACKAGE',
   USER: 'USER_PACKAGE',
+  NOTIFICATION: 'NOTIFICATION_PACKAGE',
 };
 
 export const USER_METHODS = {
-  REGISTER: 'RegisterUser',
   CREATE: 'CreateUser',
   GET_ONE: 'GetUser',
   UPDATE: 'UpdateUser',
@@ -18,5 +19,9 @@ export const USER_METHODS = {
   REFRESH_TOKEN: 'RefreshToken',
   CHANGE_PASSWORD: 'ChangePassword',
   CREATE_PROFILE: 'CreateProfile',
-  CHANGE_STATUS: 'ChangeUserStatus',
+  CHANGE_STATUS: 'ChangeStatus',
+  REGISTER: 'Register',
+  RESET_PASSWORD_REQUEST: 'ResetPasswordRequest',
+  RESET_PASSWORD: 'ResetPassword',
+  VERIFY_OTP: 'VerifyOtp',
 } as const;

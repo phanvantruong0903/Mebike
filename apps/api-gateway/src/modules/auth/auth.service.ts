@@ -2,7 +2,6 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
 import {
-  CreateUserDto,
   RegisterResponse,
   LoginResponse,
   ResfreshTokenResponse,
@@ -11,17 +10,28 @@ import {
   LoginInput,
   ChangePasswordInput,
   ChangePasswordResponse,
-  RegisterInput,
+  RegisterUserInput,
+  CreateUserInput,
+  UserResponse,
+  VerifyOtpInput,
+  ResetPasswordRequestInput,
+  ResetPasswordInput,
+  VerifyOtpResponse,
 } from '@mebike/common';
 
 interface AuthServiceClient {
   LoginUser(data: LoginInput): Observable<LoginResponse>;
-  CreateUser(data: CreateUserDto): Observable<RegisterResponse>;
+  CreateUser(data: CreateUserInput): Observable<RegisterResponse>;
   RefreshToken(refreshToken: object): Observable<ResfreshTokenResponse>;
   ChangePassword(
     data: ChangePasswordInput & { accountId: string },
   ): Observable<ChangePasswordResponse>;
-  RegisterUser(data: RegisterInput): Observable<RegisterResponse>;
+  Register(data: RegisterUserInput): Observable<RegisterResponse>;
+  ResetPasswordRequest(
+    data: ResetPasswordRequestInput,
+  ): Observable<UserResponse>;
+  ResetPassword(data: ResetPasswordInput): Observable<RegisterResponse>;
+  VerifyOtp(data: VerifyOtpInput): Observable<VerifyOtpResponse>;
 }
 
 @Injectable()
@@ -40,12 +50,12 @@ export class AuthService implements OnModuleInit {
     return await firstValueFrom(this.userService.LoginUser(data));
   }
 
-  async createUser(data: CreateUserDto) {
+  async createUser(data: CreateUserInput) {
     return await firstValueFrom(this.userService.CreateUser(data));
   }
 
-  async registerUser(data: RegisterInput) {
-    return await firstValueFrom(this.userService.RegisterUser(data));
+  async register(data: RegisterUserInput) {
+    return await firstValueFrom(this.userService.Register(data));
   }
 
   async refreshToken(refreshToken: string) {
@@ -56,5 +66,19 @@ export class AuthService implements OnModuleInit {
 
   async changePassword(data: ChangePasswordInput & { accountId: string }) {
     return await firstValueFrom(this.userService.ChangePassword(data));
+  }
+
+  async resetPasswordRequest(email: string) {
+    return await firstValueFrom(
+      this.userService.ResetPasswordRequest({ email }),
+    );
+  }
+
+  async verifyOtp(data: VerifyOtpInput) {
+    return await firstValueFrom(this.userService.VerifyOtp(data));
+  }
+
+  async resetPassword(data: ResetPasswordInput) {
+    return await firstValueFrom(this.userService.ResetPassword(data));
   }
 }

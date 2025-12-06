@@ -17,9 +17,9 @@ export class SeedService implements OnModuleInit {
   }
 
   async seedAdminUser() {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin.loginex@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin.mebike@gmail.com';
     const adminPassword =
-      process.env.ADMIN_PASSWORD || 'admin.loginex@gmail.com';
+      process.env.ADMIN_PASSWORD || 'admin.mebike@gmail.com';
 
     try {
       const existingUser = await prismaAuth.user.findUnique({
@@ -37,7 +37,7 @@ export class SeedService implements OnModuleInit {
 
         const profileData: CreateProfileDto = {
           YOB: 2000,
-          name: 'Admin LogiNex',
+          name: 'Admin Mebike',
           accountId: user.id,
           role: Role.ADMIN,
         };

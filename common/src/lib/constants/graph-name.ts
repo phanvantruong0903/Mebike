@@ -8,4 +8,7 @@ export const GRAPHQL_NAME_USER = {
   CHANGE_PASSWORD: 'ChangePassword',
   CHANGE_STATUS: 'ChangeUserStatus',
   REGISTER: 'RegisterUser',
+  VERIFY_OTP: 'VerifyOTP',
+  RESET_PASSWORD_REQUEST: 'ResetPasswordRequest',
+  RESET_PASSWORD: 'ResetPassword',
 };

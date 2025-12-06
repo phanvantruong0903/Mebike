@@ -16,11 +16,15 @@ import {
   User,
   ChangePasswordDto,
   UserStatus,
+  REDIS_CONSTANTS,
+  REDIS_KEY_PREFIX,
+  ResetPasswordDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
+import { Redis } from 'ioredis';
 
 interface UserServiceClient {
   GetUser(data: { id: string }): Observable<UserResponse>;
@@ -35,6 +39,7 @@ export class AuthService
   constructor(
     private readonly jwtService: JwtServiceCustom,
     @Inject(GRPC_PACKAGE.USER) private readonly client: ClientGrpc,
+    @Inject(REDIS_CONSTANTS.REDIS_CLIENT) private readonly redisClient: Redis,
   ) {
     super(prismaAuth.user);
   }
@@ -52,6 +57,7 @@ export class AuthService
         select: {
           id: true,
           password: true,
+          isFirstLogin: true,
         },
       });
 
@@ -71,6 +77,12 @@ export class AuthService
       if (!isMatch) {
         throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [
           USER_MESSAGES.VALIDATION_FAILED,
+        ]);
+      }
+
+      if (findUser.isFirstLogin === true) {
+        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.USER_FIRST_LOGIN,
         ]);
       }
 
@@ -106,11 +118,35 @@ export class AuthService
       this.signRefreshToken(payload),
     ]);
 
+    await Promise.all([
+      this.redisClient.set(
+        `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+        payload.user_id,
+        'EX',
+        Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
+      ),
+      this.redisClient.set(
+        `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+        payload.user_id,
+        'EX',
+        Number(process.env.JWT_REFRESH_EXPIRATION_TIME) || 604800,
+      ),
+    ]);
+
     return { accessToken, refreshToken };
   }
 
   async refreshToken(refreshToken: string) {
     try {
+      const token = await this.redisClient.get(
+        `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+      );
+      if (!token) {
+        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+          USER_MESSAGES.INVALID_REFRESH_TOKEN,
+        ]);
+      }
+
       const decoded = await this.jwtService.verifyToken(refreshToken);
       if (!decoded) {
         throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
@@ -137,6 +173,14 @@ export class AuthService
         verify,
         role,
       });
+
+      await this.redisClient.set(
+        `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+        user_id,
+        'EX',
+        Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
+      );
+
       return { accessToken };
     } catch (error: unknown) {
       if (error instanceof RpcException) {
@@ -144,6 +188,27 @@ export class AuthService
       }
       const err = error as Error;
       throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
+  }
+
+  async getUserByEmail(data: { email: string }): Promise<User> {
+    try {
+      const { email } = data;
+      const result = await prismaAuth.user.findUnique({
+        where: { email },
+      });
+
+      if (!result) {
+        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+
+      return result;
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || USER_MESSAGES.GET_ALL_FAILED);
     }
   }
 
@@ -216,6 +281,92 @@ export class AuthService
       });
 
       return user;
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
+  }
+
+  async resetPassword(data: ResetPasswordDto) {
+    try {
+      const storedToken = await this.redisClient.get(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${data.resetToken}`,
+      );
+
+      if (!storedToken) {
+        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+          USER_MESSAGES.INVALID_RESET_TOKEN,
+        ]);
+      }
+
+      const decoded = await this.jwtService.verifyToken(data.resetToken);
+      if (!decoded) {
+        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+          USER_MESSAGES.INVALID_RESET_TOKEN,
+        ]);
+      }
+
+      const { user_id } = decoded as TokenPayload;
+      const newHashedPassword = await bcrypt.hash(data.newPassword, 10);
+
+      const user = prismaAuth.user.update({
+        where: { id: user_id },
+        data: {
+          password: newHashedPassword,
+        },
+      });
+
+      const deletedToken = this.redisClient.del(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${data.resetToken}`,
+      );
+
+      await Promise.all([user, deletedToken]);
+
+      return user;
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
+        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
+  }
+
+  async verifyOtpSuccess(email: string) {
+    try {
+      const user = await this.getUserByEmail({ email });
+
+      if (!user) {
+        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+
+      await prismaAuth.user.update({
+        where: { id: user.id },
+        data: {
+          isFirstLogin: false,
+        },
+      });
+
+      const resetToken = await this.jwtService.signToken(
+        { user_id: user.id } as TokenPayload,
+        { expiresIn: '5m' },
+      );
+
+      await this.redisClient.set(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${resetToken}`,
+        user.email,
+        'EX',
+        300,
+      );
+
+      return resetToken;
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
