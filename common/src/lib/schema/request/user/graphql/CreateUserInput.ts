@@ -12,6 +12,9 @@ export class CreateUserInput {
   @Field(() => Int)
   YOB!: number;
 
+  @Field(() => String)
+  phone!: string;
+
   @Field(() => Role)
   role!: Role;
 }

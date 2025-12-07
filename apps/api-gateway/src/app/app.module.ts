@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../modules/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { formatError } from '../config/graphql.config';
 import {
   ApolloServerPluginLandingPageDisabled,
   ApolloServerPluginLandingPageLocalDefault,
@@ -24,6 +25,7 @@ import { UserModule } from '../modules/user/user.module';
               includeCookies: true,
             }),
       ],
+      formatError,
     }),
     AuthModule,
     UserModule,

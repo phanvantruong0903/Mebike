@@ -19,6 +19,7 @@ export class GrpcExceptionFilter implements ExceptionFilter {
         success: false,
         message: SERVER_MESSAGE.VALIDATION_FAILED,
         errors: messages,
+        statusCode: 400,
       };
 
       return errorResponse;

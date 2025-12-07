@@ -24,4 +24,5 @@ export const USER_METHODS = {
   RESET_PASSWORD_REQUEST: 'ResetPasswordRequest',
   RESET_PASSWORD: 'ResetPassword',
   VERIFY_OTP: 'VerifyOtp',
+  GET_ACCOUNT_BY_ACCOUNT_ID: 'GetAccountByAccountIds',
 } as const;

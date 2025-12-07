@@ -19,6 +19,7 @@ message CreateUserRequest {
   string password = 3;
   int32 YOB = 4;
   string role = 5;
+  string phone = 6;
 }
 
 message Token {
@@ -31,6 +32,7 @@ message LoginUserResponse{
   string message = 2;
   Token data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message CreateUserResponse {
@@ -38,12 +40,14 @@ message CreateUserResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message UsersResponse {
   bool success = 1;
   string message = 2;
   repeated User data = 3;
+  int32 statusCode = 4;
 }
 
 message RefreshTokenRequest {
@@ -59,6 +63,7 @@ message ResfreshTokenResponse {
   string message = 2;
   RefreshToken data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ChangePasswordRequest {
@@ -72,13 +77,15 @@ message ChangePasswordResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message RegisterUserRequest {
   string email = 1;
   string name = 2;
   string password = 3;
-  int32 YOB = 4;  
+  int32 YOB = 4;
+  string phone = 5;
 }
 
 message RegisterUserResponse {
@@ -86,6 +93,7 @@ message RegisterUserResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ResetPasswordRequest {
@@ -102,6 +110,7 @@ message ResetPasswordRequestResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message VerifyOtpRequest {
@@ -114,6 +123,7 @@ message VerifyOtpResponse {
   string message = 2;
   ResetToken data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ResetPasswordResponse {
@@ -121,21 +131,35 @@ message ResetPasswordResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ResetToken {
   string resetToken = 1;
 }
 
+message GetAccountByAccountIdsRequest {
+  repeated string ids = 1;
+}
+
+message GetAccountByAccountIdsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated User data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
-  rpc RefreshTokenRequest(RefreshTokenRequest) returns (ResfreshTokenResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (ResfreshTokenResponse);
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
   rpc Register(RegisterUserRequest) returns (RegisterUserResponse);
   rpc ResetPasswordRequest(ResetPasswordRequest) returns (ResetPasswordRequestResponse);
   rpc VerifyOtp(VerifyOtpRequest) returns (VerifyOtpResponse);
   rpc ResetPassword(ResetPasswordDto) returns (ResetPasswordResponse);
+  rpc GetAccountByAccountIds(GetAccountByAccountIdsRequest) returns (GetAccountByAccountIdsResponse);
 }
 
 message Empty {}

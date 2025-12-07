@@ -8,6 +8,7 @@ import {
   UserResponse,
   UpdateUserInput,
   UserStatus,
+  Account,
 } from '@mebike/common';
 
 interface UserServiceClient {
@@ -25,6 +26,7 @@ interface UserServiceClient {
     accountId: string;
     status: UserStatus;
   }): Observable<UserResponse>;
+  GetAccountsByAccountIds(data: { ids: string[] }): Observable<Account[]>;
 }
 
 @Injectable()

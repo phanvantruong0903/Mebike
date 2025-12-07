@@ -62,34 +62,34 @@ export class AuthService
       });
 
       const findUser = await findUserPromise;
+
       if (!findUser) {
-        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
-      }
-
-      const isMatchPromise = bcrypt.compare(data.password, findUser.password);
-      const profilePromise = this.getUserProfile(findUser.id);
-
-      const [isMatch, userProfile] = await Promise.all([
-        isMatchPromise,
-        profilePromise,
-      ]);
-
-      if (!isMatch) {
-        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [
-          USER_MESSAGES.VALIDATION_FAILED,
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.NOT_FOUND,
         ]);
       }
 
       if (findUser.isFirstLogin === true) {
-        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [
+        throwGrpcError(400, SERVER_MESSAGE.NOT_FOUND, [
           USER_MESSAGES.USER_FIRST_LOGIN,
+        ]);
+      }
+
+      const [isMatch, userProfile] = await Promise.all([
+        bcrypt.compare(data.password, findUser.password),
+        this.getUserProfile(findUser.id),
+      ]);
+
+      if (!isMatch) {
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.VALIDATION_FAILED,
         ]);
       }
 
       const userData = userProfile.data as UserProfile;
 
       if (userData.status !== UserStatus.Active) {
-        throwGrpcError(USER_MESSAGES.USER_STATUS_INVALID, [
+        throwGrpcError(400, USER_MESSAGES.USER_STATUS_INVALID, [
           USER_MESSAGES.USER_STATUS_INVALID,
         ]);
       }
@@ -104,7 +104,7 @@ export class AuthService
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
     }
   }
 
@@ -118,21 +118,23 @@ export class AuthService
       this.signRefreshToken(payload),
     ]);
 
-    await Promise.all([
-      this.redisClient.set(
-        `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
-        payload.user_id,
-        'EX',
-        Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
-      ),
-      this.redisClient.set(
-        `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
-        payload.user_id,
-        'EX',
-        Number(process.env.JWT_REFRESH_EXPIRATION_TIME) || 604800,
-      ),
-    ]);
+    const pipeline = this.redisClient.pipeline();
 
+    pipeline.set(
+      `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+      payload.user_id,
+      'EX',
+      Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
+    );
+
+    pipeline.set(
+      `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+      payload.user_id,
+      'EX',
+      Number(process.env.JWT_REFRESH_EXPIRATION_TIME) || 604800,
+    );
+
+    await pipeline.exec();
     return { accessToken, refreshToken };
   }
 
@@ -142,30 +144,35 @@ export class AuthService
         `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
       );
       if (!token) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_REFRESH_TOKEN,
         ]);
       }
 
       const decoded = await this.jwtService.verifyToken(refreshToken);
       if (!decoded) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_REFRESH_TOKEN,
         ]);
       }
 
       const { user_id, verify, role } = decoded as TokenPayload;
       if (!user_id) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_TOKEN_PAYLOAD,
         ]);
       }
 
       const findUser = await prismaAuth.user.findUnique({
         where: { id: user_id },
+        select: {
+          id: true,
+        },
       });
       if (!findUser) {
-        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.NOT_FOUND,
+        ]);
       }
 
       const accessToken = await this.jwtService.signToken({
@@ -187,7 +194,7 @@ export class AuthService
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
     }
   }
 
@@ -199,7 +206,9 @@ export class AuthService
       });
 
       if (!result) {
-        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.NOT_FOUND,
+        ]);
       }
 
       return result;
@@ -232,7 +241,9 @@ export class AuthService
     try {
       const user = await this.getUserById(id);
       if (!user) {
-        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.NOT_FOUND,
+        ]);
       }
 
       return user;
@@ -241,14 +252,14 @@ export class AuthService
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
     }
   }
 
   async changePassword(data: ChangePasswordDto) {
     try {
       if (data.oldPassword === data.newPassword) {
-        throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
           USER_MESSAGES.PASSWORD_SAME,
         ]);
       }
@@ -259,7 +270,7 @@ export class AuthService
       });
 
       if (!findUser) {
-        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
       }
 
       const [isMatch, newHashedPassword] = await Promise.all([
@@ -268,7 +279,7 @@ export class AuthService
       ]);
 
       if (!isMatch) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_PASSWORD,
         ]);
       }
@@ -286,7 +297,7 @@ export class AuthService
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
     }
   }
 
@@ -297,14 +308,14 @@ export class AuthService
       );
 
       if (!storedToken) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_RESET_TOKEN,
         ]);
       }
 
       const decoded = await this.jwtService.verifyToken(data.resetToken);
       if (!decoded) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_RESET_TOKEN,
         ]);
       }
@@ -328,14 +339,14 @@ export class AuthService
       return user;
     } catch (error: any) {
       if (error?.code === 'P2025') {
-        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
       }
 
       if (error instanceof RpcException) {
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
     }
   }
 
@@ -344,7 +355,7 @@ export class AuthService
       const user = await this.getUserByEmail({ email });
 
       if (!user) {
-        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
       }
 
       await prismaAuth.user.update({
@@ -372,7 +383,7 @@ export class AuthService
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
     }
   }
 }

@@ -13,6 +13,10 @@ export class RegisterUserDto {
   password!: string;
 
   @IsNotEmpty()
+  @MinLength(10, { message: 'Phone must be at least 10 characters' })
+  phone!: string;
+
+  @IsNotEmpty()
   @Min(1900, { message: 'YOB must be greater than 1900' })
   @Max(new Date().getFullYear(), { message: 'YOB must be less than now' })
   YOB!: number;

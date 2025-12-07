@@ -28,12 +28,14 @@ message UpdateUserResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message UserDetailResponse {
   bool success = 1;
   string message = 2;
   User data = 3;
+  int32 statusCode = 4;
 }
 
 message UsersResponse {
@@ -44,6 +46,7 @@ message UsersResponse {
   int32 page = 5;
   int32 limit = 6;
   int32 totalPages = 7;
+  int32 statusCode = 8;
 }
 
 message GetAllUserRequest {
@@ -55,6 +58,7 @@ message ChangeStatusRequest {
   string accountId = 1;
   string status = 2;
 }
+
 
 service UserService {
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);

@@ -24,10 +24,10 @@ import {
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
   ResetPasswordDto,
+  prismaAuth,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
-import { lastValueFrom } from 'rxjs';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -79,7 +79,7 @@ export class AuthGrpcController {
     const { refreshToken } = data;
 
     if (!refreshToken) {
-      throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
       ]);
     }
@@ -116,20 +116,18 @@ export class AuthGrpcController {
 
     const account = user as Account;
 
-    await lastValueFrom(
-      this.kafkaClient.emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
-        key: account.id,
-        value: {
-          to: account?.email,
-          subject: 'OTP verification code',
-          template: 'reset-password',
-          data: {
-            email: account?.email,
-            otp: otpCode,
-          },
+    this.kafkaClient.emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
+      key: account.id,
+      value: {
+        to: account?.email,
+        subject: 'OTP verification code',
+        template: 'reset-password',
+        data: {
+          email: account?.email,
+          otp: otpCode,
         },
-      }),
-    );
+      },
+    });
 
     return grpcResponse(null, USER_MESSAGES.RESET_PASSWORD_OTP_SENT);
   }
@@ -146,7 +144,7 @@ export class AuthGrpcController {
       );
 
       if (storedOtp !== otp) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_OTP,
         ]);
       }
@@ -210,6 +208,7 @@ export class AuthGrpcController {
         YOB: data.YOB,
         name: data.name,
         accountId: user.id,
+        phone: data.phone,
         role: role,
       };
 
@@ -224,9 +223,20 @@ export class AuthGrpcController {
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(err?.message || USER_MESSAGES.CREATE_FAILED, [
+      throwGrpcError(400, err?.message || USER_MESSAGES.CREATE_FAILED, [
         err.message,
       ]);
     }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.GET_ACCOUNT_BY_ACCOUNT_ID)
+  async getAccountByAccountIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const accounts = await prismaAuth.user.findMany({
+      where: { id: { in: ids } },
+    });
+    return grpcResponse(accounts, USER_MESSAGES.GET_DETAIL_SUCCESS);
   }
 }

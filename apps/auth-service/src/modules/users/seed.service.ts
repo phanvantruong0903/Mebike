@@ -40,6 +40,7 @@ export class SeedService implements OnModuleInit {
           name: 'Admin Mebike',
           accountId: user.id,
           role: Role.ADMIN,
+          phone: '0123456789',
         };
 
         const kafkaClient = new ClientKafka({
