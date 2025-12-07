@@ -57,7 +57,8 @@
         "apps/auth-service-e2e/**/*",
         "apps/user-service-e2e/**/*",
         "common/**/*",
-        "apps/notification-service-e2e/**/*"
+        "apps/notification-service-e2e/**/*",
+        "apps/fleet-service-e2e/**/*"
       ]
     },
     {

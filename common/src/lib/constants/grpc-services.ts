@@ -2,12 +2,14 @@ export const GRPC_SERVICES = {
   AUTH: 'AuthService',
   USER: 'UserService',
   NOTIFICATION: 'NotificationService',
+  FLEET: 'FleetService',
 } as const;
 
 export const GRPC_PACKAGE = {
   AUTH: 'AUTH_PACKAGE',
   USER: 'USER_PACKAGE',
   NOTIFICATION: 'NOTIFICATION_PACKAGE',
+  FLEET: 'FLEET_PACKAGE',
 };
 
 export const USER_METHODS = {
@@ -26,4 +28,13 @@ export const USER_METHODS = {
   VERIFY_OTP: 'VerifyOtp',
   GET_ACCOUNT_BY_ACCOUNT_ID: 'GetAccountByAccountIds',
   GET_STATS: 'GetUserStats',
+} as const;
+
+export const SUPPLIER_METHODS = {
+  CREATE: 'CreateSupplier',
+  GET_ONE: 'GetSupplier',
+  UPDATE: 'UpdateSupplier',
+  GET_ALL: 'GetAllSuppliers',
+  CHANGE_STATUS: 'ChangeSupplierStatus',
+  GET_STATS: 'GetSupplierStats',
 } as const;

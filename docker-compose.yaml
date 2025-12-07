@@ -267,7 +267,7 @@ services:
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - NOTIFICATION_SERVICE_PORT=50054
+      - NOTIFICATION_SERVICE_PORT=50053
       - KAFKA_BROKERS=kafka:29092
       - REDIS_HOST=redis
       - REDIS_PORT=6379

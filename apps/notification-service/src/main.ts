@@ -12,7 +12,7 @@ async function bootstrap() {
   dotenvConfig();
 
   const consulService = new ConsulService();
-  const port = Number(process.env.NOTIFICATION_SERVICE_PORT) || 50054;
+  const port = Number(process.env.NOTIFICATION_SERVICE_PORT) || 50053;
   const host = consulService.getLocalIp();
 
   await consulService.registerService(
