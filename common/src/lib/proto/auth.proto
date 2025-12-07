@@ -32,6 +32,7 @@ message LoginUserResponse{
   string message = 2;
   Token data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message CreateUserResponse {
@@ -39,12 +40,14 @@ message CreateUserResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message UsersResponse {
   bool success = 1;
   string message = 2;
   repeated User data = 3;
+  int32 statusCode = 4;
 }
 
 message RefreshTokenRequest {
@@ -60,6 +63,7 @@ message ResfreshTokenResponse {
   string message = 2;
   RefreshToken data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ChangePasswordRequest {
@@ -73,6 +77,7 @@ message ChangePasswordResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message RegisterUserRequest {
@@ -88,6 +93,7 @@ message RegisterUserResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ResetPasswordRequest {
@@ -104,6 +110,7 @@ message ResetPasswordRequestResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message VerifyOtpRequest {
@@ -116,6 +123,7 @@ message VerifyOtpResponse {
   string message = 2;
   ResetToken data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ResetPasswordResponse {
@@ -123,6 +131,7 @@ message ResetPasswordResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message ResetToken {
@@ -138,12 +147,13 @@ message GetAccountByAccountIdsResponse {
   string message = 2;
   repeated User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
-  rpc RefreshTokenRequest(RefreshTokenRequest) returns (ResfreshTokenResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (ResfreshTokenResponse);
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
   rpc Register(RegisterUserRequest) returns (RegisterUserResponse);
   rpc ResetPasswordRequest(ResetPasswordRequest) returns (ResetPasswordRequestResponse);

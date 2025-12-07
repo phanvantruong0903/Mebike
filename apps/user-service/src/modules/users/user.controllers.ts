@@ -70,7 +70,7 @@ export class UserController {
         where: { accountId: id },
       });
       if (!result) {
-        throwGrpcError(USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
       }
 
       return grpcResponse<UserProfile>(
@@ -142,7 +142,9 @@ export class UserController {
         'code' in error &&
         error.code === 'P2025'
       ) {
-        throwGrpcError(SERVER_MESSAGE.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.NOT_FOUND,
+        ]);
       }
       const err = error as Error;
       throw new RpcException(err?.message);

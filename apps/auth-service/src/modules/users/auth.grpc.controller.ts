@@ -80,7 +80,7 @@ export class AuthGrpcController {
     const { refreshToken } = data;
 
     if (!refreshToken) {
-      throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
       ]);
     }
@@ -147,7 +147,7 @@ export class AuthGrpcController {
       );
 
       if (storedOtp !== otp) {
-        throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_OTP,
         ]);
       }
@@ -226,7 +226,7 @@ export class AuthGrpcController {
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(err?.message || USER_MESSAGES.CREATE_FAILED, [
+      throwGrpcError(400, err?.message || USER_MESSAGES.CREATE_FAILED, [
         err.message,
       ]);
     }

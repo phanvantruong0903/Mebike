@@ -25,6 +25,9 @@ export function ApiResponseType<TItem>(
 
     @Field(() => [String], { nullable: true })
     errors?: string[];
+
+    @Field(() => Int, { nullable: true })
+    statusCode?: number;
   }
 
   if (isArray) {

@@ -48,7 +48,7 @@ export class JwtStrategy
 
   async validate(req: any, payload: TokenPayload) {
     if (!this.userServiceCLient) {
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
         'User service is not available',
       ]);
     }
@@ -59,7 +59,7 @@ export class JwtStrategy
     );
 
     if (!isValid) {
-      throwGrpcError(SERVER_MESSAGE.UNAUTHORIZED, [
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
         USER_MESSAGES.INVALID_TOKEN_PAYLOAD,
       ]);
     }
@@ -70,7 +70,7 @@ export class JwtStrategy
       );
 
       if (!findUser) {
-        throwGrpcError(USER_MESSAGES.USER_NOT_FOUND, [
+        throwGrpcError(404, USER_MESSAGES.USER_NOT_FOUND, [
           USER_MESSAGES.USER_NOT_FOUND,
         ]);
       }
@@ -82,7 +82,7 @@ export class JwtStrategy
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      throwGrpcError(SERVER_MESSAGE.INTERNAL_SERVER, [errorMessage]);
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [errorMessage]);
     }
   }
 }
