@@ -211,6 +211,7 @@ export class AuthGrpcController {
         YOB: data.YOB,
         name: data.name,
         accountId: user.id,
+        phone: data.phone,
         role: role,
       };
 
