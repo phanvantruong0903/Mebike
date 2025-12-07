@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import {
@@ -10,6 +10,8 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from './user.service';
 import { UserResolver } from './user.resolver';
+import { UserAccountDataloader } from './user-account.dataloader';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -35,8 +37,9 @@ import { UserResolver } from './user.resolver';
         },
       },
     ]),
+    forwardRef(() => AuthModule),
   ],
-  providers: [UserService, UserResolver],
+  providers: [UserService, UserResolver, UserAccountDataloader],
   exports: [ClientsModule],
 })
 export class UserModule {}

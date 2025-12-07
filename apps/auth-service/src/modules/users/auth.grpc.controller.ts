@@ -24,6 +24,7 @@ import {
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
   ResetPasswordDto,
+  prismaAuth,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
@@ -228,5 +229,16 @@ export class AuthGrpcController {
         err.message,
       ]);
     }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.GET_ACCOUNT_BY_ACCOUNT_ID)
+  async getAccountByAccountIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const accounts = await prismaAuth.user.findMany({
+      where: { id: { in: ids } },
+    });
+    return grpcResponse(accounts, USER_MESSAGES.GET_DETAIL_SUCCESS);
   }
 }

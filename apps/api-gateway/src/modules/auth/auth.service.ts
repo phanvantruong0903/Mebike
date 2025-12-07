@@ -17,6 +17,7 @@ import {
   ResetPasswordRequestInput,
   ResetPasswordInput,
   VerifyOtpResponse,
+  Account,
 } from '@mebike/common';
 
 interface AuthServiceClient {
@@ -32,6 +33,7 @@ interface AuthServiceClient {
   ): Observable<UserResponse>;
   ResetPassword(data: ResetPasswordInput): Observable<RegisterResponse>;
   VerifyOtp(data: VerifyOtpInput): Observable<VerifyOtpResponse>;
+  GetAccountByAccountIds(data: { ids: string[] }): Observable<any>;
 }
 
 @Injectable()
@@ -80,5 +82,12 @@ export class AuthService implements OnModuleInit {
 
   async resetPassword(data: ResetPasswordInput) {
     return await firstValueFrom(this.userService.ResetPassword(data));
+  }
+
+  async getAccountByAccountIds(ids: string[]): Promise<Account[]> {
+    const result = await firstValueFrom(
+      this.userService.GetAccountByAccountIds({ ids }),
+    );
+    return result.data || [];
   }
 }

@@ -56,9 +56,11 @@ message ChangeStatusRequest {
   string status = 2;
 }
 
+
 service UserService {
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
   rpc GetAllUsers(GetAllUserRequest) returns (UsersResponse);
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
+  rpc GetProfileByAccountIds(GetProfileByAccountIdsRequest) returns (GetProfileByAccountIdsResponse);
 }

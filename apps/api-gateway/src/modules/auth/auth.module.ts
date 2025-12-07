@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import { AuthService } from './auth.service';
@@ -16,7 +16,7 @@ import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     ConsuleModule,
     RedisModule,
     ConfigModule.forRoot({ isGlobal: true }),
@@ -42,5 +42,6 @@ import { UserModule } from '../user/user.module';
     ]),
   ],
   providers: [AuthService, AuthResolver, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

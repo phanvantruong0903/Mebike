@@ -127,6 +127,17 @@ message ResetToken {
   string resetToken = 1;
 }
 
+message GetAccountByAccountIdsRequest {
+  repeated string ids = 1;
+}
+
+message GetAccountByAccountIdsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated User data = 3;
+  repeated string errors = 4;
+}
+
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
@@ -136,6 +147,7 @@ service AuthService {
   rpc ResetPasswordRequest(ResetPasswordRequest) returns (ResetPasswordRequestResponse);
   rpc VerifyOtp(VerifyOtpRequest) returns (VerifyOtpResponse);
   rpc ResetPassword(ResetPasswordDto) returns (ResetPasswordResponse);
+  rpc GetAccountByAccountIds(GetAccountByAccountIdsRequest) returns (GetAccountByAccountIdsResponse);
 }
 
 message Empty {}
