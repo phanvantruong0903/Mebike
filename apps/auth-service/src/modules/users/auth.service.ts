@@ -62,29 +62,27 @@ export class AuthService
       });
 
       const findUser = await findUserPromise;
+
       if (!findUser) {
         throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
           USER_MESSAGES.NOT_FOUND,
         ]);
       }
 
-      const isMatchPromise = bcrypt.compare(data.password, findUser.password);
-      const profilePromise = this.getUserProfile(findUser.id);
+      if (findUser.isFirstLogin === true) {
+        throwGrpcError(400, SERVER_MESSAGE.NOT_FOUND, [
+          USER_MESSAGES.USER_FIRST_LOGIN,
+        ]);
+      }
 
       const [isMatch, userProfile] = await Promise.all([
-        isMatchPromise,
-        profilePromise,
+        bcrypt.compare(data.password, findUser.password),
+        this.getUserProfile(findUser.id),
       ]);
 
       if (!isMatch) {
         throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
           USER_MESSAGES.VALIDATION_FAILED,
-        ]);
-      }
-
-      if (findUser.isFirstLogin === true) {
-        throwGrpcError(400, SERVER_MESSAGE.NOT_FOUND, [
-          USER_MESSAGES.USER_FIRST_LOGIN,
         ]);
       }
 
@@ -120,21 +118,23 @@ export class AuthService
       this.signRefreshToken(payload),
     ]);
 
-    await Promise.all([
-      this.redisClient.set(
-        `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
-        payload.user_id,
-        'EX',
-        Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
-      ),
-      this.redisClient.set(
-        `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
-        payload.user_id,
-        'EX',
-        Number(process.env.JWT_REFRESH_EXPIRATION_TIME) || 604800,
-      ),
-    ]);
+    const pipeline = this.redisClient.pipeline();
 
+    pipeline.set(
+      `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+      payload.user_id,
+      'EX',
+      Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
+    );
+
+    pipeline.set(
+      `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+      payload.user_id,
+      'EX',
+      Number(process.env.JWT_REFRESH_EXPIRATION_TIME) || 604800,
+    );
+
+    await pipeline.exec();
     return { accessToken, refreshToken };
   }
 
@@ -165,6 +165,9 @@ export class AuthService
 
       const findUser = await prismaAuth.user.findUnique({
         where: { id: user_id },
+        select: {
+          id: true,
+        },
       });
       if (!findUser) {
         throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [

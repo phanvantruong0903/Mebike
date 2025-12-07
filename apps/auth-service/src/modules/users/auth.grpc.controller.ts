@@ -117,20 +117,18 @@ export class AuthGrpcController {
 
     const account = user as Account;
 
-    await lastValueFrom(
-      this.kafkaClient.emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
-        key: account.id,
-        value: {
-          to: account?.email,
-          subject: 'OTP verification code',
-          template: 'reset-password',
-          data: {
-            email: account?.email,
-            otp: otpCode,
-          },
+    this.kafkaClient.emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
+      key: account.id,
+      value: {
+        to: account?.email,
+        subject: 'OTP verification code',
+        template: 'reset-password',
+        data: {
+          email: account?.email,
+          otp: otpCode,
         },
-      }),
-    );
+      },
+    });
 
     return grpcResponse(null, USER_MESSAGES.RESET_PASSWORD_OTP_SENT);
   }
