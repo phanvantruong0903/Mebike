@@ -2,6 +2,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { UserProfile } from './User';
 import { ApiResponseType } from '../../../../graphql/api-response.type';
 import { Account } from '../../auth/graphql/Account';
+import { UserStats } from './UserStat';
 
 @ObjectType()
 export class UserResponse extends ApiResponseType(UserProfile) {}
@@ -13,3 +14,6 @@ export class UserListResponse extends ApiResponseType(UserProfile, {
 
 @ObjectType()
 export class ChangePasswordResponse extends ApiResponseType(Account) {}
+
+@ObjectType()
+export class UserStatsResponse extends ApiResponseType(UserStats) {}

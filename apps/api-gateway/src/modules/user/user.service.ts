@@ -1,6 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
-import { Observable, lastValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, lastValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
@@ -9,6 +9,7 @@ import {
   UpdateUserInput,
   UserStatus,
   Account,
+  UserStatsResponse,
 } from '@mebike/common';
 
 interface UserServiceClient {
@@ -27,6 +28,7 @@ interface UserServiceClient {
     status: UserStatus;
   }): Observable<UserResponse>;
   GetAccountsByAccountIds(data: { ids: string[] }): Observable<Account[]>;
+  GetUserStats(data: object): Observable<UserStatsResponse>;
 }
 
 @Injectable()
@@ -61,5 +63,9 @@ export class UserService implements OnModuleInit {
 
   async changeStatus(data: { accountId: string; status: UserStatus }) {
     return await lastValueFrom(this.userService.ChangeStatus(data));
+  }
+
+  async getUserStats() {
+    return await firstValueFrom(this.userService.GetUserStats({}));
   }
 }

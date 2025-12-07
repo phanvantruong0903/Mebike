@@ -150,4 +150,10 @@ export class UserController {
       throw new RpcException(err?.message);
     }
   }
+
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_STATS)
+  async getUserStats() {
+    const result = await this.userService.getUserStat();
+    return grpcResponse(result, USER_MESSAGES.GET_ALL_STATS_SUCCESS);
+  }
 }
