@@ -28,7 +28,6 @@ import {
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
-import { lastValueFrom } from 'rxjs';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
