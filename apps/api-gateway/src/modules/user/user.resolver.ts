@@ -19,6 +19,7 @@ import {
   GetUsersInput,
   ChangeUserStatusInput,
   Account,
+  UserStatsResponse,
 } from '@mebike/common';
 
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -94,6 +95,13 @@ export class UserResolver {
   @ResolveField(() => Account)
   async userAccount(@Parent() user: UserProfile): Promise<Account> {
     return this.dataloader.batchAccounts.load(user.accountId);
+  }
+
+  @Query(() => UserStatsResponse, { name: GRAPHQL_NAME_USER.GET_STATS })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async getUserStats(): Promise<UserStatsResponse> {
+    return this.userService.getUserStats();
   }
 
   @Query(() => String)
