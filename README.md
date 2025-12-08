@@ -1,5 +1,20 @@
 # Mebike
 
+![NestJS](https://img.shields.io/badge/NestJS-v11.x-red?logo=nestjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-v5.9-blue?logo=typescript)
+![Nx](https://img.shields.io/badge/Nx-v21.5-1ca2f1?logo=nx)
+![Prisma](https://img.shields.io/badge/Prisma-v5.22-2d3748?logo=prisma)
+![GraphQL](https://img.shields.io/badge/GraphQL-E10098?logo=graphql&logoColor=white)
+![Apollo](https://img.shields.io/badge/Apollo%20GraphQL-311C87?logo=apollo-graphql&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?logo=apache-kafka&logoColor=white)
+![Consul](https://img.shields.io/badge/HashiCorp_Consul-F24C53?logo=consul&logoColor=white)
+![Traefik](https://img.shields.io/badge/Traefik-24292E?logo=traefik&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)
+
 **Mebike** is a microservices-based application built with [Nx](https://nx.dev), [NestJS](https://nestjs.com/), and [Docker](https://www.docker.com/). It uses a modern tech stack to ensure scalability and maintainability.
 
 ## 🚀 Tech Stack
