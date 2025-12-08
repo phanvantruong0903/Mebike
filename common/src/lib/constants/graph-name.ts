@@ -13,3 +13,12 @@ export const GRAPHQL_NAME_USER = {
   RESET_PASSWORD: 'ResetPassword',
   GET_STATS: 'GetUserStats',
 };
+
+export const GRAPHQL_NAME_SUPPLIER = {
+  GET_ALL: 'Suppliers',
+  GET_ONE: 'Supplier',
+  CREATE: 'CreateSupplier',
+  UPDATE: 'UpdateSupplier',
+  CHANGE_STATUS: 'ChangeSupplierStatus',
+  GET_STATS: 'GetSupplierStats',
+};

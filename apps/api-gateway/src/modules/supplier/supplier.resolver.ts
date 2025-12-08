@@ -1,0 +1,83 @@
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+  Role,
+  CreateSupplierInput,
+  UpdateSupplierInput,
+  SupplierResponse,
+  GRAPHQL_NAME_SUPPLIER,
+  SupplierListResponse,
+  GetSupplierInput,
+  ChangeSupplierStatusInput,
+} from '@mebike/common';
+import { RoleGuard } from '../auth/role.guard';
+import { Roles } from '../auth/role.decorator';
+import { SupplierService } from './supplier.service';
+
+@Resolver()
+export class SupplierResolver {
+  constructor(private readonly supplierService: SupplierService) {}
+
+  @Mutation(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.CREATE })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async createSupplier(
+    @Args('body') body: CreateSupplierInput,
+  ): Promise<SupplierResponse> {
+    return this.supplierService.createSupplier(body);
+  }
+
+  @Mutation(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.UPDATE })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async updateSupplier(
+    @Args('body') body: UpdateSupplierInput,
+    @Args('id') id: string,
+  ): Promise<SupplierResponse> {
+    return this.supplierService.updateSupplier({
+      id,
+      ...body,
+    });
+  }
+
+  @Query(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ONE })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async getSupplier(@Args('id') id: string): Promise<SupplierResponse> {
+    return this.supplierService.getSupplier({ id });
+  }
+
+  @Query(() => SupplierListResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ALL })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async getAllSuppliers(
+    @Args('params', {
+      nullable: true,
+      type: () => GetSupplierInput,
+      defaultValue: {},
+    })
+    data: GetSupplierInput,
+  ): Promise<SupplierListResponse> {
+    const page = data?.page ?? 1;
+    const limit = data?.limit ?? 10;
+
+    return this.supplierService.getAllSuppliers({ page, limit });
+  }
+
+  @Mutation(() => SupplierResponse, {
+    name: GRAPHQL_NAME_SUPPLIER.CHANGE_STATUS,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async changeSupplierStatus(
+    @Args('body') body: ChangeSupplierStatusInput,
+  ): Promise<SupplierResponse> {
+    return this.supplierService.changeSupplierStatus(body);
+  }
+
+  @Query(() => String)
+  _healthCheck(): string {
+    return 'API is running';
+  }
+}

@@ -39,7 +39,27 @@ export class SupplierController {
     data: UpdateSupplierDto & { id: string },
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const { id, ...updateData } = data;
+      const { id, address, phone, ...rest } = data;
+      const currentSupplier = await this.baseHandler.getOneById(id);
+
+      if (!currentSupplier) {
+        throwGrpcError(404, SUPPLIER_MESSAGES.NOT_FOUND, [
+          SUPPLIER_MESSAGES.NOT_FOUND,
+        ]);
+      }
+
+      const oldContactInfo = (currentSupplier.contactInfo as any) || {};
+      const newContactInfo = {
+        ...oldContactInfo,
+      };
+
+      if (address) newContactInfo.address = address;
+      if (phone) newContactInfo.phone = phone;
+
+      const updateData: any = {
+        ...rest,
+        contactInfo: newContactInfo,
+      };
 
       const result = await this.baseHandler.updateLogic(id, updateData);
       return grpcResponse<Supplier>(result, SUPPLIER_MESSAGES.UPDATE_SUCCESS);
@@ -69,7 +89,7 @@ export class SupplierController {
       }
 
       return grpcResponse<Supplier>(
-        result,
+        result as unknown as Supplier,
         SUPPLIER_MESSAGES.GET_DETAIL_SUCCESS,
       );
     } catch (error) {
