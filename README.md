@@ -1,16 +1,33 @@
 # Mebike
 
+![NestJS](https://img.shields.io/badge/NestJS-v11.x-red?logo=nestjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-v5.9-blue?logo=typescript)
+![Nx](https://img.shields.io/badge/Nx-v21.5-1ca2f1?logo=nx)
+![Prisma](https://img.shields.io/badge/Prisma-v5.22-2d3748?logo=prisma)
+![GraphQL](https://img.shields.io/badge/GraphQL-E10098?logo=graphql&logoColor=white)
+![Apollo](https://img.shields.io/badge/Apollo%20GraphQL-311C87?logo=apollo-graphql&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?logo=apache-kafka&logoColor=white)
+![Consul](https://img.shields.io/badge/HashiCorp_Consul-F24C53?logo=consul&logoColor=white)
+![Traefik](https://img.shields.io/badge/Traefik-24292E?logo=traefik&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)
+
 **Mebike** is a microservices-based application built with [Nx](https://nx.dev), [NestJS](https://nestjs.com/), and [Docker](https://www.docker.com/). It uses a modern tech stack to ensure scalability and maintainability.
 
 ## 🚀 Tech Stack
 
 - **Monorepo Tool**: [Nx](https://nx.dev)
 - **Backend Framework**: [NestJS](https://nestjs.com/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/) & [MySQL](https://www.mysql.com/)
+- **Caching**: [Redis](https://redis.io/)
 - **ORM**: [Prisma](https://www.prisma.io/)
 - **Service Discovery**: [Consul](https://www.consul.io/)
 - **Reverse Proxy**: [Traefik](https://traefik.io/)
 - **Containerization**: Docker & Docker Compose
+- **CI/CD**: [GitHub Actions](https://github.com/features/actions)
 
 ## 🏗 Architecture
 
@@ -19,6 +36,7 @@ The project consists of the following main services:
 - **API Gateway (Custom Nestjs)**: A custom-built gateway service using NestJS. It acts as the single entry point for client requests, handling routing, request aggregation, and authentication guards before forwarding traffic to internal microservices.
 - **Auth Service**: Handles user authentication and authorization (JWT, Passport).
 - **User Service**: Manages user profiles and data.
+- **Fleet Service**: Manages inventory (Bike, Station, Supplier).
 - **Consul**: Used for service discovery and configuration.
 - **Traefik**: Acts as the edge router and load balancer.
 
@@ -76,6 +94,9 @@ npx nx serve auth-service
 
 # Start the User Service
 npx nx serve user-service
+
+# Start the Fleet Service
+npx nx serve fleet-service
 ```
 
 ## 📦 Build
@@ -85,6 +106,7 @@ To build the project for production:
 ```bash
 npx nx build auth-service
 npx nx build user-service
+npx nx build fleet-service
 ```
 
 ## 🧪 Testing
@@ -94,6 +116,7 @@ Run unit tests:
 ```bash
 npx nx test auth-service
 npx nx test user-service
+npx nx test fleet-service
 ```
 
 ## 📂 Project Structure
@@ -103,7 +126,8 @@ Mebike/
 ├── apps/               # Application services
 │   ├── api-gateway/    # API Gateway service
 │   ├── auth-service/   # Authentication service
-│   └── user-service/   # User management service
+│   ├── user-service/   # User management service
+│   └── fleet-service/  # Inventory (Bike, Station, Supplier) management service
 ├── common/             # Shared libraries and modules
 ├── docker-compose.yaml # Docker infrastructure config
 ├── nx.json             # Nx configuration

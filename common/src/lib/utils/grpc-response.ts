@@ -1,16 +1,30 @@
 import { RpcException } from '@nestjs/microservices';
 import { ErrorResponse } from '../interfaces/api-response';
 
-export function throwGrpcError(message: string, errors?: string[]): never {
-  const errorResponse: ErrorResponse = { success: false, message, errors };
+export function throwGrpcError(
+  statusCode: number,
+  message: string,
+  errors?: string[],
+): never {
+  const errorResponse: ErrorResponse = {
+    success: false,
+    message,
+    errors,
+    statusCode,
+  };
   throw new RpcException(errorResponse);
 }
 
-export function grpcResponse<T>(data: T, message = 'Success') {
+export function grpcResponse<T>(
+  data: T | T[],
+  message = 'Success',
+  statusCode = 200,
+) {
   return {
     success: true,
     message,
     data,
+    statusCode,
   };
 }
 
@@ -23,6 +37,7 @@ export function grpcPaginateResponse<T>(
     totalPages: number;
   },
   message = 'Success',
+  statusCode = 200,
 ) {
   return {
     success: true,
@@ -32,5 +47,6 @@ export function grpcPaginateResponse<T>(
     page: result.page,
     limit: result.limit,
     totalPages: result.totalPages,
+    statusCode,
   };
 }

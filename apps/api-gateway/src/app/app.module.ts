@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../modules/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { formatError } from '../config/graphql.config';
 import {
   ApolloServerPluginLandingPageDisabled,
   ApolloServerPluginLandingPageLocalDefault,
 } from 'apollo-server-core';
 import { UserModule } from '../modules/user/user.module';
+import { SupplierModule } from '../modules/supplier/supplier.module';
 
 @Module({
   imports: [
@@ -24,9 +26,11 @@ import { UserModule } from '../modules/user/user.module';
               includeCookies: true,
             }),
       ],
+      formatError,
     }),
     AuthModule,
     UserModule,
+    SupplierModule,
   ],
 })
 export class AppModule {}

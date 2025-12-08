@@ -9,7 +9,7 @@ RUN npm pkg delete scripts.postinstall
 
 COPY apps/auth-service/prisma ./apps/auth-service/prisma
 COPY apps/user-service/prisma ./apps/user-service/prisma
-
+COPY apps/fleet-service/prisma ./apps/fleet-service/prisma
 
 RUN npm ci --legacy-peer-deps
 
@@ -17,7 +17,7 @@ COPY . .
 
 RUN npx prisma generate --schema=apps/auth-service/prisma/schema.prisma
 RUN npx prisma generate --schema=apps/user-service/prisma/schema.prisma
-
+RUN npx prisma generate --schema=apps/fleet-service/prisma/schema.prisma
 
 RUN npx nx run api-gateway:prune --configuration=production
 
@@ -42,7 +42,7 @@ RUN npm pkg delete scripts.postinstall && \
   class-validator class-transformer \
   consul axios bcrypt passport passport-jwt \
   rxjs reflect-metadata @nestjs/jwt dotenv \
-  @apollo/server \
+  @apollo/server ioredis@5.8.2 \
   --legacy-peer-deps
 
 COPY --from=builder /app/apps/api-gateway/dist/main.js ./
@@ -51,7 +51,7 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/common ./common
 COPY --from=builder /app/common/src/lib/prisma/auth/generated/libquery_engine-linux-musl-openssl-3.0.x.so.node ./
 COPY --from=builder /app/common/src/lib/prisma/user/generated/libquery_engine-linux-musl-openssl-3.0.x.so.node ./
-
+COPY --from=builder /app/common/src/lib/prisma/fleet/generated/libquery_engine-linux-musl-openssl-3.0.x.so.node ./
 
 EXPOSE 3000
 CMD ["node","main.js"]

@@ -33,7 +33,7 @@ RUN npm pkg delete scripts.postinstall && \
   class-validator class-transformer \
   consul axios bcrypt passport passport-jwt \
   rxjs reflect-metadata @nestjs/jwt dotenv prisma@5.22.0 \
-  kafkajs@2.2.4 \
+  kafkajs@2.2.4 ioredis@5.8.2 \
   --legacy-peer-deps
 
 COPY --from=builder /app/apps/auth-service/dist/main.js ./

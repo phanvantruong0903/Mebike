@@ -19,7 +19,9 @@
     {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": { "targetName": "typecheck" },
+        "typecheck": {
+          "targetName": "typecheck"
+        },
         "build": {
           "targetName": "build",
           "configName": "tsconfig.lib.json",
@@ -40,25 +42,45 @@
         "serveStaticTargetName": "serve-static"
       }
     },
-    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
     {
       "plugin": "@nx/jest/plugin",
-      "options": { "targetName": "test" },
+      "options": {
+        "targetName": "test"
+      },
       "exclude": [
         "apps/auth-service-e2e/**/*",
         "apps/user-service-e2e/**/*",
-        "common/**/*"
+        "common/**/*",
+        "apps/notification-service-e2e/**/*",
+        "apps/fleet-service-e2e/**/*"
       ]
     },
     {
       "plugin": "@nx/docker",
-      "options": { "buildTarget": "docker:build", "runTarget": "docker:run" }
+      "options": {
+        "buildTarget": "docker:build",
+        "runTarget": "docker:run"
+      }
     },
     {
       "plugin": "@nx/js/typescript",
       "include": ["common/*"],
-      "options": { "typecheck": { "targetName": "typecheck" } }
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        }
+      }
     }
   ],
-  "targetDefaults": { "test": { "dependsOn": ["^build"] } }
+  "targetDefaults": {
+    "test": {
+      "dependsOn": ["^build"]
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import { AuthService } from './auth.service';
@@ -7,6 +7,7 @@ import {
   ConsulService,
   CONSULT_SERVICE_ID,
   GRPC_PACKAGE,
+  RedisModule,
 } from '@mebike/common';
 import { AuthResolver } from './auth.resolver';
 import { ConfigModule } from '@nestjs/config';
@@ -15,8 +16,9 @@ import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     ConsuleModule,
+    RedisModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
@@ -40,5 +42,6 @@ import { UserModule } from '../user/user.module';
     ]),
   ],
   providers: [AuthService, AuthResolver, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

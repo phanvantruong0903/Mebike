@@ -17,10 +17,18 @@ import {
   ChangePasswordDto,
   KAFKA_SERVICE,
   KAFKA_TOPIC,
-  RegisterDto,
+  RegisterUserDto,
   Role,
+  ResetPasswordRequestDto,
+  Account,
+  REDIS_CONSTANTS,
+  REDIS_KEY_PREFIX,
+  ResetPasswordDto,
+  prismaAuth,
+  LogoutDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
+import { Redis } from 'ioredis';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -30,9 +38,11 @@ export class AuthGrpcController {
   constructor(
     @Inject(KAFKA_SERVICE.AUTH_SERVICE)
     private readonly kafkaClient: ClientKafka,
+    @Inject(REDIS_CONSTANTS.REDIS_CLIENT)
+    private readonly redis: Redis,
     private readonly authService: AuthService,
   ) {
-    this.baseHandler = new BaseGrpcHandler(this.authService, UserDto);
+    this.baseHandler = new BaseGrpcHandler(this.authService, CreateUserDto);
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.CREATE)
@@ -43,7 +53,9 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REGISTER)
-  async register(data: RegisterDto): Promise<ReturnType<typeof grpcResponse>> {
+  async register(
+    data: RegisterUserDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     return this._handleCreateUserLogic(data, Role.USER);
   }
 
@@ -68,7 +80,7 @@ export class AuthGrpcController {
     const { refreshToken } = data;
 
     if (!refreshToken) {
-      throwGrpcError(SERVER_MESSAGE.BAD_REQUEST, [
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
       ]);
     }
@@ -91,18 +103,103 @@ export class AuthGrpcController {
     }
   }
 
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.RESET_PASSWORD_REQUEST)
+  async resetPasswordRequest(data: ResetPasswordRequestDto) {
+    const user = await this.authService.getUserByEmail(data);
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    await this.redis.set(
+      `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${user.email}`,
+      otpCode,
+      'EX',
+      300,
+    );
+
+    const account = user as Account;
+
+    this.kafkaClient.emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
+      key: account.id,
+      value: {
+        to: account?.email,
+        subject: 'OTP verification code',
+        template: 'reset-password',
+        data: {
+          email: account?.email,
+          otp: otpCode,
+        },
+      },
+    });
+
+    return grpcResponse(null, USER_MESSAGES.RESET_PASSWORD_OTP_SENT);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_OTP)
+  async verifyOtp(data: {
+    email: string;
+    otp: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const { email, otp } = data;
+      const storedOtp = await this.redis.get(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${email}`,
+      );
+
+      if (storedOtp !== otp) {
+        throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+          USER_MESSAGES.INVALID_OTP,
+        ]);
+      }
+
+      const deleted = this.redis.del(
+        `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${email}`,
+      );
+
+      const verifyResult = this.authService.verifyOtpSuccess(email);
+
+      const [_, finalResult] = await Promise.all([deleted, verifyResult]);
+      return grpcResponse(
+        { resetToken: finalResult },
+        USER_MESSAGES.OTP_VERIFIED_SUCCESS,
+      );
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.RESET_PASSWORD)
+  async resetPassword(data: ResetPasswordDto) {
+    const user = await this.authService.resetPassword(data);
+    return grpcResponse(user, USER_MESSAGES.PASSWORD_RESET_SUCCESS);
+  }
+
   private async _handleCreateUserLogic(
-    data: RegisterDto | CreateUserDto,
+    data: RegisterUserDto | CreateUserDto,
     role: Role,
   ): Promise<ReturnType<typeof grpcResponse>> {
     let user: User | null = null;
     try {
+      let rawPassword = '';
+      let isFirstLogin = false;
+
+      if (role === Role.USER && 'password' in data) {
+        rawPassword = data.password;
+      } else {
+        rawPassword =
+          process.env.DEFAULT_USER_PASSWORD || 'default_user_password';
+        isFirstLogin = true;
+      }
+
       // Step 1: Create User Account Record
-      const hashPassword = await bcrypt.hash(data.password, 10);
+      const hashPassword = await bcrypt.hash(rawPassword, 10);
 
       const userData: UserDto = {
         email: data.email,
         password: hashPassword,
+        isFirstLogin,
       };
 
       user = await this.baseHandler.createLogic(userData);
@@ -112,6 +209,7 @@ export class AuthGrpcController {
         YOB: data.YOB,
         name: data.name,
         accountId: user.id,
+        phone: data.phone,
         role: role,
       };
 
@@ -126,9 +224,27 @@ export class AuthGrpcController {
         throw error;
       }
       const err = error as Error;
-      throwGrpcError(err?.message || USER_MESSAGES.CREATE_FAILED, [
+      throwGrpcError(400, err?.message || USER_MESSAGES.CREATE_FAILED, [
         err.message,
       ]);
     }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.GET_ACCOUNT_BY_ACCOUNT_ID)
+  async getAccountByAccountIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const accounts = await prismaAuth.user.findMany({
+      where: { id: { in: ids } },
+    });
+    return grpcResponse(accounts, USER_MESSAGES.GET_DETAIL_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.LOGOUT)
+  async logout(data: LogoutDto): Promise<ReturnType<typeof grpcResponse>> {
+    const { accessToken, refreshToken } = data;
+    await this.authService.logout(accessToken, refreshToken);
+    return grpcResponse(null, USER_MESSAGES.LOGOUT_SUCCESS);
   }
 }

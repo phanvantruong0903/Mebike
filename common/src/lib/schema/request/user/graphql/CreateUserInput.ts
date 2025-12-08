@@ -9,11 +9,11 @@ export class CreateUserInput {
   @Field()
   name!: string;
 
-  @Field()
-  password!: string;
-
   @Field(() => Int)
   YOB!: number;
+
+  @Field(() => String)
+  phone!: string;
 
   @Field(() => Role)
   role!: Role;

@@ -28,12 +28,15 @@ message UpdateUserResponse {
   string message = 2;
   User data = 3;
   repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message UserDetailResponse {
   bool success = 1;
   string message = 2;
   User data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
 }
 
 message UsersResponse {
@@ -44,6 +47,8 @@ message UsersResponse {
   int32 page = 5;
   int32 limit = 6;
   int32 totalPages = 7;
+  int32 statusCode = 8;
+  repeated string errors = 9;
 }
 
 message GetAllUserRequest {
@@ -56,9 +61,30 @@ message ChangeStatusRequest {
   string status = 2;
 }
 
+message UserStats {
+  int32 totalUsers = 1;
+  int32 totalUser = 2;
+  int32 totalUserUnverfied = 3;
+  int32 totalStaff = 4;
+  int32 totalAdmin = 5;
+  int32 totalSos = 6;
+}
+
+message UserStatsResponse {
+  bool success = 1;
+  string message = 2;
+  UserStats data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}
+
+
 service UserService {
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
   rpc GetAllUsers(GetAllUserRequest) returns (UsersResponse);
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
+  rpc GetUserStats(Empty) returns (UserStatsResponse);
 }
+
+message Empty {}

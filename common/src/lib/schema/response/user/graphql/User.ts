@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Role, UserStatus, UserVerifyStatus } from '../../../../prisma/index';
+import { Account } from '../../auth';
 
 @ObjectType()
 export class UserProfile {
@@ -23,4 +24,10 @@ export class UserProfile {
 
   @Field(() => UserStatus)
   status!: UserStatus;
+
+  @Field(() => String)
+  phone!: string;
+
+  @Field(() => Account, { nullable: true })
+  userAccount?: Account;
 }

@@ -20,6 +20,7 @@ model Profile {
   accountId String           @unique
   name      String
   YOB       Int
+  phone     String
   role      Role             @default(USER)
   verify    UserVerifyStatus @default(Unverified)
   status    UserStatus       @default(Active)
@@ -39,6 +40,7 @@ enum Role {
   USER
   ADMIN
   STAFF
+  SOS
 }
 
 enum UserStatus {

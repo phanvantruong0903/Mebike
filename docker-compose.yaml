@@ -7,8 +7,8 @@ services:
       - '8500:8500'
     command: 'agent -dev -client=0.0.0.0'
     networks:
-      - loginex-network
-
+      - mebike-network
+  
   auth-db:
     image: postgres:16-alpine
     container_name: auth-db
@@ -22,7 +22,7 @@ services:
     volumes:
       - auth_data:/var/lib/postgresql/data
     networks:
-      - loginex-network
+      - mebike-network
 
   user-db:
     image: postgres:16-alpine
@@ -37,15 +37,30 @@ services:
     volumes:
       - user_data:/var/lib/postgresql/data
     networks:
-      - loginex-network
+      - mebike-network
+  
+  fleet-db:
+    image: postgres:16-alpine
+    container_name: fleet-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${FLEET_DB_NAME}
+    ports:
+      - '5435:5432'
+    volumes:
+      - fleet_data:/var/lib/postgresql/data
+    networks:
+      - mebike-network
 
   traefik:
     image: traefik:latest
     container_name: traefik
     restart: 'unless-stopped'
     ports:
-      - '80:80'
-      - '443:443'
+      - "80:80"
+      - "443:443"
     environment:
       - CF_API_EMAIL=${CF_API_EMAIL}
       - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
@@ -56,21 +71,21 @@ services:
       - './traefik/acme.json:/acme.json'
       - './traefik/logs:/var/log/traefik'
     labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-loginex.local}`)'
-      - 'traefik.http.routers.traefik-dashboard.entrypoints=websecure'
-      - 'traefik.http.routers.traefik-dashboard.service=api@internal'
-      - 'traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth'
-      - 'traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}'
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-mebike.local}`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}"
     networks:
-      - loginex-network
+      - mebike-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
-      - '9092:9092'
-      - '29092:29092'
+      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: 'broker,controller'
@@ -87,47 +102,54 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_NUM_PARTITIONS: 3
-      KAFKAJS_NO_PARTITIONER_WARNING: '1'
+      KAFKAJS_NO_PARTITIONER_WARNING: "1"
 
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     volumes:
       - kafka_data:/var/lib/kafka
     healthcheck:
-      test:
-        [
-          'CMD',
-          'kafka-topics',
-          '--bootstrap-server',
-          'localhost:9092',
-          '--list',
-        ]
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 10s
       timeout: 10s
       retries: 5
     networks:
-      - loginex-network
+      - mebike-network
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     restart: 'unless-stopped'
     ports:
-      - '8080:8080'
+      - "8080:8080"
     environment:
-      KAFKA_CLUSTERS_0_NAME: LogiNex-Cluster
+      KAFKA_CLUSTERS_0_NAME: Mebike-Cluster
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     depends_on:
       kafka:
         condition: service_healthy
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.kafka-ui.rule=Host(`kafka.localhost`) || Host(`kafka.${DOMAIN:-loginex.local}`)'
+      - 'traefik.http.routers.kafka-ui.rule=Host(`kafka.localhost`) || Host(`kafka.${DOMAIN:-mebike.local}`)'
       - 'traefik.http.routers.kafka-ui.entrypoints=web'
-      - 'traefik.http.services.kafka-ui.loadbalancer.server.port=8080'
+      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
     networks:
-      - loginex-network
+      - mebike-network
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: 'unless-stopped'
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - mebike-network
 
   api-gateway:
     build:
@@ -142,8 +164,9 @@ services:
         condition: service_healthy
       user-service:
         condition: service_healthy
-
       kafka:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       - CONSUL_HOST=consul
@@ -151,21 +174,24 @@ services:
       - PORT=3000
       - NODE_ENV=development
       - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     env_file:
       - ./apps/api-gateway/.env
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.api-gateway.rule=(Host(`localhost`) || Host(`${DOMAIN:-loginex.local}`)) && PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway.rule=(Host(`localhost`) || Host(`${DOMAIN:-mebike.local}`)) && PathPrefix(`/graphql`)'
       - 'traefik.http.routers.api-gateway.entrypoints=web,websecure'
       - 'traefik.http.routers.api-gateway.tls.certresolver=cloudflare'
 
       - 'traefik.http.routers.api-gateway.middlewares=my-cors,api-ratelimit,api-compress,api-retry'
 
-      - 'traefik.http.middlewares.my-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS'
-      - 'traefik.http.middlewares.my-cors.headers.accesscontrolallowheaders=*'
-      - 'traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=https://${DOMAIN:-loginex.local},http://localhost:${PORT:-3000},https://studio.apollographql.com,${FRONTEND_URL:-loginex.local}'
-      - 'traefik.http.middlewares.my-cors.headers.accesscontrolmaxage=100'
-      - 'traefik.http.middlewares.my-cors.headers.addvaryheader=true'
+      - "traefik.http.middlewares.my-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.my-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=https://${DOMAIN:-mebike.local},http://localhost:${PORT:-3000},https://studio.apollographql.com,${FRONTEND_URL:-mebike.local}"
+      - "traefik.http.middlewares.my-cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.my-cors.headers.addvaryheader=true"
 
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.average=100'
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.burst=50'
@@ -174,7 +200,7 @@ services:
 
       - 'traefik.http.services.api-gateway.loadbalancer.server.port=3000'
     networks:
-      - loginex-network
+      - mebike-network
 
   auth-service:
     build:
@@ -189,6 +215,8 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
@@ -197,10 +225,10 @@ services:
       - KAFKA_BROKERS=kafka:29092
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - JWT_ACCESS_EXPIRATION_TIME=${JWT_ACCESS_EXPIRATION_TIME}
-      - JWT_REFRESH_EXPIRATION_TIME=${JWT_REFRESH_EXPIRATION_TIME}
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - DEFAULT_USER_PASSWORD=${DEFAULT_USER_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
       interval: 5s
@@ -208,7 +236,7 @@ services:
       retries: 10
       start_period: 30s
     networks:
-      - loginex-network
+      - mebike-network
   user-service:
     build:
       context: .
@@ -228,6 +256,9 @@ services:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?schema=public
       - USER_SERVICE_PORT=50052
       - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50052']
       interval: 5s
@@ -235,14 +266,78 @@ services:
       retries: 10
       start_period: 30s
     networks:
-      - loginex-network
+      - mebike-network
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification-service/Dockerfile
+    container_name: notification-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - NOTIFICATION_SERVICE_PORT=50053
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mebike-network
+
+  fleet-service:
+    build:
+      context: .
+      dockerfile: apps/fleet-service/Dockerfile
+    container_name: fleet-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      fleet-db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@fleet-db:5432/${FLEET_DB_NAME}?schema=public
+      - FLEET_SERVICE_PORT=50054
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mebike-network
 
 networks:
-  loginex-network:
+  mebike-network:
     driver: bridge
 
 volumes:
   auth_data:
   user_data:
-
   kafka_data:
+  fleet_data:

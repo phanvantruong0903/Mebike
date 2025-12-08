@@ -3,3 +3,4 @@ export * from './messages';
 export * from './graph-name';
 export * from './consul';
 export * from './kafka-service';
+export * from './redis';

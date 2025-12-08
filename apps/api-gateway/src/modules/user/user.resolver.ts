@@ -1,5 +1,12 @@
 import { BadRequestException, UseGuards } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  Resolver,
+  ResolveField,
+} from '@nestjs/graphql';
 
 import {
   GRAPHQL_NAME_USER,
@@ -11,6 +18,8 @@ import {
   UserResponse,
   GetUsersInput,
   ChangeUserStatusInput,
+  Account,
+  UserStatsResponse,
 } from '@mebike/common';
 
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -18,10 +27,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/role.decorator';
 import { RoleGuard } from '../auth/role.guard';
 import { UserService } from './user.service';
+import { UserAccountDataloader } from './user-account.dataloader';
 
-@Resolver()
+@Resolver(() => UserProfile)
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly dataloader: UserAccountDataloader,
+  ) {}
 
   @Query(() => UserListResponse, { name: GRAPHQL_NAME_USER.GET_ALL })
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -77,6 +90,18 @@ export class UserResolver {
     @Args('data') data: ChangeUserStatusInput,
   ): Promise<UserResponse> {
     return this.userService.changeStatus(data);
+  }
+
+  @ResolveField(() => Account)
+  async userAccount(@Parent() user: UserProfile): Promise<Account> {
+    return this.dataloader.batchAccounts.load(user.accountId);
+  }
+
+  @Query(() => UserStatsResponse, { name: GRAPHQL_NAME_USER.GET_STATS })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async getUserStats(): Promise<UserStatsResponse> {
+    return this.userService.getUserStats();
   }
 
   @Query(() => String)

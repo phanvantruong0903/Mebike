@@ -3,6 +3,7 @@ export const USER_MESSAGES = {
   UPDATE_SUCCESS: 'User updated successfully',
   UPDATE_FAIL: 'User updated failed',
   GET_ALL_SUCCESS: 'Users retrieved successfully',
+  GET_ALL_STATS_SUCCESS: 'Users stats retrieved successfully',
   GET_ALL_FAIL: 'Users retrieved failed',
   GET_DETAIL_SUCCESS: 'User details retrieved successfully',
   DELETE_SUCCESS: 'User deleted successfully',
@@ -26,6 +27,30 @@ export const USER_MESSAGES = {
   CHANGE_PASSWORD_SUCCESS: 'Change password successfully',
   PASSWORD_SAME: 'Password same',
   USER_STATUS_INVALID: 'User status invalid',
+  USER_FIRST_LOGIN: 'User must change password first time login',
+  RESET_PASSWORD_SUCCESS: 'Email was sent successfully',
+  RESET_PASSWORD_OTP_SENT: 'OTP code sent to email successfully',
+  INVALID_OTP: 'Invalid OTP code',
+  PASSWORD_RESET_SUCCESS: 'Password reset successfully',
+  OTP_VERIFIED_SUCCESS: 'OTP verified successfully',
+  INVALID_RESET_TOKEN: 'Invalid reset token',
+  LOGOUT_SUCCESS: 'User logged out successfully',
+  INVALID_TOKEN: 'Invalid token',
+};
+
+export const SUPPLIER_MESSAGES = {
+  CREATE_SUCCESS: 'Supplier created successfully',
+  UPDATE_SUCCESS: 'Supplier updated successfully',
+  GET_ALL_SUCCESS: 'Suppliers retrieved successfully',
+  GET_ALL_FAIL: 'Suppliers retrieved failed',
+  GET_DETAIL_SUCCESS: 'Supplier details retrieved successfully',
+  DELETE_SUCCESS: 'Supplier deleted successfully',
+  NOT_FOUND: 'Supplier not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Supplier failed',
+  VALIDATION_FAILED: 'Supplier name or phone incorrect',
+  UPDATE_FAIL: 'Update Supplier failed',
+  GET_ALL_STATS_SUCCESS: 'Supplier stats retrieved successfully',
 };
 
 export const SERVER_MESSAGE = {

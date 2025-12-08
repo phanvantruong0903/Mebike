@@ -20,6 +20,18 @@
     },
     {
       "path": "./apps/user-service"
+    },
+    {
+      "path": "./apps/notification-service-e2e"
+    },
+    {
+      "path": "./apps/notification-service"
+    },
+    {
+      "path": "./apps/fleet-service-e2e"
+    },
+    {
+      "path": "./apps/fleet-service"
     }
   ]
 }
