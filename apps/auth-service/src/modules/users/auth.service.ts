@@ -394,6 +394,12 @@ export class AuthService
     const storedRefreshToken = await this.redisClient.get(
       `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
     );
+    if (!storedAccessToken || !storedRefreshToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.INVALID_TOKEN,
+      ]);
+    }
+
     await Promise.all([
       this.redisClient.del(`${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`),
       this.redisClient.del(`${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`),

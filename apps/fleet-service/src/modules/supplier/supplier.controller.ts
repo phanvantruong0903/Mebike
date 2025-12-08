@@ -7,13 +7,13 @@ import {
   throwGrpcError,
   grpcPaginateResponse,
   SERVER_MESSAGE,
-  Supplier,
   CreateSupplierDto,
   UpdateSupplierDto,
   prismaFleet,
   SUPPLIER_METHODS,
   SUPPLIER_MESSAGES,
   ChangeSupplierStatusDto,
+  SupplierModel,
 } from '@mebike/common';
 import { SupplierService } from './supllier.service';
 
@@ -21,7 +21,7 @@ import { SupplierService } from './supllier.service';
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class SupplierController {
   private readonly baseHandler: BaseGrpcHandler<
-    Supplier,
+    SupplierModel,
     CreateSupplierDto,
     UpdateSupplierDto
   >;
@@ -62,7 +62,10 @@ export class SupplierController {
       };
 
       const result = await this.baseHandler.updateLogic(id, updateData);
-      return grpcResponse<Supplier>(result, SUPPLIER_MESSAGES.UPDATE_SUCCESS);
+      return grpcResponse<SupplierModel>(
+        result,
+        SUPPLIER_MESSAGES.UPDATE_SUCCESS,
+      );
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
@@ -88,8 +91,8 @@ export class SupplierController {
         ]);
       }
 
-      return grpcResponse<Supplier>(
-        result as unknown as Supplier,
+      return grpcResponse<SupplierModel>(
+        result as unknown as SupplierModel,
         SUPPLIER_MESSAGES.GET_DETAIL_SUCCESS,
       );
     } catch (error) {
@@ -118,7 +121,10 @@ export class SupplierController {
         supplierData as unknown as CreateSupplierDto,
       );
 
-      return grpcResponse<Supplier>(result, SUPPLIER_MESSAGES.CREATE_SUCCESS);
+      return grpcResponse<SupplierModel>(
+        result,
+        SUPPLIER_MESSAGES.CREATE_SUCCESS,
+      );
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
