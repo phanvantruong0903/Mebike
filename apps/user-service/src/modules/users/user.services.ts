@@ -34,7 +34,7 @@ export class UserService extends BaseService<
     };
 
     const result = {
-      totalUsers: stats.length,
+      totalUsers: stats.reduce((acc, curr) => acc + curr._count.id, 0),
       totalUser: countTotalByRole(Role.USER),
       totalUserUnverfied:
         stats.find(

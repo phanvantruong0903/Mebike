@@ -150,6 +150,11 @@ message GetAccountByAccountIdsResponse {
   int32 statusCode = 5;
 }
 
+message LogoutRequest {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
@@ -160,6 +165,7 @@ service AuthService {
   rpc VerifyOtp(VerifyOtpRequest) returns (VerifyOtpResponse);
   rpc ResetPassword(ResetPasswordDto) returns (ResetPasswordResponse);
   rpc GetAccountByAccountIds(GetAccountByAccountIdsRequest) returns (GetAccountByAccountIdsResponse);
+  rpc Logout(LogoutRequest) returns (UsersResponse);
 }
 
 message Empty {}

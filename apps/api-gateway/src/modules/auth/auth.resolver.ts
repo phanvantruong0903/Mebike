@@ -19,6 +19,7 @@ import {
   UserProfile,
   VerifyOtpResponse,
   ResetPasswordInput,
+  LogoutInput,
 } from '@mebike/common';
 import { RoleGuard } from './role.guard';
 import { Roles } from './role.decorator';
@@ -96,6 +97,14 @@ export class AuthResolver {
     @Args('data', { type: () => ResetPasswordInput }) data: ResetPasswordInput,
   ): Promise<RegisterResponse> {
     return this.authService.resetPassword(data);
+  }
+
+  @Mutation(() => UserResponse, { name: GRAPHQL_NAME_USER.LOGOUT })
+  @UseGuards(JwtAuthGuard)
+  async logout(
+    @Args('data', { type: () => LogoutInput }) data: LogoutInput,
+  ): Promise<UserResponse> {
+    return this.authService.logout(data);
   }
 
   @Query(() => String)

@@ -34,6 +34,23 @@ export const USER_MESSAGES = {
   PASSWORD_RESET_SUCCESS: 'Password reset successfully',
   OTP_VERIFIED_SUCCESS: 'OTP verified successfully',
   INVALID_RESET_TOKEN: 'Invalid reset token',
+  LOGOUT_SUCCESS: 'User logged out successfully',
+  INVALID_TOKEN: 'Invalid token',
+};
+
+export const SUPPLIER_MESSAGES = {
+  CREATE_SUCCESS: 'Supplier created successfully',
+  UPDATE_SUCCESS: 'Supplier updated successfully',
+  GET_ALL_SUCCESS: 'Suppliers retrieved successfully',
+  GET_ALL_FAIL: 'Suppliers retrieved failed',
+  GET_DETAIL_SUCCESS: 'Supplier details retrieved successfully',
+  DELETE_SUCCESS: 'Supplier deleted successfully',
+  NOT_FOUND: 'Supplier not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Supplier failed',
+  VALIDATION_FAILED: 'Supplier name or phone incorrect',
+  UPDATE_FAIL: 'Update Supplier failed',
+  GET_ALL_STATS_SUCCESS: 'Supplier stats retrieved successfully',
 };
 
 export const SERVER_MESSAGE = {

@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package supplier;
+
+message Supplier {
+  string id = 1;
+  string name = 2;
+  ContactInfo contactInfo = 3;
+  string contactFee = 4;
+  string status = 5;
+}
+
+message ContactInfo {
+  string phone = 1;
+  string address = 2;
+}
+
+message UpdateSupplierRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string phone = 3;
+  optional string address = 4;
+  optional string contactFee = 5;
+}
+
+message GetSupplierRequest {
+  string id = 1;
+}
+
+message UpdateSupplierResponse {
+  bool success = 1;
+  string message = 2;
+  Supplier data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message SupplierDetailResponse {
+  bool success = 1;
+  string message = 2;
+  Supplier data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}
+
+message SuppliersResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Supplier data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  int32 statusCode = 8;
+  repeated string errors = 9;
+}
+
+message GetAllSupplierRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message ChangeSupplierStatusRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message SupplierStats {
+  int32 totalSupplier = 1;
+  int32 totalSupplierActive = 2;
+  int32 totalSupplierInactive = 3;
+}
+
+message SupplierStatsResponse {
+  bool success = 1;
+  string message = 2;
+  SupplierStats data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}
+
+message CreateSupplierRequest {
+  string name = 1;
+  string phone = 2;
+  string address = 3;
+  string contactFee = 4;
+}
+
+message CreateSupplierResponse {
+  bool success = 1;
+  string message = 2;
+  Supplier data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+service FleetService {
+  rpc GetSupplier(GetSupplierRequest) returns (SupplierDetailResponse);
+  rpc UpdateSupplier(UpdateSupplierRequest) returns (UpdateSupplierResponse);
+  rpc GetAllSuppliers(GetAllSupplierRequest) returns (SuppliersResponse);
+  rpc ChangeSupplierStatus(ChangeSupplierStatusRequest) returns (UpdateSupplierResponse);
+  rpc GetSupplierStats(Empty) returns (SupplierStatsResponse);
+  rpc CreateSupplier(CreateSupplierRequest) returns (CreateSupplierResponse);
+}
+
+message Empty {}

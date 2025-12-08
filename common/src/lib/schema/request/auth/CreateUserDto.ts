@@ -4,7 +4,7 @@ import {
   Min,
   Max,
   IsNotIn,
-  MinLength,
+  IsPhoneNumber,
 } from 'class-validator';
 import { Role } from '../../../prisma/index';
 
@@ -22,7 +22,7 @@ export class CreateUserDto {
   YOB!: number;
 
   @IsNotEmpty()
-  @MinLength(10, { message: 'Phone must be at least 10 characters' })
+  @IsPhoneNumber('VN', { message: 'Invalid Vietnam phone number' })
   phone!: string;
 
   @IsNotEmpty()
