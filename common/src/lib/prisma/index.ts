@@ -39,6 +39,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 export type User = AuthPrismaInternal.User;
 export type Profile = UserPrismaInternal.Profile;
-export type Supplier = FleetPrismaInternal.Supplier;
+export type SupplierModel = FleetPrismaInternal.Supplier;
 export { Role, UserVerifyStatus, UserStatus } from './user/generated';
 export { SupplierStatus } from './fleet/generated';
