@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   BaseService,
   CreateSupplierDto,
-  Supplier,
+  SupplierModel,
   SupplierStatus,
   UpdateSupplierDto,
   prismaFleet,
@@ -10,7 +10,7 @@ import {
 
 @Injectable()
 export class SupplierService extends BaseService<
-  Supplier,
+  SupplierModel,
   CreateSupplierDto,
   UpdateSupplierDto
 > {
