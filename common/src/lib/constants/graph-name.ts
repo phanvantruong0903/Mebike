@@ -12,6 +12,7 @@ export const GRAPHQL_NAME_USER = {
   RESET_PASSWORD_REQUEST: 'ResetPasswordRequest',
   RESET_PASSWORD: 'ResetPassword',
   GET_STATS: 'GetUserStats',
+  LOGOUT: 'LogoutUser',
 };
 
 export const GRAPHQL_NAME_SUPPLIER = {

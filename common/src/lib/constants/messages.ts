@@ -34,6 +34,8 @@ export const USER_MESSAGES = {
   PASSWORD_RESET_SUCCESS: 'Password reset successfully',
   OTP_VERIFIED_SUCCESS: 'OTP verified successfully',
   INVALID_RESET_TOKEN: 'Invalid reset token',
+  LOGOUT_SUCCESS: 'User logged out successfully',
+  INVALID_TOKEN: 'Invalid token',
 };
 
 export const SUPPLIER_MESSAGES = {

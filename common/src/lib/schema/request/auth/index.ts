@@ -3,3 +3,4 @@ export * from './CreateUserDto';
 export * from './UpdateUserDto';
 export * from './UserDto';
 export * from './RegisterUserDto';
+export * from './LogoutDto';

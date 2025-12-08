@@ -1,6 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, lastValueFrom } from 'rxjs';
 import {
   RegisterResponse,
   LoginResponse,
@@ -18,6 +18,7 @@ import {
   ResetPasswordInput,
   VerifyOtpResponse,
   Account,
+  LogoutInput,
 } from '@mebike/common';
 
 interface AuthServiceClient {
@@ -33,7 +34,10 @@ interface AuthServiceClient {
   ): Observable<UserResponse>;
   ResetPassword(data: ResetPasswordInput): Observable<RegisterResponse>;
   VerifyOtp(data: VerifyOtpInput): Observable<VerifyOtpResponse>;
-  GetAccountByAccountIds(data: { ids: string[] }): Observable<any>;
+  GetAccountByAccountIds(data: {
+    ids: string[];
+  }): Observable<{ data: Account[] }>;
+  Logout(data: LogoutInput): Observable<UserResponse>;
 }
 
 @Injectable()
@@ -89,5 +93,9 @@ export class AuthService implements OnModuleInit {
       this.userService.GetAccountByAccountIds({ ids }),
     );
     return result.data || [];
+  }
+
+  async logout(data: LogoutInput) {
+    return await lastValueFrom(this.userService.Logout(data));
   }
 }

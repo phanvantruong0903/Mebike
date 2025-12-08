@@ -28,6 +28,7 @@ export const USER_METHODS = {
   VERIFY_OTP: 'VerifyOtp',
   GET_ACCOUNT_BY_ACCOUNT_ID: 'GetAccountByAccountIds',
   GET_STATS: 'GetUserStats',
+  LOGOUT: 'Logout',
 } as const;
 
 export const SUPPLIER_METHODS = {

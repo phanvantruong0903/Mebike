@@ -25,6 +25,7 @@ import {
   REDIS_KEY_PREFIX,
   ResetPasswordDto,
   prismaAuth,
+  LogoutDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
@@ -238,5 +239,12 @@ export class AuthGrpcController {
       where: { id: { in: ids } },
     });
     return grpcResponse(accounts, USER_MESSAGES.GET_DETAIL_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.LOGOUT)
+  async logout(data: LogoutDto): Promise<ReturnType<typeof grpcResponse>> {
+    const { accessToken, refreshToken } = data;
+    await this.authService.logout(accessToken, refreshToken);
+    return grpcResponse(null, USER_MESSAGES.LOGOUT_SUCCESS);
   }
 }

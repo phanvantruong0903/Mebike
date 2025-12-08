@@ -386,4 +386,17 @@ export class AuthService
       throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
     }
   }
+
+  async logout(accessToken: string, refreshToken: string) {
+    const storedAccessToken = await this.redisClient.get(
+      `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+    );
+    const storedRefreshToken = await this.redisClient.get(
+      `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+    );
+    await Promise.all([
+      this.redisClient.del(`${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`),
+      this.redisClient.del(`${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`),
+    ]);
+  }
 }

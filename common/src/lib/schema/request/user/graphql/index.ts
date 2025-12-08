@@ -7,3 +7,4 @@ export * from './ChangeStatusInput';
 export * from './VerifyOtpInput';
 export * from './ResetPasswordInput';
 export * from './ResetPasswordRequestInput';
+export * from './LogoutInput';
