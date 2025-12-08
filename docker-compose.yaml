@@ -38,6 +38,21 @@ services:
       - user_data:/var/lib/postgresql/data
     networks:
       - mebike-network
+  
+  fleet-db:
+    image: postgres:16-alpine
+    container_name: fleet-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${FLEET_DB_NAME}
+    ports:
+      - '5435:5432'
+    volumes:
+      - fleet_data:/var/lib/postgresql/data
+    networks:
+      - mebike-network
 
   traefik:
     image: traefik:latest
@@ -286,6 +301,37 @@ services:
     networks:
       - mebike-network
 
+  fleet-service:
+    build:
+      context: .
+      dockerfile: apps/fleet-service/Dockerfile
+    container_name: fleet-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      fleet-db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@fleet-db:5432/${FLEET_DB_NAME}?schema=public
+      - FLEET_SERVICE_PORT=50054
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mebike-network
+
 networks:
   mebike-network:
     driver: bridge
@@ -294,3 +340,4 @@ volumes:
   auth_data:
   user_data:
   kafka_data:
+  fleet_data:
