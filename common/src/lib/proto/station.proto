@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package station;
 
-service StationService {
+service FleetService {
   rpc CreateStation (CreateStationRequest) returns (Station);
   rpc GetStation (GetStationRequest) returns (Station);
   rpc UpdateStation (UpdateStationRequest) returns (Station);
