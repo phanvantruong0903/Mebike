@@ -22,8 +22,8 @@ export class CreateStationDto {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
-  @Min(-90, { message: 'Latitude must be at least -90' })
-  @Max(90, { message: 'Latitude must be at most 90' })
+  @Min(-85.05, { message: 'Latitude must be at least -85.05' })
+  @Max(85.05, { message: 'Latitude must be at most 90' })
   latitude!: number;
 
   @IsNotEmpty()

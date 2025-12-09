@@ -14,7 +14,7 @@ message CreateStationRequest {
   string address = 2;
   string latitude = 3;
   string longitude = 4;
-  string capacity = 5;
+  int32 capacity = 5;
 }
 
 message GetStationRequest {
@@ -27,12 +27,14 @@ message UpdateStationRequest {
   optional string address = 3;
   optional string latitude = 4;
   optional string longitude = 5;
-  optional string capacity = 6;
+  optional int32 capacity = 6;
 }
 
 message GetAllStationsRequest {
   int32 page = 1;
   int32 limit = 2;
+  optional string latitude = 3;
+  optional string longitude = 4;
 }
 
 message Station {
@@ -42,6 +44,7 @@ message Station {
   string latitude = 4;
   string longitude = 5;
   int32 capacity = 6;
+  optional double distance = 7;
 }
 
 message StationList {
