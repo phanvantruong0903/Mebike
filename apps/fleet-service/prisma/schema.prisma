@@ -27,6 +27,19 @@ model Supplier {
   @@map("suppliers")
 }
 
+model Station {
+  id            String           @id @default(uuid())
+  name          String           @db.VarChar(255)
+  address       String           @db.Text
+  latitude      Decimal          @db.Decimal(10,6)
+  longitude     Decimal          @db.Decimal(11,6)
+  capacity      Int              @default(0)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("stations")
+}
+
 enum SupplierStatus {
   Active
   Inactive
