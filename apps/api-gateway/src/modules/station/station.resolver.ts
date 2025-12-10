@@ -41,15 +41,11 @@ export class StationResolver {
   }
 
   @Query(() => StationResponse, { name: GRAPQL_NAME_STATION.GET_ONE })
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.ADMIN)
   async getStation(@Args('id') id: string): Promise<StationResponse> {
     return this.stationService.getStation({ id });
   }
 
   @Query(() => StationListResponse, { name: GRAPQL_NAME_STATION.GET_ALL })
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.ADMIN)
   async getAllStation(
     @Args('params', {
       nullable: true,

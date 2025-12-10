@@ -3,6 +3,7 @@ import { AppModule } from './app/app.module';
 import * as dotenv from 'dotenv';
 import './modules/user/graphql/enum';
 import './modules/supplier/graphql/enum';
+import './modules/bike/graphql/enum';
 
 async function bootstrap() {
   dotenv.config();

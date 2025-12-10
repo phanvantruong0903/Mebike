@@ -30,3 +30,11 @@ export const GRAPQL_NAME_STATION = {
   CREATE: 'CreateStation',
   UPDATE: 'UpdateStation',
 };
+
+export const GRAPHQL_NAME_BIKE = {
+  GET_ALL: 'Bikes',
+  GET_ONE: 'Bike',
+  CREATE: 'CreateBike',
+  UPDATE: 'UpdateBike',
+  CHANGE_STATUS: 'ChangeBikeStatus',
+};
