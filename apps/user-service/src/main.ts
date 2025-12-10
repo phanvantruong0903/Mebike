@@ -26,17 +26,29 @@ async function bootstrap() {
     port,
   );
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.GRPC,
-    options: {
-      package: ['user', 'grpc.health.v1'],
-      protoPath: [
-        join(process.cwd(), 'common/src/lib/proto/user.proto'),
-        join(process.cwd(), 'common/src/lib/proto/health.proto'),
-      ],
-      url: `0.0.0.0:${process.env.USER_SERVICE_PORT}`,
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  app.useGlobalFilters(new GrpcExceptionFilter());
+
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.GRPC,
+      options: {
+        package: ['user', 'grpc.health.v1'],
+        protoPath: [
+          join(process.cwd(), 'common/src/lib/proto/user.proto'),
+          join(process.cwd(), 'common/src/lib/proto/health.proto'),
+        ],
+        url: `0.0.0.0:${process.env.USER_SERVICE_PORT}`,
+      },
     },
-  });
+    { inheritAppConfig: true },
+  );
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
@@ -53,14 +65,6 @@ async function bootstrap() {
     },
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-  app.useGlobalFilters(new GrpcExceptionFilter());
   await app.startAllMicroservices();
 }
 bootstrap();

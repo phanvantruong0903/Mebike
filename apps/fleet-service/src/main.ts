@@ -25,18 +25,30 @@ async function bootstrap() {
     port,
   );
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.GRPC,
-    options: {
-      package: ['supplier', 'station', 'grpc.health.v1'],
-      protoPath: [
-        join(process.cwd(), 'common/src/lib/proto/supplier.proto'),
-        join(process.cwd(), 'common/src/lib/proto/station.proto'),
-        join(process.cwd(), 'common/src/lib/proto/health.proto'),
-      ],
-      url: `0.0.0.0:${process.env.FLEET_SERVICE_PORT}`,
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  app.useGlobalFilters(new GrpcExceptionFilter());
+
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.GRPC,
+      options: {
+        package: ['supplier', 'station', 'grpc.health.v1'],
+        protoPath: [
+          join(process.cwd(), 'common/src/lib/proto/supplier.proto'),
+          join(process.cwd(), 'common/src/lib/proto/station.proto'),
+          join(process.cwd(), 'common/src/lib/proto/health.proto'),
+        ],
+        url: `0.0.0.0:${process.env.FLEET_SERVICE_PORT}`,
+      },
     },
-  });
+    { inheritAppConfig: true },
+  );
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
@@ -53,14 +65,6 @@ async function bootstrap() {
     },
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-  app.useGlobalFilters(new GrpcExceptionFilter());
   await app.startAllMicroservices();
 }
 bootstrap();

@@ -3,13 +3,6 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
-  CreateSupplierInput,
-  UpdateSupplierInput,
-  SupplierResponse,
-  GRAPHQL_NAME_SUPPLIER,
-  SupplierListResponse,
-  GetSupplierInput,
-  ChangeSupplierStatusInput,
   StationResponse,
   GRAPQL_NAME_STATION,
   CreateStationInput,
@@ -37,7 +30,7 @@ export class StationResolver {
   @Mutation(() => StationResponse, { name: GRAPQL_NAME_STATION.UPDATE })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
-  async updateSupplier(
+  async updateStation(
     @Args('body') body: UpdateStationInput,
     @Args('id') id: string,
   ): Promise<StationResponse> {

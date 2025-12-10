@@ -48,9 +48,37 @@ export class UserController {
     try {
       const { id, ...updateData } = data;
 
-      const result = await this.baseHandler.updateLogic(id, updateData);
+      const result = await prismaUser.profile.update({
+        where: { accountId: id },
+        data: updateData,
+      });
       return grpcResponse<UserProfile>(result, USER_MESSAGES.UPDATE_SUCCESS);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'P2002') {
+        const fields: string[] = error.meta?.target ?? [];
+        const messages = fields.map((field) => {
+          switch (field) {
+            case 'email':
+              return USER_MESSAGES.EMAIL_EXISTED;
+            default:
+              return `${field} existed`;
+          }
+        });
+        throwGrpcError(409, SERVER_MESSAGE.UNIQUE_CONSTRAINT_FAILED, messages);
+      }
+
+      if (error?.code === 'P2003') {
+        const field = error.meta?.field_name ?? 'relation';
+        throwGrpcError(400, SERVER_MESSAGE.FOREIGN_KEY_FAILED, [
+          SERVER_MESSAGE.FOREIGN_KEY_INVALID(field),
+        ]);
+      }
+
+      if (error?.code === 'P2025') {
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          SERVER_MESSAGE.NOT_FOUND,
+        ]);
+      }
       if (error instanceof RpcException) {
         throw error;
       }
