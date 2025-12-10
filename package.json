@@ -88,6 +88,8 @@
   },
   "workspaces": [
     "apps/*",
-    "common"
+    "common",
+    "rental-service",
+    "rental-service-e2e"
   ]
 }

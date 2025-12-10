@@ -3,6 +3,7 @@ export const GRPC_SERVICES = {
   USER: 'UserService',
   NOTIFICATION: 'NotificationService',
   FLEET: 'FleetService',
+  RENTAL: 'RentalService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -10,6 +11,7 @@ export const GRPC_PACKAGE = {
   USER: 'USER_PACKAGE',
   NOTIFICATION: 'NOTIFICATION_PACKAGE',
   FLEET: 'FLEET_PACKAGE',
+  RENTAL: 'RENTAL_PACKAGE',
 };
 
 export const USER_METHODS = {
