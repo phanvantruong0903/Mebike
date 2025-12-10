@@ -1,4 +1,4 @@
-import { Min, Max, IsNumber, IsOptional } from 'class-validator';
+import { Min, Max, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class GetStationDto {
@@ -25,4 +25,8 @@ export class GetStationDto {
   @Min(-180, { message: 'Longitude must be at least -180' })
   @Max(180, { message: 'Longitude must be at most 180' })
   longitude?: number;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

@@ -23,6 +23,7 @@ import {
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
   GetStationDto,
+  buildSearchFilter,
 } from '@mebike/common';
 import { StationService } from './station.service';
 import Redis from 'ioredis';
@@ -135,9 +136,16 @@ export class StationController {
     data: GetStationDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit, longitude, latitude } = data;
+      const { page, limit, longitude, latitude, search } = data;
+      const searchFields = ['name', 'address', 'id'];
+      const searchFilter = buildSearchFilter(search, searchFields);
+
       if (!longitude || !latitude) {
-        const result = await this.baseHandler.getAllLogic(page, limit);
+        const result = await this.baseHandler.getAllLogic(
+          page,
+          limit,
+          searchFilter,
+        );
         return grpcPaginateResponse(result, STATION_MESSAGES.GET_ALL_SUCCESS);
       }
 
@@ -152,35 +160,55 @@ export class StationController {
         'ASC',
       )) as [string, string][];
 
-      const paginatedResult = geoResult.slice((page - 1) * limit, page * limit);
-      const total = geoResult.length;
-
-      if (paginatedResult.length === 0) {
+      if (!geoResult.length) {
         return grpcPaginateResponse(
           {
             data: [],
             limit: limit,
             page: page,
-            total: total,
-            totalPages: Math.ceil(total / limit),
+            total: 0,
+            totalPages: 0,
           },
           STATION_MESSAGES.GET_ALL_SUCCESS,
         );
       }
 
-      const stationIds = paginatedResult.map((item) => item[0]);
-      const stations = await prismaFleet.station.findMany({
+      const stationIds = geoResult.map((item) => item[0]);
+      let stations = await prismaFleet.station.findMany({
         where: {
           id: { in: stationIds },
         },
       });
+
+      if (data.search) {
+        const keyword = data.search.toLowerCase();
+        stations = stations.filter((s) => {
+          return (
+            s.name.toLowerCase().includes(keyword) ||
+            s.address.toLowerCase().includes(keyword)
+          );
+        });
+
+        if (!stations.length) {
+          return grpcPaginateResponse(
+            {
+              data: [],
+              limit: limit,
+              page: page,
+              total: 0,
+              totalPages: 0,
+            },
+            STATION_MESSAGES.GET_ALL_SUCCESS,
+          );
+        }
+      }
 
       const stationMap = new Map(
         stations.map((station) => [station.id, station]),
       );
 
       // ghép station info vào cái mảng paginated redis trả ra dạng [id, distance]
-      const result = paginatedResult
+      const result = geoResult
         .map((item) => {
           const id = item[0];
           const distance = Number.parseFloat(item[1]);
@@ -197,9 +225,12 @@ export class StationController {
         })
         .filter((item) => item !== null);
 
+      const total = result.length;
+      const paginatedResult = result.slice((page - 1) * limit, page * limit);
+
       return grpcPaginateResponse(
         {
-          data: result,
+          data: paginatedResult,
           limit: limit,
           page: page,
           total: total,

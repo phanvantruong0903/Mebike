@@ -21,6 +21,7 @@ import {
   KAFKA_TOPIC,
   ChangeUserStatusDto,
   SERVER_MESSAGE,
+  buildSearchFilter,
 } from '@mebike/common';
 import { UserService } from './user.services';
 
@@ -132,10 +133,19 @@ export class UserController {
   async getAllUsers(data: {
     page: number;
     limit: number;
+    search?: string;
   }): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
       const { page, limit } = data;
-      const result = await this.baseHandler.getAllLogic(page, limit);
+
+      const searchFields = ['name', 'phone'];
+      const searchFilter = buildSearchFilter(data.search, searchFields);
+
+      const result = await this.baseHandler.getAllLogic(
+        page,
+        limit,
+        searchFilter,
+      );
       return grpcPaginateResponse(result, USER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

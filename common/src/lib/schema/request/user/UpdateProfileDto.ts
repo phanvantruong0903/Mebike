@@ -25,4 +25,8 @@ export class UpdateProfileDto {
   @IsString()
   @MinLength(10, { message: 'Phone must be at least 10 characters' })
   phone?: string;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

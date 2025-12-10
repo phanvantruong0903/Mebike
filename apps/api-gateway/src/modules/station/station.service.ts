@@ -43,7 +43,13 @@ export class StationService implements OnModuleInit {
   }
 
   async getAllStation(data: GetStationInput) {
-    return await firstValueFrom(this.fleetService.GetAllStations(data));
+    const response = await firstValueFrom(
+      this.fleetService.GetAllStations(data),
+    );
+    return {
+      ...response,
+      data: response.data ?? [],
+    };
   }
 
   async getStation(data: { id: string }) {

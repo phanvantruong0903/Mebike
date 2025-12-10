@@ -50,7 +50,13 @@ export class SupplierService implements OnModuleInit {
   }
 
   async getAllSuppliers(data: GetSupplierInput) {
-    return await firstValueFrom(this.fleetService.GetAllSuppliers(data));
+    const response = await firstValueFrom(
+      this.fleetService.GetAllSuppliers(data),
+    );
+    return {
+      ...response,
+      data: response.data ?? [],
+    };
   }
 
   async changeSupplierStatus(data: ChangeSupplierStatusInput & { id: string }) {
