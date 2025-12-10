@@ -14,6 +14,7 @@ import {
   SUPPLIER_MESSAGES,
   ChangeSupplierStatusDto,
   SupplierModel,
+  buildSearchFilter,
 } from '@mebike/common';
 import { SupplierService } from './supllier.service';
 
@@ -138,10 +139,14 @@ export class SupplierController {
   async getAllSuppliers(data: {
     page: number;
     limit: number;
+    search?: string;
   }): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
       const { page, limit } = data;
-      const result = await this.baseHandler.getAllLogic(page, limit);
+      const searchFilter = ['name', 'id'];
+      const search = buildSearchFilter(data.search, searchFilter);
+
+      const result = await this.baseHandler.getAllLogic(page, limit, search);
       return grpcPaginateResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

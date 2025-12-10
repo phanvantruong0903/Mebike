@@ -20,6 +20,7 @@ model Supplier {
   name          String
   contactInfo   Json 
   contactFee    Decimal          @db.Decimal(8,4)
+  bikes         Bike[]
   status        SupplierStatus   @default(Active)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
@@ -27,7 +28,44 @@ model Supplier {
   @@map("suppliers")
 }
 
+model Station {
+  id            String           @id @default(uuid())
+  name          String           @db.VarChar(255)
+  address       String           @db.Text
+  latitude      Decimal          @db.Decimal(10,6)
+  longitude     Decimal          @db.Decimal(11,6)
+  capacity      Int              @default(0)
+  bikes         Bike[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("stations")
+}
+
+model Bike {
+  id            String           @id @default(uuid())
+  chipId        String
+  stationId     String
+  station       Station          @relation(fields: [stationId], references: [id])
+  supplierId    String
+  supplier      Supplier         @relation(fields: [supplierId], references: [id])
+  status        BikeStatus       @default(Available)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@map("bikes")
+}
+
 enum SupplierStatus {
   Active
   Inactive
+}
+
+enum BikeStatus {
+  Available
+  Booked
+  Broken
+  Reserved
+  Maintained
+  Unavailable
 }

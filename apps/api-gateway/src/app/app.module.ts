@@ -9,6 +9,8 @@ import {
 } from 'apollo-server-core';
 import { UserModule } from '../modules/user/user.module';
 import { SupplierModule } from '../modules/supplier/supplier.module';
+import { StationModule } from '../modules/station/station.module';
+import { BikeModule } from '../modules/bike/bike.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { SupplierModule } from '../modules/supplier/supplier.module';
     AuthModule,
     UserModule,
     SupplierModule,
+    StationModule,
+    BikeModule,
   ],
 })
 export class AppModule {}

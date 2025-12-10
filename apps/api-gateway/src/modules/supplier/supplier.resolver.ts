@@ -42,8 +42,6 @@ export class SupplierResolver {
   }
 
   @Query(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ONE })
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.ADMIN)
   async getSupplier(@Args('id') id: string): Promise<SupplierResponse> {
     return this.supplierService.getSupplier({ id });
   }
