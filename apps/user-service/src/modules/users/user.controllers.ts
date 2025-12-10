@@ -43,7 +43,7 @@ export class UserController {
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.UPDATE)
   async updateProfile(
-    data: UpdateProfileDto & { id: string },
+    data: UpdateProfileDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const { id, ...updateData } = data;
@@ -75,9 +75,7 @@ export class UserController {
       }
 
       if (error?.code === 'P2025') {
-        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-          SERVER_MESSAGE.NOT_FOUND,
-        ]);
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
       }
       if (error instanceof RpcException) {
         throw error;
