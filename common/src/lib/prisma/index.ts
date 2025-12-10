@@ -41,5 +41,6 @@ export type User = AuthPrismaInternal.User;
 export type Profile = UserPrismaInternal.Profile;
 export type SupplierModel = FleetPrismaInternal.Supplier;
 export type StationModel = FleetPrismaInternal.Station;
+export type BikeModel = FleetPrismaInternal.Bike;
 export { Role, UserVerifyStatus, UserStatus } from './user/generated';
-export { SupplierStatus } from './fleet/generated';
+export { SupplierStatus, BikeStatus } from './fleet/generated';

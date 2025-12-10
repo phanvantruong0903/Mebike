@@ -85,6 +85,9 @@ export class StationController {
     try {
       const result = await prismaFleet.station.findUnique({
         where: { id },
+        include: {
+          bikes: true,
+        },
       });
       if (!result) {
         throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [

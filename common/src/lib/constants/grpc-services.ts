@@ -46,3 +46,11 @@ export const STATION_METHODS = {
   UPDATE: 'UpdateStation',
   GET_ALL: 'GetAllStations',
 };
+
+export const BIKE_METHODS = {
+  CREATE: 'CreateBike',
+  GET_ONE: 'GetBike',
+  UPDATE: 'UpdateBike',
+  GET_ALL: 'GetAllBikes',
+  CHANGE_STATUS: 'ChangeBikeStatus',
+};

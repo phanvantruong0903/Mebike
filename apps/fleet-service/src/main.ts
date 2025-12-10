@@ -38,11 +38,12 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['supplier', 'station', 'grpc.health.v1'],
+        package: ['supplier', 'station', 'grpc.health.v1', 'bike'],
         protoPath: [
           join(process.cwd(), 'common/src/lib/proto/supplier.proto'),
           join(process.cwd(), 'common/src/lib/proto/station.proto'),
           join(process.cwd(), 'common/src/lib/proto/health.proto'),
+          join(process.cwd(), 'common/src/lib/proto/bike.proto'),
         ],
         url: `0.0.0.0:${process.env.FLEET_SERVICE_PORT}`,
       },
