@@ -198,8 +198,6 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-    env_file:
-      - ./apps/api-gateway/.env
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.api-gateway.rule=(Host(`localhost`) || Host(`${DOMAIN:-mebike.local}`)) && PathPrefix(`/graphql`)'
