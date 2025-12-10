@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
 import {
   ConsuleModule,
-  ConsulService,
-  CONSULT_SERVICE_ID,
-  GRPC_PACKAGE,
   JwtSharedModule,
   KAFKA_CLIENT_ID,
   KAFKA_GROUP_ID,
@@ -12,7 +9,6 @@ import {
 } from '@mebike/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'node:path';
 import { StationService } from './station.service';
 import { StationController } from './station.controller';
 
@@ -23,27 +19,6 @@ import { StationController } from './station.controller';
     JwtSharedModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
-      {
-        name: GRPC_PACKAGE.FLEET,
-        imports: [ConsuleModule],
-        inject: [ConsulService],
-        useFactory: async (consulService: ConsulService) => {
-          const fleetService = await consulService.discoverService(
-            CONSULT_SERVICE_ID.FLEET,
-          );
-          return {
-            transport: Transport.GRPC,
-            options: {
-              package: 'station',
-              protoPath: join(
-                process.cwd(),
-                'common/src/lib/proto/station.proto',
-              ),
-              url: `${fleetService.address}:${fleetService.port}`,
-            },
-          };
-        },
-      },
       {
         name: KAFKA_SERVICE.FLEET_SERVICE,
         imports: [ConfigModule],
