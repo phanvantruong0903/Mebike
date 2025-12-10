@@ -21,6 +21,7 @@ import {
   KAFKA_TOPIC,
   ChangeUserStatusDto,
   SERVER_MESSAGE,
+  buildSearchFilter,
 } from '@mebike/common';
 import { UserService } from './user.services';
 
@@ -43,14 +44,40 @@ export class UserController {
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.UPDATE)
   async updateProfile(
-    data: UpdateProfileDto & { id: string },
+    data: UpdateProfileDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const { id, ...updateData } = data;
 
-      const result = await this.baseHandler.updateLogic(id, updateData);
+      const result = await prismaUser.profile.update({
+        where: { accountId: id },
+        data: updateData,
+      });
       return grpcResponse<UserProfile>(result, USER_MESSAGES.UPDATE_SUCCESS);
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.code === 'P2002') {
+        const fields: string[] = error.meta?.target ?? [];
+        const messages = fields.map((field) => {
+          switch (field) {
+            case 'email':
+              return USER_MESSAGES.EMAIL_EXISTED;
+            default:
+              return `${field} existed`;
+          }
+        });
+        throwGrpcError(409, SERVER_MESSAGE.UNIQUE_CONSTRAINT_FAILED, messages);
+      }
+
+      if (error?.code === 'P2003') {
+        const field = error.meta?.field_name ?? 'relation';
+        throwGrpcError(400, SERVER_MESSAGE.FOREIGN_KEY_FAILED, [
+          SERVER_MESSAGE.FOREIGN_KEY_INVALID(field),
+        ]);
+      }
+
+      if (error?.code === 'P2025') {
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
       if (error instanceof RpcException) {
         throw error;
       }
@@ -106,10 +133,19 @@ export class UserController {
   async getAllUsers(data: {
     page: number;
     limit: number;
+    search?: string;
   }): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
       const { page, limit } = data;
-      const result = await this.baseHandler.getAllLogic(page, limit);
+
+      const searchFields = ['name', 'phone'];
+      const searchFilter = buildSearchFilter(data.search, searchFields);
+
+      const result = await this.baseHandler.getAllLogic(
+        page,
+        limit,
+        searchFilter,
+      );
       return grpcPaginateResponse(result, USER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

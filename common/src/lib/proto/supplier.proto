@@ -58,6 +58,7 @@ message SuppliersResponse {
 message GetAllSupplierRequest {
   int32 page = 1;
   int32 limit = 2;
+  optional string search = 3;
 }
 
 message ChangeSupplierStatusRequest {

@@ -53,6 +53,36 @@ export const SUPPLIER_MESSAGES = {
   GET_ALL_STATS_SUCCESS: 'Supplier stats retrieved successfully',
 };
 
+export const STATION_MESSAGES = {
+  CREATE_SUCCESS: 'Station created successfully',
+  UPDATE_SUCCESS: 'Station updated successfully',
+  GET_ALL_SUCCESS: 'Stations retrieved successfully',
+  GET_ALL_FAIL: 'Stations retrieved failed',
+  GET_DETAIL_SUCCESS: 'Station details retrieved successfully',
+  DELETE_SUCCESS: 'Station deleted successfully',
+  NOT_FOUND: 'Station not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Station failed',
+  VALIDATION_FAILED: 'Station name or phone incorrect',
+  UPDATE_FAIL: 'Update Station failed',
+  GET_ALL_STATS_SUCCESS: 'Station stats retrieved successfully',
+};
+
+export const BIKE_MESSAGES = {
+  CREATE_SUCCESS: 'Bike created successfully',
+  UPDATE_SUCCESS: 'Bike updated successfully',
+  GET_ALL_SUCCESS: 'Bikes retrieved successfully',
+  GET_ALL_FAIL: 'Bikes retrieved failed',
+  GET_DETAIL_SUCCESS: 'Bike details retrieved successfully',
+  DELETE_SUCCESS: 'Bike deleted successfully',
+  NOT_FOUND: 'Bike not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Bike failed',
+  VALIDATION_FAILED: 'Bike name or phone incorrect',
+  UPDATE_FAIL: 'Update Bike failed',
+  GET_ALL_STATS_SUCCESS: 'Bike stats retrieved successfully',
+};
+
 export const SERVER_MESSAGE = {
   INTERNAL_SERVER: 'Interal Server Error',
   VALIDATION_FAILED: 'Validation Failed',

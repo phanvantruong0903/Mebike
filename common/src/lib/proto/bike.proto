@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package bike;
+
+service FleetService {
+  rpc CreateBike (CreateBikeRequest) returns (CreateBikeResponse);
+  rpc GetBike (GetBikeRequest) returns (BikeDetailResponse);
+  rpc UpdateBike (UpdateBikeRequest) returns (UpdateBikeResponse);
+  rpc GetAllBikes (GetAllBikesRequest) returns (BikeList);
+  rpc ChangeBikeStatus (ChangeBikeStatusRequest) returns (BikeDetailResponse);
+}
+
+message CreateBikeRequest {
+  string chipId = 1;
+  string stationId = 2;
+  string supplierId = 3;
+}
+
+message ChangeBikeStatusRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message GetBikeRequest {
+  string id = 1;
+}
+
+message UpdateBikeRequest {
+  string id = 1;
+  optional string chipId = 2;
+  optional string stationId = 3;
+  optional string supplierId = 4;
+}
+
+message GetAllBikesRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message Bike {
+  string id = 1;
+  string chipId = 2;
+  optional StationBike station = 3;
+  optional SupplierBike supplier = 4;
+  string status = 5;
+}
+
+message BikeList {
+  bool success = 1;
+  string message = 2;
+  repeated Bike data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  int32 statusCode = 8;
+  repeated string errors = 9;
+}
+
+message CreateBikeResponse {
+  bool success = 1;
+  string message = 2;
+  Bike data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message UpdateBikeResponse {
+  bool success = 1;
+  string message = 2;
+  Bike data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message BikeDetailResponse {
+  bool success = 1;
+  string message = 2;
+  Bike data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}
+
+message StationBike {
+  string id = 1;
+  optional string name = 2;
+  optional string address = 3;
+  optional string latitude = 4;
+  optional string longitude = 5;
+  optional int32 capacity = 6;
+}
+
+message SupplierBike {
+  string id = 1;
+  optional string name = 2;
+  optional ContactInfoInBike contactInfo = 3;
+  optional string contactFee = 4;
+  optional string status = 5;
+}
+
+message ContactInfoInBike {
+  optional string phone = 1;
+  optional string address = 2;
+}

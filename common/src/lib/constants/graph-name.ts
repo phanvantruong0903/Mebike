@@ -23,3 +23,18 @@ export const GRAPHQL_NAME_SUPPLIER = {
   CHANGE_STATUS: 'ChangeSupplierStatus',
   GET_STATS: 'GetSupplierStats',
 };
+
+export const GRAPQL_NAME_STATION = {
+  GET_ALL: 'Stations',
+  GET_ONE: 'Staion',
+  CREATE: 'CreateStation',
+  UPDATE: 'UpdateStation',
+};
+
+export const GRAPHQL_NAME_BIKE = {
+  GET_ALL: 'Bikes',
+  GET_ONE: 'Bike',
+  CREATE: 'CreateBike',
+  UPDATE: 'UpdateBike',
+  CHANGE_STATUS: 'ChangeBikeStatus',
+};

@@ -39,3 +39,18 @@ export const SUPPLIER_METHODS = {
   CHANGE_STATUS: 'ChangeSupplierStatus',
   GET_STATS: 'GetSupplierStats',
 } as const;
+
+export const STATION_METHODS = {
+  CREATE: 'CreateStation',
+  GET_ONE: 'GetStation',
+  UPDATE: 'UpdateStation',
+  GET_ALL: 'GetAllStations',
+};
+
+export const BIKE_METHODS = {
+  CREATE: 'CreateBike',
+  GET_ONE: 'GetBike',
+  UPDATE: 'UpdateBike',
+  GET_ALL: 'GetAllBikes',
+  CHANGE_STATUS: 'ChangeBikeStatus',
+};

@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package station;
+
+service FleetService {
+  rpc CreateStation (CreateStationRequest) returns (CreateStationResponse);
+  rpc GetStation (GetStationRequest) returns (StationDetailResponse);
+  rpc UpdateStation (UpdateStationRequest) returns (UpdateStationResponse);
+  rpc GetAllStations (GetAllStationsRequest) returns (StationList);
+}
+
+message CreateStationRequest {
+  string name = 1;
+  string address = 2;
+  string latitude = 3;
+  string longitude = 4;
+  int32 capacity = 5;
+}
+
+message GetStationRequest {
+  string id = 1;
+}
+
+message UpdateStationRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string address = 3;
+  optional string latitude = 4;
+  optional string longitude = 5;
+  optional int32 capacity = 6;
+}
+
+message GetAllStationsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string latitude = 3;
+  optional string longitude = 4;
+  optional string search = 5;
+}
+
+message Station {
+  string id = 1;
+  string name = 2;
+  string address = 3;
+  string latitude = 4;
+  string longitude = 5;
+  int32 capacity = 6;
+  optional double distance = 7;
+}
+
+message StationList {
+  bool success = 1;
+  string message = 2;
+  repeated Station data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  int32 statusCode = 8;
+  repeated string errors = 9;
+}
+
+message CreateStationResponse {
+  bool success = 1;
+  string message = 2;
+  Station data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message UpdateStationResponse {
+  bool success = 1;
+  string message = 2;
+  Station data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message StationDetailResponse {
+  bool success = 1;
+  string message = 2;
+  Station data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}

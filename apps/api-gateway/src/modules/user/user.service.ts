@@ -44,7 +44,11 @@ export class UserService implements OnModuleInit {
   }
 
   async getAllUser(data: { page: number; limit: number }) {
-    return await lastValueFrom(this.userService.GetAllUsers(data));
+    const response = await lastValueFrom(this.userService.GetAllUsers(data));
+    return {
+      ...response,
+      data: response.data ?? [],
+    };
   }
 
   async getUserDetail(id: string) {

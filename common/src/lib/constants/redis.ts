@@ -10,4 +10,5 @@ export const REDIS_KEY_PREFIX = {
   PASSWORD_RESET: 'reset_otp:',
   ACCESS_TOKEN: 'access_token:',
   REFRESH_TOKEN: 'refresh_token:',
+  STATION: 'station_geo:',
 };
