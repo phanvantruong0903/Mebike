@@ -164,6 +164,8 @@ services:
         condition: service_healthy
       user-service:
         condition: service_healthy
+      fleet-service:
+        condition: service_healthy
       kafka:
         condition: service_healthy
       redis:

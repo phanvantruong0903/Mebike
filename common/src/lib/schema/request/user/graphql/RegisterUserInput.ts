@@ -4,7 +4,7 @@ import { CreateUserInput } from './CreateUserInput';
 @InputType()
 export class RegisterUserInput extends OmitType(CreateUserInput, [
   'role',
-  'phone',
+  'email',
 ] as const) {
   @Field()
   password!: string;
