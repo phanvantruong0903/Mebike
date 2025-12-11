@@ -17,6 +17,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
     ports:
       - '5433:5432'
     volumes:
@@ -32,6 +33,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
     ports:
       - '5434:5432'
     volumes:
@@ -47,6 +49,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${FLEET_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
     ports:
       - '5435:5432'
     volumes:
@@ -220,7 +223,7 @@ services:
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@auth-db:5432/${AUTH_DB_NAME}?schema=public
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@auth-db:5432/${AUTH_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
       - AUTH_SERVICE_PORT=50051
       - KAFKA_BROKERS=kafka:29092
       - ADMIN_EMAIL=${ADMIN_EMAIL}
@@ -253,7 +256,7 @@ services:
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?schema=public
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
       - USER_SERVICE_PORT=50052
       - KAFKA_BROKERS=kafka:29092
       - REDIS_HOST=redis
@@ -317,7 +320,7 @@ services:
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@fleet-db:5432/${FLEET_DB_NAME}?schema=public
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@fleet-db:5432/${FLEET_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
       - FLEET_SERVICE_PORT=50054
       - KAFKA_BROKERS=kafka:29092
       - REDIS_HOST=redis
