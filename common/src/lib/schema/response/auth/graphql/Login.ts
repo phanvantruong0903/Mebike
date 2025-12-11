@@ -3,5 +3,5 @@ import { RegisterUserInput } from '../../../request/user/graphql/RegisterUserInp
 
 @InputType()
 export class LoginInput extends PartialType(
-  OmitType(RegisterUserInput, ['YOB', 'name'] as const),
+  OmitType(RegisterUserInput, ['YOB', 'name', 'phone'] as const),
 ) {}
