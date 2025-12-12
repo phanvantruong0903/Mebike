@@ -184,24 +184,34 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.api-gateway.rule=(Host(`localhost`) || Host(`${DOMAIN:-mebike.local}`)) && PathPrefix(`/graphql`)'
-      - 'traefik.http.routers.api-gateway.entrypoints=web,websecure'
-      - 'traefik.http.routers.api-gateway.tls.certresolver=cloudflare'
+      
+      # HTTP Router (for local development without SSL)
+      - 'traefik.http.routers.api-gateway-http.rule=Host(`localhost`) && PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway-http.entrypoints=web'
+      - 'traefik.http.routers.api-gateway-http.middlewares=my-cors,api-ratelimit,api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-http.priority=100'
+      
+      # HTTPS Router (for production with domain and SSL)
+      - 'traefik.http.routers.api-gateway-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway-https.entrypoints=websecure'
+      - 'traefik.http.routers.api-gateway-https.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.api-gateway-https.middlewares=my-cors,api-ratelimit,api-compress,api-retry'
 
-      - 'traefik.http.routers.api-gateway.middlewares=my-cors,api-ratelimit,api-compress,api-retry'
-
+      # CORS Middleware
       - "traefik.http.middlewares.my-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
       - "traefik.http.middlewares.my-cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.my-cors.headers.accesscontrolallowcredentials=true"
-      - "traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=https://${DOMAIN:-mebike.local},http://localhost:3000,https://studio.apollographql.com,${FRONTEND_URL:-mebike.local}"
+      - "traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=http://localhost:3000,http://localhost:3001,https://studio.apollographql.com"
       - "traefik.http.middlewares.my-cors.headers.accesscontrolmaxage=100"
       - "traefik.http.middlewares.my-cors.headers.addvaryheader=true"
 
+      # Other Middlewares
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.average=100'
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.burst=50'
       - 'traefik.http.middlewares.api-compress.compress=true'
       - 'traefik.http.middlewares.api-retry.retry.attempts=3'
 
+      # Service
       - 'traefik.http.services.api-gateway.loadbalancer.server.port=3000'
     networks:
       - mebike-network
