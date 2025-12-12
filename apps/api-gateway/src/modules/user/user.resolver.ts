@@ -1,4 +1,4 @@
-import { BadRequestException, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -12,7 +12,6 @@ import {
   GRAPHQL_NAME_USER,
   Role,
   UpdateUserInput,
-  USER_MESSAGES,
   UserListResponse,
   UserProfile,
   UserResponse,
@@ -54,8 +53,7 @@ export class UserResolver {
   }
 
   @Query(() => UserResponse, { name: GRAPHQL_NAME_USER.GET_ONE })
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.ADMIN, Role.USER)
+  @UseGuards(JwtAuthGuard)
   async getUserDetail(
     @Args('params', { type: () => String, nullable: true })
     id: string | undefined,
@@ -63,10 +61,7 @@ export class UserResolver {
   ): Promise<UserResponse> {
     let userId = '';
     if (user.role === Role.ADMIN) {
-      if (!id) {
-        throw new BadRequestException(USER_MESSAGES.ID_REQUIRED);
-      }
-      userId = id;
+      userId = id || user.accountId;
     } else {
       userId = user.accountId;
     }
