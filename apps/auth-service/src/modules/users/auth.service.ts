@@ -264,6 +264,12 @@ export class AuthService
         ]);
       }
 
+      if (data.newPassword !== data.confirmPassword) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          USER_MESSAGES.PASSWORD_NOT_MATCH,
+        ]);
+      }
+
       const findUser = await prismaAuth.user.findUnique({
         where: { id: data.accountId },
         select: { password: true },

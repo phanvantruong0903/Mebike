@@ -7,4 +7,7 @@ export class ChangePasswordInput {
 
   @Field()
   newPassword!: string;
+
+  @Field()
+  confirmPassword!: string;
 }

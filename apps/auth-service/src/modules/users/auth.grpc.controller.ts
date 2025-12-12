@@ -186,6 +186,11 @@ export class AuthGrpcController {
       let isFirstLogin = false;
 
       if (role === Role.USER && 'password' in data) {
+        if (data.password !== data.confirmPassword) {
+          throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+            USER_MESSAGES.PASSWORD_NOT_MATCH,
+          ]);
+        }
         rawPassword = data.password;
       } else {
         rawPassword =

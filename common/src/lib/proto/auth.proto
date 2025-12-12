@@ -70,6 +70,7 @@ message ChangePasswordRequest {
   string accountId = 1;
   string oldPassword = 2;
   string newPassword = 3;
+  string confirmPassword = 4;
 }
 
 message ChangePasswordResponse {
@@ -86,6 +87,7 @@ message RegisterUserRequest {
   string password = 3;
   int32 YOB = 4;
   string phone = 5;
+  string confirmPassword = 6;
 }
 
 message RegisterUserResponse {

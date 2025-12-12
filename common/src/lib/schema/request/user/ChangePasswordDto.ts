@@ -12,4 +12,8 @@ export class ChangePasswordDto {
   @IsString()
   @IsNotEmpty()
   newPassword!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  confirmPassword!: string;
 }
