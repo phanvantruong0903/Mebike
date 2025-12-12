@@ -1,4 +1,4 @@
-import { BadRequestException, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -12,7 +12,6 @@ import {
   GRAPHQL_NAME_USER,
   Role,
   UpdateUserInput,
-  USER_MESSAGES,
   UserListResponse,
   UserProfile,
   UserResponse,
