@@ -3,11 +3,48 @@ syntax = "proto3";
 package rental;
 
 service RentalService {
-  rpc Ping (PingRequest) returns (PingResponse);
+  rpc CreateRental (CreateRentalRequest) returns (CreateRentalResponse);
+  rpc EndRental (EndRentalRequest) returns (EndRentalResponse);
 }
 
-message PingRequest {}
+enum RentalStatus {
+  Rented = 0;
+  Completed = 1;
+  Cancelled = 2;
+  Reserved = 3;
+}
 
-message PingResponse {
-  string message = 1;
+message Rental {
+  string id = 1;
+  string userId = 2;
+  optional string bikeId = 3;
+  string startStation = 4;
+  optional string endStation = 5;
+  string startTime = 6; // ISO 8601 string
+  optional string endTime = 7; // ISO 8601 string
+  int32 duration = 8;
+  string totalPrice = 9; // Decimal string
+  optional string subscriptionId = 10;
+  RentalStatus status = 11;
+  string createdAt = 12; // ISO 8601 string
+  string updatedAt = 13; // ISO 8601 string
+}
+
+message CreateRentalRequest {
+  string accountId = 1;
+  string bikeId = 2;
+  optional string subscriptionId = 3;
+}
+
+message CreateRentalResponse {
+  Rental rental = 1;
+}
+
+message EndRentalRequest {
+  string accountId = 1;
+  string id = 2;
+}
+
+message EndRentalResponse {
+  Rental rental = 1;
 }

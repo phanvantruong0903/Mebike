@@ -56,3 +56,8 @@ export const BIKE_METHODS = {
   GET_ALL: 'GetAllBikes',
   CHANGE_STATUS: 'ChangeBikeStatus',
 };
+
+export const RENTAL_METHODS = {
+  CREATE: 'CreateRental',
+  END: 'EndRental',
+};
