@@ -37,7 +37,11 @@ message CreateRentalRequest {
 }
 
 message CreateRentalResponse {
-  Rental rental = 1;
+  bool success = 1;
+  string message = 2;
+  Rental data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message EndRentalRequest {
@@ -46,5 +50,9 @@ message EndRentalRequest {
 }
 
 message EndRentalResponse {
-  Rental rental = 1;
+  bool success = 1;
+  string message = 2;
+  Rental data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
 }

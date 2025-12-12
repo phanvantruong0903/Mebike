@@ -2,11 +2,11 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateRentalDto {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Account ID is required' })
   accountId!: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Bike ID is required' })
   bikeId!: string;
 
   @IsString()

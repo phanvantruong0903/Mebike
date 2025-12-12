@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RentalService } from './rental.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@mebike/common';
 
 @Controller()
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class RentalController {
   constructor(private readonly rentalService: RentalService) {}
 
@@ -28,6 +29,7 @@ export class RentalController {
         throw error;
       }
       const err = error as Error;
+      console.log(err);
       throw new RpcException(err?.message || RENTAL_MESSAGES.CREATE_FAILED);
     }
   }
