@@ -12,15 +12,6 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors({
-    origin: [
-      'https://studio.apollographql.com',
-      `http://localhost:${port}`,
-      process.env.DOMAIN,
-    ],
-    credentials: true,
-  });
-
   await app.listen(port);
 }
 bootstrap();

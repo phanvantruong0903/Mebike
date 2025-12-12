@@ -192,7 +192,8 @@ services:
 
       - "traefik.http.middlewares.my-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
       - "traefik.http.middlewares.my-cors.headers.accesscontrolallowheaders=*"
-      - "traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=https://${DOMAIN:-mebike.local},http://localhost:${PORT:-3000},https://studio.apollographql.com,${FRONTEND_URL:-mebike.local}"
+      - "traefik.http.middlewares.my-cors.headers.accesscontrolallowcredentials=true"
+      - "traefik.http.middlewares.my-cors.headers.accesscontrolalloworiginlist=https://${DOMAIN:-mebike.local},http://localhost:3000,https://studio.apollographql.com,${FRONTEND_URL:-mebike.local}"
       - "traefik.http.middlewares.my-cors.headers.accesscontrolmaxage=100"
       - "traefik.http.middlewares.my-cors.headers.addvaryheader=true"
 
