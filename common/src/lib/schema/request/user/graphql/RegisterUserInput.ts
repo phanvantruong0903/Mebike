@@ -7,4 +7,7 @@ export class RegisterUserInput extends OmitType(CreateUserInput, [
 ] as const) {
   @Field()
   password!: string;
+
+  @Field()
+  confirmPassword!: string;
 }
