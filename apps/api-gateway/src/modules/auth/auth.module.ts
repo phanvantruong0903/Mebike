@@ -13,10 +13,12 @@ import { AuthResolver } from './auth.resolver';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { UserModule } from '../user/user.module';
+import { WalletModule } from '../wallet/wallet.module';
 
 @Module({
   imports: [
     forwardRef(() => UserModule),
+    WalletModule,
     ConsuleModule,
     RedisModule,
     ConfigModule.forRoot({ isGlobal: true }),

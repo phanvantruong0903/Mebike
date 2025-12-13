@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
-import { PaymentService } from './payment.service';
-import { PaymentResolver } from './payment.resolver';
-import { PaymentController } from './payment.controller';
+import { WalletService } from './wallet.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
   ConsuleModule,
@@ -28,10 +26,10 @@ import { ConfigModule } from '@nestjs/config';
           return {
             transport: Transport.GRPC,
             options: {
-              package: 'payment',
+              package: 'wallet',
               protoPath: join(
                 process.cwd(),
-                'common/src/lib/proto/payment.proto',
+                'common/src/lib/proto/wallet.proto',
               ),
               url: `${service.address}:${service.port}`,
             },
@@ -40,8 +38,8 @@ import { ConfigModule } from '@nestjs/config';
       },
     ]),
   ],
-  providers: [PaymentResolver, PaymentService],
-  controllers: [PaymentController],
-  exports: [PaymentService],
+  providers: [WalletService],
+  controllers: [],
+  exports: [WalletService],
 })
-export class PaymentModule {}
+export class WalletModule {}

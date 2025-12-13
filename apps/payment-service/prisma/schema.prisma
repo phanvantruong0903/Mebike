@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../../../common/src/lib/prisma/payment/generated"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  accountId     String            
+  type          TransactionType   
+  status        TransactionStatus @default(PENDING)
+  amount        Decimal
+  paymentMethod PaymentMethod
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("transactions")
+}
+
+model Wallet {
+  id            String            @id @default(uuid())
+  accountId     String            @unique
+  balance       Decimal
+  status        WalletStatus      @default(ACTIVE)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("wallets")
+}
+
+model WalletHistory {
+  id            String            @id @default(uuid())
+  walletId      String            
+  transactionId String            @unique
+  type          TransactionType   
+  amount        Decimal
+  balanceBefore Decimal
+  balanceAfter  Decimal
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("wallet_histories")
+}
+
+enum TransactionType {
+  TOPUP
+  RENTALFEE
+  WITHDRAWAL
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  VNPAY
+  ZALOPAY
+  BALANCE
+}
+
+enum WalletStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum WalletHistoryType {
+  CREDIT
+  DEBIT
+}

@@ -7,4 +7,7 @@ export class CreatePaymentInput {
 
   @Field(() => String, { nullable: true })
   ipAddr?: string;
+
+  @Field(() => String, { nullable: true })
+  accountId?: string;
 }

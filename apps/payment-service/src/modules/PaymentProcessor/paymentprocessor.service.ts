@@ -4,6 +4,17 @@ import crypto from 'node:crypto';
 import querystring from 'qs';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  PAYMENT_MESSAGES,
+  PaymentMethod,
+  prismaPayment,
+  SERVER_MESSAGE,
+  throwGrpcError,
+  TransactionStatus,
+  TransactionType,
+  WalletModel,
+  WalletStatus,
+} from '@mebike/common';
 
 interface PaymentData {
   amount: number;
@@ -11,6 +22,7 @@ interface PaymentData {
   language?: string;
   orderType?: string;
   ipAddr: string;
+  accountId: string;
 }
 
 interface VnpParams {
@@ -60,7 +72,10 @@ export class PaymentprocessorService {
       language = 'vn',
       orderType = 'other',
       ipAddr,
+      accountId,
     } = data;
+
+    const orderInfo = `Nạp tiền cho tài khoản ${accountId}`;
 
     const vnp_Params: VnpParams = {
       vnp_Version: '2.1.0',
@@ -69,7 +84,7 @@ export class PaymentprocessorService {
       vnp_Locale: language,
       vnp_CurrCode: 'VND',
       vnp_TxnRef: orderId,
-      vnp_OrderInfo: `Nạp tiền cho tài khoản Mebike`,
+      vnp_OrderInfo: orderInfo,
       vnp_OrderType: orderType,
       vnp_Amount: amount * 100,
       vnp_ReturnUrl: returnUrl,
@@ -90,5 +105,63 @@ export class PaymentprocessorService {
     };
 
     return vnpUrl + '?' + querystring.stringify(finalParams, { encode: false });
+  }
+
+  async DepositCallback(accountId: string, amount: number) {
+    const findWallet = await prismaPayment.wallet.findUnique({
+      where: {
+        accountId,
+      },
+    });
+    if (!findWallet) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+      ]);
+    }
+
+    const newAmount = findWallet.balance.add(amount);
+    const transactionId = uuidv4();
+
+    await Promise.all([
+      prismaPayment.wallet.update({
+        where: {
+          accountId,
+        },
+        data: {
+          balance: newAmount,
+        },
+      }),
+      prismaPayment.walletHistory.create({
+        data: {
+          walletId: findWallet.id,
+          transactionId,
+          type: TransactionType.TOPUP,
+          amount,
+          balanceBefore: findWallet.balance,
+          balanceAfter: newAmount,
+        },
+      }),
+      prismaPayment.transaction.create({
+        data: {
+          id: transactionId,
+          accountId,
+          type: TransactionType.TOPUP,
+          amount,
+          paymentMethod: PaymentMethod.VNPAY,
+          status: TransactionStatus.SUCCESS,
+        },
+      }),
+    ]);
+  }
+
+  async createWallet(accountId: string): Promise<WalletModel> {
+    const result = await prismaPayment.wallet.create({
+      data: {
+        accountId: accountId,
+        balance: 0,
+        status: WalletStatus.ACTIVE,
+      },
+    });
+    return result;
   }
 }

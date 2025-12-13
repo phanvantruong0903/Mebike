@@ -12,6 +12,7 @@ import { SupplierModule } from '../modules/supplier/supplier.module';
 import { StationModule } from '../modules/station/station.module';
 import { BikeModule } from '../modules/bike/bike.module';
 import { PaymentModule } from '../modules/payment/payment.module';
+import { WalletModule } from '../modules/wallet/wallet.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PaymentModule } from '../modules/payment/payment.module';
     StationModule,
     BikeModule,
     PaymentModule,
+    WalletModule,
   ],
 })
 export class AppModule {}

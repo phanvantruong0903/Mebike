@@ -4,11 +4,18 @@ package payment;
 
 service PaymentService {
   rpc CreatePaymentUrl (CreatePaymentUrlRequest) returns (CreatePaymentUrlResponse);
+  rpc PaymentCallback (PaymentCallbackRequest) returns (Empty);
 }
 
 message CreatePaymentUrlRequest {
   int32 amount = 1;
   string ipAddr =2;
+  string accountId = 3;
+}
+
+message PaymentCallbackRequest {
+  string accountId = 1;
+  int32 amount = 2;
 }
 
 message CreatePaymentUrlResponse {
@@ -22,3 +29,5 @@ message CreatePaymentUrlResponse {
 message PaymentUrl {
   string paymentUrl = 1;
 }
+
+message Empty {}

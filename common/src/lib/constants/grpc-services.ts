@@ -59,4 +59,6 @@ export const BIKE_METHODS = {
 
 export const PAYMENT_METHODS = {
   CREATE_PAYMENT_URL: 'CreatePaymentUrl',
+  PAYMENT_CALLBACK: 'PaymentCallback',
+  CREATE_WALLET: 'CreateWallet',
 };

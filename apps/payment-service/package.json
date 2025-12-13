@@ -4,6 +4,17 @@
   "private": true,
   "nx": {
     "targets": {
+      "prisma:generate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "prisma generate",
+          "cwd": "apps/payment-service"
+        },
+        "cache": true,
+        "outputs": [
+          "{workspaceRoot}/common/src/lib/prisma/payment/generated"
+        ]
+      },
       "build": {
         "executor": "nx:run-commands",
         "options": {

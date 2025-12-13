@@ -20,6 +20,7 @@ export class PaymentprocessorController {
   async createPaymentUrl(data: {
     amount: number;
     ipAddr: string;
+    accountId: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
     if (!data.amount) {
       throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
@@ -36,5 +37,27 @@ export class PaymentprocessorController {
       data,
     );
     return grpcResponse({ paymentUrl }, PAYMENT_MESSAGES.CREATE_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.PAYMENT_CALLBACK)
+  async paymentCallback(data: {
+    accountId: string;
+    amount: number;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const response = await this.paymentprocessorService.DepositCallback(
+      data.accountId,
+      Number(data.amount),
+    );
+    return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.CREATE_WALLET)
+  async createWallet(data: {
+    accountId: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const response = await this.paymentprocessorService.createWallet(
+      data.accountId,
+    );
+    return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }
 }

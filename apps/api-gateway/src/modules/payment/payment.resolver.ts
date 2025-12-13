@@ -7,10 +7,12 @@ import {
   GRAPHQL_NAME_PAYMENT,
   CreatePaymentInput,
   getClientIp,
+  UserProfile,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { PaymentService } from './payment.service';
 import { Roles } from '../auth/role.decorator';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver()
 export class PaymentResolver {
@@ -22,9 +24,15 @@ export class PaymentResolver {
   async createPayment(
     @Args('body') body: CreatePaymentInput,
     @Context() context: any,
+    @CurrentUser() user: UserProfile,
   ): Promise<PaymentResponse> {
     const ipAddr = getClientIp(context.req);
-    return this.paymentService.createPayment({ ...body, ipAddr });
+
+    return this.paymentService.createPayment({
+      ...body,
+      ipAddr,
+      accountId: user.accountId,
+    });
   }
 
   @Query(() => String)

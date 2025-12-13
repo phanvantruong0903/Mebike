@@ -86,6 +86,7 @@ export const BIKE_MESSAGES = {
 
 export const PAYMENT_MESSAGES = {
   CREATE_SUCCESS: 'Payment created successfully',
+  WALLET_NOT_FOUND: 'Wallet not found',
   AMOUNT_REQUIRED: 'Amount is required',
   NOT_FOUND: 'Payment not found',
   VALIDATION_ERROR: 'Validation error',
@@ -94,6 +95,7 @@ export const PAYMENT_MESSAGES = {
   UPDATE_FAIL: 'Update Payment failed',
   GET_ALL_STATS_SUCCESS: 'Payment stats retrieved successfully',
   IP_ADDR_REQUIRED: 'IP address is required',
+  DEPOSIT_SUCCESS: 'Deposit successfully',
 };
 
 export const SERVER_MESSAGE = {
