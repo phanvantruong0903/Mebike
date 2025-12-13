@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -19,7 +19,9 @@ import {
   UserProfile,
   VerifyOtpResponse,
   ResetPasswordInput,
-  LogoutInput,
+  throwGrpcError,
+  SERVER_MESSAGE,
+  USER_MESSAGES,
 } from '@mebike/common';
 import { RoleGuard } from './role.guard';
 import { Roles } from './role.decorator';
@@ -52,9 +54,14 @@ export class AuthResolver {
   @Mutation(() => ResfreshTokenResponse, {
     name: GRAPHQL_NAME_USER.REFRESH_TOKEN,
   })
-  async refreshToken(
-    @Args('refreshToken') refreshToken: string,
-  ): Promise<ResfreshTokenResponse> {
+  async refreshToken(@Context() context: any): Promise<ResfreshTokenResponse> {
+    const refreshToken = context.req.cookies['refreshToken'];
+
+    if (!refreshToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.INVALID_REFRESH_TOKEN,
+      ]);
+    }
     return this.authService.refreshToken(refreshToken);
   }
 
@@ -100,11 +107,16 @@ export class AuthResolver {
   }
 
   @Mutation(() => UserResponse, { name: GRAPHQL_NAME_USER.LOGOUT })
-  @UseGuards(JwtAuthGuard)
-  async logout(
-    @Args('data', { type: () => LogoutInput }) data: LogoutInput,
-  ): Promise<UserResponse> {
-    return this.authService.logout(data);
+  async logout(@Context() data: any): Promise<UserResponse> {
+    const accessToken = data.req.cookies['accessToken'];
+    const refreshToken = data.req.cookies['refreshToken'];
+
+    if (!accessToken || !refreshToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.INVALID_REFRESH_TOKEN,
+      ]);
+    }
+    return this.authService.logout({ accessToken, refreshToken });
   }
 
   @Query(() => String)

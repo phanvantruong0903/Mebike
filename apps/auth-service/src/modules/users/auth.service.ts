@@ -175,20 +175,39 @@ export class AuthService
         ]);
       }
 
-      const accessToken = await this.jwtService.signToken({
-        user_id,
-        verify,
-        role,
-      });
+      const [accessToken, newRefreshToken] = await Promise.all([
+        this.signAcessToken({
+          user_id,
+          verify,
+          role,
+        }),
+        this.signRefreshToken({
+          user_id,
+          verify,
+          role,
+        }),
+      ]);
 
-      await this.redisClient.set(
-        `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
-        user_id,
-        'EX',
-        Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
-      );
+      await Promise.all([
+        this.redisClient.del(
+          `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
+        ),
+        this.redisClient.set(
+          `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+          user_id,
+          'EX',
+          Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
+        ),
 
-      return { accessToken };
+        this.redisClient.set(
+          `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${newRefreshToken}`,
+          user_id,
+          'EX',
+          Number(process.env.JWT_REFRESH_EXPIRATION_TIME) || 604800,
+        ),
+      ]);
+
+      return { accessToken, refreshToken: newRefreshToken };
     } catch (error: unknown) {
       if (error instanceof RpcException) {
         throw error;
