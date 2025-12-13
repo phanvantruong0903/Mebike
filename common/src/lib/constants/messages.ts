@@ -23,9 +23,9 @@ export const USER_MESSAGES = {
   PASSWORRD_NOT_CHANGED: 'Password must be changed',
   USER_NOT_FOUND: 'User not found',
   GET_ALL_FAILED: 'Get all users failed',
-  INVALID_PASSWORD: 'Invalid Password',
+  INVALID_PASSWORD: 'Password is incorrect',
   CHANGE_PASSWORD_SUCCESS: 'Change password successfully',
-  PASSWORD_SAME: 'Password same',
+  PASSWORD_SAME: 'New password are the same with old password',
   USER_STATUS_INVALID: 'User status invalid',
   USER_FIRST_LOGIN: 'User must change password first time login',
   RESET_PASSWORD_SUCCESS: 'Email was sent successfully',
@@ -36,6 +36,7 @@ export const USER_MESSAGES = {
   INVALID_RESET_TOKEN: 'Invalid reset token',
   LOGOUT_SUCCESS: 'User logged out successfully',
   INVALID_TOKEN: 'Invalid token',
+  PASSWORD_NOT_MATCH: 'Password not match',
 };
 
 export const SUPPLIER_MESSAGES = {
