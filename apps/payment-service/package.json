@@ -82,5 +82,11 @@
       }
     }
   },
-  "dependencies": {}
+  "devDependencies": {
+    "@types/moment": "^2.11.29",
+    "@types/qs": "^6.14.0"
+  },
+  "dependencies": {
+    "moment": "^2.30.1"
+  }
 }

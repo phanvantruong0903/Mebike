@@ -1,0 +1,94 @@
+import { Injectable } from '@nestjs/common';
+import moment from 'moment';
+import crypto from 'node:crypto';
+import querystring from 'qs';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
+
+interface PaymentData {
+  amount: number;
+  bankCode?: string;
+  language?: string;
+  orderType?: string;
+  ipAddr: string;
+}
+
+interface VnpParams {
+  [key: string]: string | number;
+}
+
+function sortObject(obj: VnpParams): VnpParams {
+  const sorted: VnpParams = {};
+  const str = Object.keys(obj).sort();
+  for (const key of str) {
+    if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+      sorted[key] = encodeURIComponent(String(obj[key])).replace(/%20/g, '+');
+    }
+  }
+  return sorted;
+}
+
+@Injectable()
+export class PaymentprocessorService {
+  private readonly tmnCode: string;
+  private readonly secretKey: string;
+  private readonly vnpUrl: string;
+  private readonly returnUrl: string;
+
+  constructor(private readonly configService: ConfigService) {
+    this.tmnCode = this.configService.get<string>('VNPAY_TMN_CODE') || '';
+    this.secretKey = this.configService.get<string>('VNPAY_HASHSECRET') || '';
+    this.vnpUrl = this.configService.get<string>('VNP_URL') || '';
+    this.returnUrl = this.configService.get<string>('VNP_RETURNURL') || '';
+  }
+
+  async createPaymentUrl(data: PaymentData): Promise<string> {
+    const date = new Date();
+    const createDate = moment(date).format('YYYYMMDDHHmmss');
+    const orderId =
+      uuidv4().replace(/-/g, '').substring(0, 15) +
+      moment(date).format('HHmmss');
+
+    const tmnCode = this.tmnCode;
+    const secretKey = this.secretKey;
+    const vnpUrl = this.vnpUrl;
+    const returnUrl = this.returnUrl;
+
+    const {
+      amount,
+      bankCode,
+      language = 'vn',
+      orderType = 'other',
+      ipAddr,
+    } = data;
+
+    const vnp_Params: VnpParams = {
+      vnp_Version: '2.1.0',
+      vnp_Command: 'pay',
+      vnp_TmnCode: tmnCode,
+      vnp_Locale: language,
+      vnp_CurrCode: 'VND',
+      vnp_TxnRef: orderId,
+      vnp_OrderInfo: `Nạp tiền cho tài khoản Mebike`,
+      vnp_OrderType: orderType,
+      vnp_Amount: amount * 100,
+      vnp_ReturnUrl: returnUrl,
+      vnp_CreateDate: createDate,
+      vnp_IpAddr: ipAddr,
+    };
+
+    if (bankCode) vnp_Params['vnp_BankCode'] = bankCode;
+
+    const sortedParams = sortObject(vnp_Params);
+    const signData = querystring.stringify(sortedParams, { encode: false });
+    const hmac = crypto.createHmac('sha512', secretKey);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+
+    const finalParams = {
+      ...sortedParams,
+      vnp_SecureHash: signed,
+    };
+
+    return vnpUrl + '?' + querystring.stringify(finalParams, { encode: false });
+  }
+}

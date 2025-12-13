@@ -84,6 +84,18 @@ export const BIKE_MESSAGES = {
   GET_ALL_STATS_SUCCESS: 'Bike stats retrieved successfully',
 };
 
+export const PAYMENT_MESSAGES = {
+  CREATE_SUCCESS: 'Payment created successfully',
+  AMOUNT_REQUIRED: 'Amount is required',
+  NOT_FOUND: 'Payment not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Payment failed',
+  VALIDATION_FAILED: 'Payment name or phone incorrect',
+  UPDATE_FAIL: 'Update Payment failed',
+  GET_ALL_STATS_SUCCESS: 'Payment stats retrieved successfully',
+  IP_ADDR_REQUIRED: 'IP address is required',
+};
+
 export const SERVER_MESSAGE = {
   INTERNAL_SERVER: 'Interal Server Error',
   VALIDATION_FAILED: 'Validation Failed',

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package payment;
+
+service PaymentService {
+  rpc CreatePaymentUrl (CreatePaymentUrlRequest) returns (CreatePaymentUrlResponse);
+}
+
+message CreatePaymentUrlRequest {
+  int32 amount = 1;
+  string ipAddr =2;
+}
+
+message CreatePaymentUrlResponse {
+  bool success = 1;
+  string message = 2;
+  PaymentUrl data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message PaymentUrl {
+  string paymentUrl = 1;
+}

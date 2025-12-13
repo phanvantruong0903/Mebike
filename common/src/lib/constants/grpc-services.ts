@@ -3,6 +3,7 @@ export const GRPC_SERVICES = {
   USER: 'UserService',
   NOTIFICATION: 'NotificationService',
   FLEET: 'FleetService',
+  PAYMENT: 'PaymentService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -10,6 +11,7 @@ export const GRPC_PACKAGE = {
   USER: 'USER_PACKAGE',
   NOTIFICATION: 'NOTIFICATION_PACKAGE',
   FLEET: 'FLEET_PACKAGE',
+  PAYMENT: 'PAYMENT_PACKAGE',
 };
 
 export const USER_METHODS = {
@@ -53,4 +55,8 @@ export const BIKE_METHODS = {
   UPDATE: 'UpdateBike',
   GET_ALL: 'GetAllBikes',
   CHANGE_STATUS: 'ChangeBikeStatus',
+};
+
+export const PAYMENT_METHODS = {
+  CREATE_PAYMENT_URL: 'CreatePaymentUrl',
 };

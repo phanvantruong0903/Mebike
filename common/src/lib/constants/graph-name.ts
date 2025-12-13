@@ -38,3 +38,7 @@ export const GRAPHQL_NAME_BIKE = {
   UPDATE: 'UpdateBike',
   CHANGE_STATUS: 'ChangeBikeStatus',
 };
+
+export const GRAPHQL_NAME_PAYMENT = {
+  CREATE: 'CreatePayment',
+};
