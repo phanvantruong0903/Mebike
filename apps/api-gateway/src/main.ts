@@ -19,17 +19,11 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      `${process.env.FRONTEND_URL}`,
+      'http://localhost:3000',
       'https://studio.apollographql.com',
       process.env.FRONTEND_URL,
-    ].filter(Boolean),
+    ].filter((origin) => !!origin),
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Apollo-Require-Preflight',
-    ],
   });
 
   await app.listen(port);
