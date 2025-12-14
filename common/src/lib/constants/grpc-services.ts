@@ -61,4 +61,12 @@ export const PAYMENT_METHODS = {
   CREATE_PAYMENT_URL: 'CreatePaymentUrl',
   PAYMENT_CALLBACK: 'PaymentCallback',
   CREATE_WALLET: 'CreateWallet',
+  DEBIT_RENTAL: 'DebitRental',
+  GET_WALLET: 'GetWallet',
+  GET_ALL_WALLET: 'GetAllWallets',
+};
+
+export const TRANSACTION_METHODS = {
+  GET_ONE: 'GetTransaction',
+  GET_ALL: 'GetAllTransactions',
 };

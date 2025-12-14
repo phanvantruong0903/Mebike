@@ -16,6 +16,7 @@ message CreatePaymentUrlRequest {
 message PaymentCallbackRequest {
   string accountId = 1;
   int32 amount = 2;
+  string description = 3;
 }
 
 message CreatePaymentUrlResponse {

@@ -107,17 +107,12 @@ export class PaymentprocessorService {
     return vnpUrl + '?' + querystring.stringify(finalParams, { encode: false });
   }
 
-  async DepositCallback(accountId: string, amount: number) {
-    const findWallet = await prismaPayment.wallet.findUnique({
-      where: {
-        accountId,
-      },
-    });
-    if (!findWallet) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
-      ]);
-    }
+  async DepositCallback(
+    accountId: string,
+    amount: number,
+    description: string,
+  ) {
+    const findWallet = await this.checkWalletExist(accountId);
 
     const newAmount = findWallet.balance.add(amount);
     const transactionId = uuidv4();
@@ -148,6 +143,7 @@ export class PaymentprocessorService {
           type: TransactionType.TOPUP,
           amount,
           paymentMethod: PaymentMethod.VNPAY,
+          description,
           status: TransactionStatus.SUCCESS,
         },
       }),
@@ -155,6 +151,13 @@ export class PaymentprocessorService {
   }
 
   async createWallet(accountId: string): Promise<WalletModel> {
+    const findWallet = await this.checkWalletExist(accountId);
+    if (findWallet) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.WALLET_EXISTED,
+      ]);
+    }
+
     const result = await prismaPayment.wallet.create({
       data: {
         accountId: accountId,
@@ -163,5 +166,115 @@ export class PaymentprocessorService {
       },
     });
     return result;
+  }
+
+  async debit(
+    accountId: string,
+    amount: number,
+    transactionType: TransactionType,
+    description: string,
+  ) {
+    this.validateData(accountId, amount, description, transactionType);
+    const wallet = await this.checkWalletExist(accountId);
+    const newAmount = wallet.balance.sub(amount);
+
+    if (newAmount.lt(0)) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
+      ]);
+    }
+
+    const transactionId = uuidv4();
+    await Promise.all([
+      prismaPayment.wallet.update({
+        where: {
+          accountId,
+        },
+        data: {
+          balance: newAmount,
+        },
+      }),
+      prismaPayment.walletHistory.create({
+        data: {
+          walletId: wallet.id,
+          transactionId,
+          type: transactionType,
+          amount,
+          balanceBefore: wallet.balance,
+          balanceAfter: newAmount,
+        },
+      }),
+      prismaPayment.transaction.create({
+        data: {
+          id: transactionId,
+          accountId,
+          type: transactionType,
+          amount,
+          paymentMethod: PaymentMethod.BALANCE,
+          status: TransactionStatus.SUCCESS,
+          description,
+        },
+      }),
+    ]);
+  }
+
+  async checkWalletExist(accountId: string): Promise<WalletModel> {
+    const findWallet = await prismaPayment.wallet.findUnique({
+      where: {
+        accountId,
+      },
+    });
+    if (!findWallet) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+      ]);
+    }
+
+    if (findWallet.status === WalletStatus.BLOCKED) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.WALLET_BLOCKED,
+      ]);
+    }
+    return findWallet;
+  }
+
+  private async validateData(
+    accountId: string,
+    amount: number,
+    description?: string,
+    transactionType?: TransactionType,
+  ) {
+    if (!accountId) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.ACCOUNT_ID_REQUIRED,
+      ]);
+    }
+    if (!amount) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.AMOUNT_REQUIRED,
+      ]);
+    }
+    if (amount < 0) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.AMOUNT_MUST_BE_POSITIVE,
+      ]);
+    }
+    if (description !== undefined && description !== null) {
+      if (typeof description === 'string' && description.trim().length === 0) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          PAYMENT_MESSAGES.DESCRIPTION_REQUIRED,
+        ]);
+      }
+    }
+    if (transactionType !== undefined && transactionType !== null) {
+      if (
+        typeof transactionType === 'string' &&
+        transactionType.trim().length === 0
+      ) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          PAYMENT_MESSAGES.TRANSACTION_TYPE_REQUIRED,
+        ]);
+      }
+    }
   }
 }

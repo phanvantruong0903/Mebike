@@ -8,6 +8,7 @@ import {
   PAYMENT_METHODS,
   SERVER_MESSAGE,
   throwGrpcError,
+  TransactionType,
 } from '@mebike/common';
 
 @Controller()
@@ -27,6 +28,11 @@ export class PaymentprocessorController {
         PAYMENT_MESSAGES.AMOUNT_REQUIRED,
       ]);
     }
+    if (data.amount < 0) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.AMOUNT_MUST_BE_POSITIVE,
+      ]);
+    }
     if (!data.ipAddr) {
       throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         PAYMENT_MESSAGES.IP_ADDR_REQUIRED,
@@ -43,10 +49,12 @@ export class PaymentprocessorController {
   async paymentCallback(data: {
     accountId: string;
     amount: number;
+    description: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
     const response = await this.paymentprocessorService.DepositCallback(
       data.accountId,
       Number(data.amount),
+      data.description,
     );
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }
@@ -57,6 +65,22 @@ export class PaymentprocessorController {
   }): Promise<ReturnType<typeof grpcResponse>> {
     const response = await this.paymentprocessorService.createWallet(
       data.accountId,
+    );
+    return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.DEBIT_RENTAL)
+  async debitRental(data: {
+    accountId: string;
+    amount: number;
+    transactionType: TransactionType;
+    description: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const response = await this.paymentprocessorService.debit(
+      data.accountId,
+      data.amount,
+      data.transactionType,
+      data.description,
     );
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }

@@ -96,6 +96,20 @@ export const PAYMENT_MESSAGES = {
   GET_ALL_STATS_SUCCESS: 'Payment stats retrieved successfully',
   IP_ADDR_REQUIRED: 'IP address is required',
   DEPOSIT_SUCCESS: 'Deposit successfully',
+  NOT_ENOUGH_BALANCE: 'User does not have enough balance',
+  WALLET_BLOCKED: 'Wallet is blocked, Please contact support',
+  WALLET_EXISTED: 'User wallet existed',
+  DESCRIPTION_REQUIRED: 'Description is required',
+  ACCOUNT_ID_REQUIRED: 'Account ID is required',
+  AMOUNT_MUST_BE_POSITIVE: 'Amount must be positive',
+  TRANSACTION_TYPE_REQUIRED: 'Transaction type is required',
+  GET_WALLET_SUCCESS: 'Wallet retrieved successfully',
+  GET_ALL_WALLET_SUCCESS: 'Wallets retrieved successfully',
+  WITHDRAW_NOT_FOUND: 'Withdraw not found',
+  INVALID_STATUS: 'Invalid status',
+  GET_ALL_SUCCESS: 'Transactions retrieved successfully',
+  GET_ONE: 'Transaction retrieved successfully',
+  CREATE_WITHDRAW_SUCCESS: 'Withdraw created successfully',
 };
 
 export const SERVER_MESSAGE = {

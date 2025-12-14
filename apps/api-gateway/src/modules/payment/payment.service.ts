@@ -10,7 +10,11 @@ import {
 
 interface PaymentServiceClient {
   CreatePaymentUrl(data: CreatePaymentInput): Observable<PaymentResponse>;
-  PaymentCallback(data: { accountId: string; amount: number }): Observable<any>;
+  PaymentCallback(data: {
+    accountId: string;
+    amount: number;
+    description: string;
+  }): Observable<any>;
 }
 
 @Injectable()
@@ -31,7 +35,11 @@ export class PaymentService implements OnModuleInit {
     return await firstValueFrom(this.paymentService.CreatePaymentUrl(data));
   }
 
-  async depositCallback(data: { accountId: string; amount: number }) {
+  async depositCallback(data: {
+    accountId: string;
+    amount: number;
+    description: string;
+  }) {
     return await firstValueFrom(this.paymentService.PaymentCallback(data));
   }
 }
