@@ -11,6 +11,8 @@ import { UserModule } from '../modules/user/user.module';
 import { SupplierModule } from '../modules/supplier/supplier.module';
 import { StationModule } from '../modules/station/station.module';
 import { BikeModule } from '../modules/bike/bike.module';
+import { PaymentModule } from '../modules/payment/payment.module';
+import { WalletModule } from '../modules/wallet/wallet.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { BikeModule } from '../modules/bike/bike.module';
     SupplierModule,
     StationModule,
     BikeModule,
+    PaymentModule,
+    WalletModule,
   ],
 })
 export class AppModule {}

@@ -22,13 +22,18 @@ import {
   throwGrpcError,
   SERVER_MESSAGE,
   USER_MESSAGES,
+  Account,
 } from '@mebike/common';
 import { RoleGuard } from './role.guard';
 import { Roles } from './role.decorator';
+import { WalletService } from '../wallet/wallet.service';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly walletService: WalletService,
+  ) {}
 
   @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.CREATE })
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -36,14 +41,22 @@ export class AuthResolver {
   async createUser(
     @Args('body') body: CreateUserInput,
   ): Promise<RegisterResponse> {
-    return this.authService.createUser(body);
+    const response = await this.authService.createUser(body);
+    await this.walletService.createWallet({
+      accountId: (response.data as Account)?.id,
+    });
+    return response;
   }
 
   @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.REGISTER })
   async register(
     @Args('body') body: RegisterUserInput,
   ): Promise<RegisterResponse> {
-    return this.authService.register(body);
+    const response = await this.authService.register(body);
+    await this.walletService.createWallet({
+      accountId: (response.data as Account)?.id,
+    });
+    return response;
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.LOGIN })

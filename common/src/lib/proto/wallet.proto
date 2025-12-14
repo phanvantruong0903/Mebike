@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package wallet;
+
+service PaymentService {
+  rpc CreateWallet (CreateWalletRequest) returns (CreateWalletResponse);
+}
+
+message CreateWalletRequest {
+  string accountId = 1;
+}
+
+message CreateWalletResponse {
+  bool success = 1;
+  string message = 2;
+  Wallet data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message Wallet {
+  string id = 1;
+  string accountId = 2;
+  int32 balance = 3;
+  string status = 4;
+}

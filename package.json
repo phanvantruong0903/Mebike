@@ -30,6 +30,7 @@
     "consul": "^2.0.1",
     "cookie-parser": "^1.4.7",
     "dataloader": "^2.2.3",
+    "decimal.js": "^10.6.0",
     "graphql": "^16.11.0",
     "ioredis": "^5.8.2",
     "kafkajs": "^2.2.4",
