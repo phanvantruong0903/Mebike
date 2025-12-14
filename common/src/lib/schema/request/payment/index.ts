@@ -1,5 +1,5 @@
 export * from './graphql';
 export * from './CreateWithDrawDto';
-export * from './getTransactionDto';
+export * from './GetTransactionDto';
 export * from './UpdateWithDrawStatusDto';
 export * from './UpdateWalletStatusDto';

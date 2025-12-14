@@ -1,2 +1,2 @@
-export * from './payment';
+export * from './Payment';
 export * from './PaymentResponse';

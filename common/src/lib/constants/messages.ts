@@ -110,6 +110,7 @@ export const PAYMENT_MESSAGES = {
   GET_ALL_SUCCESS: 'Transactions retrieved successfully',
   GET_ONE: 'Transaction retrieved successfully',
   CREATE_WITHDRAW_SUCCESS: 'Withdraw created successfully',
+  UPDATE_WITHDRAW_SUCCESS: 'Withdraw updated successfully',
 };
 
 export const SERVER_MESSAGE = {

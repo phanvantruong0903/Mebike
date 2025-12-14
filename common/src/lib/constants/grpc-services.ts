@@ -69,4 +69,6 @@ export const PAYMENT_METHODS = {
 export const TRANSACTION_METHODS = {
   GET_ONE: 'GetTransaction',
   GET_ALL: 'GetAllTransactions',
+  CREATE_WITHDRAW: 'CreateWithdraw',
+  UPDATE_WITHDRAW_STATUS: 'UpdateWithdrawStatus',
 };
