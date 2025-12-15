@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Station } from '../../station';
 import { Supplier } from '../../supplier';
 import { BikeStatus } from '../../../../prisma/index';
@@ -20,9 +20,9 @@ export class Bike {
   @Field(() => BikeStatus)
   status!: BikeStatus;
 
-  @Field(() => GraphQLISODateTime)
-  createdAt!: Date;
+  @Field()
+  createdAt!: string;
 
-  @Field(() => GraphQLISODateTime)
-  updatedAt!: Date;
+  @Field()
+  updatedAt!: string;
 }

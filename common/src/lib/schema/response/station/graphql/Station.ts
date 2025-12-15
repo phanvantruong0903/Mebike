@@ -30,9 +30,9 @@ export class Station {
   @Field(() => Float, { nullable: true })
   distance?: number;
 
-  @Field(() => GraphQLISODateTime)
-  createdAt!: Date;
+  @Field()
+  createdAt!: string;
 
-  @Field(() => GraphQLISODateTime)
-  updatedAt!: Date;
+  @Field()
+  updatedAt!: string;
 }

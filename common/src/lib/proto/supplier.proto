@@ -2,16 +2,14 @@ syntax = "proto3";
 
 package supplier;
 
-import "google/protobuf/timestamp.proto";
-
 message Supplier {
   string id = 1;
   string name = 2;
   ContactInfo contactInfo = 3;
   string contactFee = 4;
   string status = 5;
-  google.protobuf.Timestamp createdAt = 6; 
-  google.protobuf.Timestamp updatedAt = 7;
+  string createdAt = 6; 
+  string updatedAt = 7;
 }
 
 message ContactInfo {

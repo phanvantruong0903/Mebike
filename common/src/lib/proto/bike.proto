@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package bike;
 
-import "google/protobuf/timestamp.proto";
-
 service FleetService {
   rpc CreateBike (CreateBikeRequest) returns (CreateBikeResponse);
   rpc GetBike (GetBikeRequest) returns (BikeDetailResponse);
@@ -46,8 +44,8 @@ message Bike {
   optional StationBike station = 3;
   optional SupplierBike supplier = 4;
   string status = 5;
-  google.protobuf.Timestamp createdAt = 6; 
-  google.protobuf.Timestamp updatedAt = 7;
+  string createdAt = 6; 
+  string updatedAt = 7;
 }
 
 message BikeList {

@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package station;
 
-import "google/protobuf/timestamp.proto";
-
 service FleetService {
   rpc CreateStation (CreateStationRequest) returns (CreateStationResponse);
   rpc GetStation (GetStationRequest) returns (StationDetailResponse);
@@ -48,8 +46,8 @@ message Station {
   string longitude = 5;
   int32 capacity = 6;
   optional double distance = 7;
-  google.protobuf.Timestamp createdAt = 8; 
-  google.protobuf.Timestamp updatedAt = 9;
+  string createdAt = 8; 
+  string updatedAt = 9;
 }
 
 message StationList {

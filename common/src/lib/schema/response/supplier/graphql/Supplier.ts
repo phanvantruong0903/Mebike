@@ -26,9 +26,9 @@ export class Supplier {
   @Field(() => String)
   status!: string;
 
-  @Field(() => GraphQLISODateTime)
-  createdAt!: Date;
+  @Field()
+  createdAt!: string;
 
-  @Field(() => GraphQLISODateTime)
-  updatedAt!: Date;
+  @Field()
+  updatedAt!: string;
 }

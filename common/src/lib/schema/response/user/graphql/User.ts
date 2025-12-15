@@ -31,9 +31,9 @@ export class UserProfile {
   @Field(() => Account, { nullable: true })
   userAccount?: Account;
 
-  @Field(() => GraphQLISODateTime)
-  createdAt!: Date;
+  @Field()
+  createdAt!: string;
 
-  @Field(() => GraphQLISODateTime)
-  updatedAt!: Date;
+  @Field()
+  updatedAt!: string;
 }
