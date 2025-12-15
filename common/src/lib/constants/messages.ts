@@ -37,6 +37,7 @@ export const USER_MESSAGES = {
   LOGOUT_SUCCESS: 'User logged out successfully',
   INVALID_TOKEN: 'Invalid token',
   PASSWORD_NOT_MATCH: 'Password not match',
+  ACCESS_TOKEN_REQUIRED: 'Access Token is required',
 };
 
 export const SUPPLIER_MESSAGES = {

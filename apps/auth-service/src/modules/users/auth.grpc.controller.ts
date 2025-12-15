@@ -76,6 +76,7 @@ export class AuthGrpcController {
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REFRESH_TOKEN)
   async refreshToken(data: {
     refreshToken: string;
+    accessToken: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
     const { refreshToken } = data;
 
@@ -84,8 +85,16 @@ export class AuthGrpcController {
         USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
       ]);
     }
+    if (!data.accessToken) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
+      ]);
+    }
 
-    const result = await this.authService.refreshToken(refreshToken);
+    const result = await this.authService.refreshToken(
+      refreshToken,
+      accessToken,
+    );
     return grpcResponse(result, USER_MESSAGES.REFRESH_TOKEN_SUCCESSFULLY);
   }
 
