@@ -85,7 +85,7 @@ export class AuthGrpcController {
         USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
       ]);
     }
-    if (!data.accessToken) {
+    if (!accessToken) {
       throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
       ]);

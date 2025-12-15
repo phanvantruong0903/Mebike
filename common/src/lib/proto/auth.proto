@@ -52,6 +52,7 @@ message UsersResponse {
 
 message RefreshTokenRequest {
   string refreshToken = 1;
+  string accessToken = 2;
 }
 
 message RefreshToken{
