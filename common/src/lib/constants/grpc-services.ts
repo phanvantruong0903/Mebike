@@ -64,6 +64,7 @@ export const PAYMENT_METHODS = {
   DEBIT_RENTAL: 'DebitRental',
   GET_WALLET: 'GetWallet',
   GET_ALL_WALLET: 'GetAllWallets',
+  CHANGE_WALLET_STATUS: 'ChangeWalletStatus',
 };
 
 export const TRANSACTION_METHODS = {

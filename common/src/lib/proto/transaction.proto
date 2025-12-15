@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package transaction;
+
+import "google/protobuf/timestamp.proto";
+
+service PaymentService {
+  rpc GetAllTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc GetTransaction (GetTransactionRequest) returns (GetTransactionResponse);
+  rpc CreateWithdraw (CreateWithdrawRequest) returns (GetAllWalletsResponse);
+  rpc UpdateWithdrawStatus (UpdateWalletStatusRequest) returns (WithdrawResponse);
+}
+
+message Transaction {
+  string id = 1;
+  string accountId = 2;
+  string type = 3;
+  string status = 4;
+  int32 amount = 5;
+  string32 paymentMethod = 6;
+  string description = 7;
+  google.protobuf.Timestamp createdAt = 8; 
+  google.protobuf.Timestamp updatedAt = 9;
+}
+
+message Withdraw {
+  string id = 1
+  string accountId = 2;
+  string bank = 3;
+  string accountOwner = 4;
+  string accountNumber = 5;
+  int32 amount = 6;
+  optional string reason = 7;
+  optional string note = 8;
+  string status = 9;
+  google.protobuf.Timestamp createdAt = 10; 
+  google.protobuf.Timestamp updatedAt = 11;
+}
+
+message UpdateWalletStatusRequest {
+  string id = 1;
+  string status = 2;
+  optional string reason =3;
+}
+
+message GetTransactionRequest {
+  string id = 1;
+}
+
+message GetTransactionResponse {
+  bool success = 1;
+  string message = 2;
+  Transaction data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message GetTransactionsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message GetTransactionsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Transaction data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message CreateWithdrawRequest {
+  string accountId = 1;
+  string bank = 2;
+  string accountOwner = 3;
+  string accountNumber = 4;
+  int32 amount = 5;
+  string note = 6;
+}
+
+message WithdrawResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Withdraw data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}

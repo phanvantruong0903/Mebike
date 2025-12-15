@@ -3,6 +3,7 @@ import { TransactionService } from './transaction.service';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
+  buildSearchFilter,
   CreateWithDrawDto,
   GetTransactionDto,
   GRPC_SERVICES,
@@ -31,9 +32,13 @@ export class TransactionController {
   async getAllTransaction(
     data: GetTransactionDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
+    const searchFields = ['id', 'accountId'];
+    const searchFilter = buildSearchFilter(data.accountId, searchFields);
+
     const result = await this.baseGrpcHandler.getAllLogic(
       data.page,
       data.limit,
+      searchFilter,
     );
     return grpcPaginateResponse(result, PAYMENT_MESSAGES.GET_ALL_SUCCESS);
   }

@@ -2,9 +2,29 @@ syntax = "proto3";
 
 package payment;
 
+import "google/protobuf/timestamp.proto";
+
 service PaymentService {
   rpc CreatePaymentUrl (CreatePaymentUrlRequest) returns (CreatePaymentUrlResponse);
   rpc PaymentCallback (PaymentCallbackRequest) returns (Empty);
+  rpc DebitRental (DebitRentalRequest) returns (DebitRentalResponse);
+}
+
+message DebitRentalRequest {
+  string accountId = 1;
+  int32 amount = 2;
+  string transactionType = 3;
+  optional string description = 4;
+}
+
+message DebitRentalResponse {
+  bool success = 1;
+  string message = 2;
+  Empty data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+  google.protobuf.Timestamp createdAt = 6; 
+  google.protobuf.Timestamp updatedAt = 7;
 }
 
 message CreatePaymentUrlRequest {

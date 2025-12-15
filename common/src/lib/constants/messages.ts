@@ -96,6 +96,7 @@ export const PAYMENT_MESSAGES = {
   GET_ALL_STATS_SUCCESS: 'Payment stats retrieved successfully',
   IP_ADDR_REQUIRED: 'IP address is required',
   DEPOSIT_SUCCESS: 'Deposit successfully',
+  CHANGE_STATUS_SUCCESS: 'Change wallet status successfully',
   NOT_ENOUGH_BALANCE: 'User does not have enough balance',
   WALLET_BLOCKED: 'Wallet is blocked, Please contact support',
   WALLET_EXISTED: 'User wallet existed',

@@ -1,17 +1,18 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { PaymentprocessorService } from './paymentprocessor.service';
 import {
+  DebitRentalDto,
   GRPC_SERVICES,
   grpcResponse,
   PAYMENT_MESSAGES,
   PAYMENT_METHODS,
   SERVER_MESSAGE,
   throwGrpcError,
-  TransactionType,
 } from '@mebike/common';
 
 @Controller()
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class PaymentprocessorController {
   constructor(
     private readonly paymentprocessorService: PaymentprocessorService,
@@ -70,18 +71,10 @@ export class PaymentprocessorController {
   }
 
   @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.DEBIT_RENTAL)
-  async debitRental(data: {
-    accountId: string;
-    amount: number;
-    transactionType: TransactionType;
-    description: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
-    const response = await this.paymentprocessorService.debit(
-      data.accountId,
-      data.amount,
-      data.transactionType,
-      data.description,
-    );
+  async debitRental(
+    data: DebitRentalDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    const response = await this.paymentprocessorService.debit(data);
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }
 }
