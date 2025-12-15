@@ -1,4 +1,11 @@
-import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  Float,
+  GraphQLISODateTime,
+  ID,
+  Int,
+  ObjectType,
+} from '@nestjs/graphql';
 
 @ObjectType()
 export class Station {
@@ -22,4 +29,10 @@ export class Station {
 
   @Field(() => Float, { nullable: true })
   distance?: number;
+
+  @Field(() => GraphQLISODateTime)
+  createdAt!: Date;
+
+  @Field(() => GraphQLISODateTime)
+  updatedAt!: Date;
 }
