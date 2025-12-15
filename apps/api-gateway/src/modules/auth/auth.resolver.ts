@@ -69,13 +69,19 @@ export class AuthResolver {
   })
   async refreshToken(@Context() context: any): Promise<ResfreshTokenResponse> {
     const refreshToken = context.req.cookies['refreshToken'];
+    const accessToken = context.req.cookies['accessToken'];
 
     if (!refreshToken) {
       throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
         USER_MESSAGES.INVALID_REFRESH_TOKEN,
       ]);
     }
-    return this.authService.refreshToken(refreshToken);
+    if (!accessToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
+      ]);
+    }
+    return this.authService.refreshToken(refreshToken, accessToken);
   }
 
   @Mutation(() => ChangePasswordResponse, {

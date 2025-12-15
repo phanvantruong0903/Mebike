@@ -78,7 +78,7 @@ export class AuthGrpcController {
     refreshToken: string;
     accessToken: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
-    const { refreshToken } = data;
+    const { refreshToken, accessToken } = data;
 
     if (!refreshToken) {
       throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [

@@ -24,7 +24,10 @@ import {
 interface AuthServiceClient {
   LoginUser(data: LoginInput): Observable<LoginResponse>;
   CreateUser(data: CreateUserInput): Observable<RegisterResponse>;
-  RefreshToken(refreshToken: object): Observable<ResfreshTokenResponse>;
+  RefreshToken(data: {
+    refreshToken: string;
+    accessToken: string;
+  }): Observable<ResfreshTokenResponse>;
   ChangePassword(
     data: ChangePasswordInput & { accountId: string },
   ): Observable<ChangePasswordResponse>;
@@ -64,9 +67,9 @@ export class AuthService implements OnModuleInit {
     return await firstValueFrom(this.userService.Register(data));
   }
 
-  async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string, accessToken: string) {
     return await firstValueFrom(
-      this.userService.RefreshToken({ refreshToken }),
+      this.userService.RefreshToken({ refreshToken, accessToken }),
     );
   }
 
