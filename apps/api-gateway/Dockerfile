@@ -10,6 +10,7 @@ RUN npm pkg delete scripts.postinstall
 COPY apps/auth-service/prisma ./apps/auth-service/prisma
 COPY apps/user-service/prisma ./apps/user-service/prisma
 COPY apps/fleet-service/prisma ./apps/fleet-service/prisma
+COPY apps/payment-service/prisma ./apps/payment-service/prisma
 
 RUN npm ci --legacy-peer-deps
 
@@ -18,6 +19,7 @@ COPY . .
 RUN npx prisma generate --schema=apps/auth-service/prisma/schema.prisma
 RUN npx prisma generate --schema=apps/user-service/prisma/schema.prisma
 RUN npx prisma generate --schema=apps/fleet-service/prisma/schema.prisma
+RUN npx prisma generate --schema=apps/payment-service/prisma/schema.prisma
 
 RUN npx nx run api-gateway:prune --configuration=production
 
@@ -52,6 +54,7 @@ COPY --from=builder /app/common ./common
 COPY --from=builder /app/common/src/lib/prisma/auth/generated/libquery_engine-linux-musl-openssl-3.0.x.so.node ./
 COPY --from=builder /app/common/src/lib/prisma/user/generated/libquery_engine-linux-musl-openssl-3.0.x.so.node ./
 COPY --from=builder /app/common/src/lib/prisma/fleet/generated/libquery_engine-linux-musl-openssl-3.0.x.so.node ./
+COPY --from=builder /app/common/src/lib/prisma/payment/generated/libquery_engine-linux-musl-openssl-3.0.x.so.node ./
 
 EXPOSE 3000
 CMD ["node","main.js"]
