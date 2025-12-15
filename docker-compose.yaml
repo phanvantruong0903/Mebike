@@ -67,7 +67,7 @@ services:
       POSTGRES_DB: ${PAYMENT_DB_NAME}
       POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
     ports:
-      - '5436:5432'
+      - '5437:5432'
     volumes:
       - payment_data:/var/lib/postgresql/data
     networks:
