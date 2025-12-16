@@ -23,27 +23,42 @@ export class HttpErrorStatusPlugin implements ApolloServerPlugin {
             }
           }
         } else {
-          console.log(response);
+          const statusFromPayload = this.getStatusFromResponsePayload(response);
+          if (statusFromPayload && response.http) {
+            response.http.status = statusFromPayload;
+          } else {
+            console.log(response);
+          }
         }
       },
     };
   }
 
-  private getErrors(response: any): any[] | undefined {
-    const responseAny = response as any;
-    if (responseAny.body && responseAny.body.kind === 'single') {
-      return responseAny.body.singleResult.errors;
+  private getErrors(response: unknown): any[] | undefined {
+    const r = response as any;
+    if (r?.body?.kind === 'single') {
+      return r.body.singleResult?.errors;
     }
-    return response.errors;
+    return r?.errors;
   }
 
   private getStatusCode(error: any): number | undefined {
-    return (
+    const direct =
       (error as any).statusCode ||
-      (error.extensions?.response as any)?.statusCode ||
-      (error.extensions?.exception as any)?.status ||
-      (error.extensions as any)?.statusCode
-    );
+      error.extensions?.response?.statusCode ||
+      error.extensions?.exception?.status ||
+      error.extensions?.statusCode;
+
+    if (direct) return direct;
+
+    try {
+      const parsed = JSON.parse(error.message);
+      return (
+        parsed?.statusCode || parsed?.response?.statusCode || parsed?.status
+      );
+    } catch {
+      return undefined;
+    }
   }
 
   private handleFallbackStatus(http: any, error: any): void {
@@ -57,7 +72,35 @@ export class HttpErrorStatusPlugin implements ApolloServerPlugin {
       error.extensions?.code === 'FORBIDDEN'
     ) {
       http.status = 403;
-      http.status = 403;
     }
+  }
+
+  private getStatusFromResponsePayload(response: unknown): number | undefined {
+    const r = response as any;
+    const responseBody = r?.body?.singleResult?.data ?? r?.data;
+    if (!responseBody) return undefined;
+
+    const findStatus = (obj: unknown): number | undefined => {
+      if (!obj || typeof obj !== 'object') return undefined;
+
+      const o = obj as Record<string, unknown>;
+
+      if (
+        'statusCode' in o &&
+        typeof o.statusCode === 'number' &&
+        o.statusCode !== 200
+      ) {
+        return o.statusCode as number;
+      }
+
+      for (const value of Object.values(o)) {
+        const found = findStatus(value);
+        if (found) return found;
+      }
+
+      return undefined;
+    };
+
+    return findStatus(responseBody);
   }
 }
