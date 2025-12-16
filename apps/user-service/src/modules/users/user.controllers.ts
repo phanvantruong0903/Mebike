@@ -53,7 +53,7 @@ export class UserController {
         where: { accountId: id },
         data: updateData,
       });
-      return grpcResponse<UserProfile>(result, USER_MESSAGES.UPDATE_SUCCESS);
+      return grpcResponse(result, USER_MESSAGES.UPDATE_SUCCESS);
     } catch (error: any) {
       if (error?.code === 'P2002') {
         const fields: string[] = error.meta?.target ?? [];
@@ -100,10 +100,7 @@ export class UserController {
         throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
       }
 
-      return grpcResponse<UserProfile>(
-        result,
-        USER_MESSAGES.GET_DETAIL_SUCCESS,
-      );
+      return grpcResponse(result, USER_MESSAGES.GET_DETAIL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
