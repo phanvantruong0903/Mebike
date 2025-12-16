@@ -17,7 +17,6 @@ import {
   prismaUser,
   Profile,
   grpcPaginateResponse,
-  UserProfile,
   KAFKA_TOPIC,
   ChangeUserStatusDto,
   SERVER_MESSAGE,
