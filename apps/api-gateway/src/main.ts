@@ -3,6 +3,7 @@ import { AppModule } from './app/app.module';
 
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { RpcExceptionsFilter } from './filters/rpc-exception.filter';
 
 import './modules/user/graphql/enum';
 import './modules/supplier/graphql/enum';
@@ -25,6 +26,8 @@ async function bootstrap() {
     ].filter((origin) => !!origin),
     credentials: true,
   });
+
+  app.useGlobalFilters(new RpcExceptionsFilter());
 
   await app.listen(port);
 }

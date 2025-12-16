@@ -30,4 +30,10 @@ export class UserProfile {
 
   @Field(() => Account, { nullable: true })
   userAccount?: Account;
+
+  @Field()
+  createdAt!: string;
+
+  @Field()
+  updatedAt!: string;
 }

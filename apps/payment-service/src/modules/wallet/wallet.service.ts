@@ -16,6 +16,10 @@ export class WalletService extends BaseService<
   never,
   ChangeWalletStatusDto
 > {
+  constructor() {
+    super(prismaPayment.wallet);
+  }
+
   async createWallet(accountId: string): Promise<WalletModel> {
     const result = await prismaPayment.wallet.create({
       data: {

@@ -270,6 +270,8 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+      payment-service:
+        condition: service_healthy
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500

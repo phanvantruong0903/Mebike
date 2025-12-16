@@ -5,6 +5,7 @@ import querystring from 'qs';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  DebitRentalDto,
   PAYMENT_MESSAGES,
   PaymentMethod,
   prismaPayment,
@@ -168,16 +169,15 @@ export class PaymentprocessorService {
     return result;
   }
 
-  async debit(
-    accountId: string,
-    amount: number,
-    transactionType: TransactionType,
-    description: string,
-  ) {
-    this.validateData(accountId, amount, description, transactionType);
-    const wallet = await this.checkWalletExist(accountId);
-    const newAmount = wallet.balance.sub(amount);
-
+  async debit(data: DebitRentalDto) {
+    this.validateData(
+      data.accountId,
+      data.amount,
+      data.description,
+      data.transactionType,
+    );
+    const wallet = await this.checkWalletExist(data.accountId);
+    const newAmount = wallet.balance.sub(data.amount);
     if (newAmount.lt(0)) {
       throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
@@ -188,7 +188,7 @@ export class PaymentprocessorService {
     await Promise.all([
       prismaPayment.wallet.update({
         where: {
-          accountId,
+          accountId: data.accountId,
         },
         data: {
           balance: newAmount,
@@ -198,8 +198,8 @@ export class PaymentprocessorService {
         data: {
           walletId: wallet.id,
           transactionId,
-          type: transactionType,
-          amount,
+          type: data.transactionType,
+          amount: data.amount,
           balanceBefore: wallet.balance,
           balanceAfter: newAmount,
         },
@@ -207,12 +207,12 @@ export class PaymentprocessorService {
       prismaPayment.transaction.create({
         data: {
           id: transactionId,
-          accountId,
-          type: transactionType,
-          amount,
+          accountId: data.accountId,
+          type: data.transactionType,
+          amount: data.amount,
           paymentMethod: PaymentMethod.BALANCE,
           status: TransactionStatus.SUCCESS,
-          description,
+          description: data.description || 'Debit for rental service',
         },
       }),
     ]);

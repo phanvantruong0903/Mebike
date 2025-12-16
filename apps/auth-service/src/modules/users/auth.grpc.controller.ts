@@ -26,6 +26,7 @@ import {
   ResetPasswordDto,
   prismaAuth,
   LogoutDto,
+  UserVerifyStatus,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
@@ -49,14 +50,14 @@ export class AuthGrpcController {
   async createUser(
     data: CreateUserDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    return this._handleCreateUserLogic(data, data.role);
+    return this._handleCreateUserLogic(data, data.role, false);
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REGISTER)
   async register(
     data: RegisterUserDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    return this._handleCreateUserLogic(data, Role.USER);
+    return this._handleCreateUserLogic(data, Role.USER, true);
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.LOGIN)
@@ -76,16 +77,25 @@ export class AuthGrpcController {
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REFRESH_TOKEN)
   async refreshToken(data: {
     refreshToken: string;
+    accessToken: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
-    const { refreshToken } = data;
+    const { refreshToken, accessToken } = data;
 
     if (!refreshToken) {
       throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
       ]);
     }
+    if (!accessToken) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
+      ]);
+    }
 
-    const result = await this.authService.refreshToken(refreshToken);
+    const result = await this.authService.refreshToken(
+      refreshToken,
+      accessToken,
+    );
     return grpcResponse(result, USER_MESSAGES.REFRESH_TOKEN_SUCCESSFULLY);
   }
 
@@ -156,7 +166,7 @@ export class AuthGrpcController {
 
       const verifyResult = this.authService.verifyOtpSuccess(email);
 
-      const [_, finalResult] = await Promise.all([deleted, verifyResult]);
+      const [finalResult] = await Promise.all([verifyResult, deleted]);
       return grpcResponse(
         { resetToken: finalResult },
         USER_MESSAGES.OTP_VERIFIED_SUCCESS,
@@ -179,6 +189,7 @@ export class AuthGrpcController {
   private async _handleCreateUserLogic(
     data: RegisterUserDto | CreateUserDto,
     role: Role,
+    shouldGenerateToken: boolean,
   ): Promise<ReturnType<typeof grpcResponse>> {
     let user: User | null = null;
     try {
@@ -222,6 +233,20 @@ export class AuthGrpcController {
         key: user.id,
         value: profileData,
       });
+
+      if (shouldGenerateToken) {
+        const { accessToken, refreshToken } =
+          await this.authService.generateToken({
+            user_id: user.id,
+            role: role,
+            verify: UserVerifyStatus.Unverified,
+          });
+
+        return grpcResponse(
+          { accessToken, refreshToken, id: user.id },
+          USER_MESSAGES.CREATE_SCUCCESS,
+        );
+      }
 
       return grpcResponse(user, USER_MESSAGES.CREATE_SCUCCESS);
     } catch (error) {

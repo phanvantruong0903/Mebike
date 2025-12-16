@@ -22,7 +22,7 @@ model Transaction {
   status        TransactionStatus @default(PENDING)
   amount        Decimal
   paymentMethod PaymentMethod
-  description   String
+  description   String            @default("")
   history       WalletHistory?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt

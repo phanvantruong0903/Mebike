@@ -138,7 +138,7 @@ export class AuthService
     return { accessToken, refreshToken };
   }
 
-  async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string, accessToken: string) {
     try {
       const token = await this.redisClient.get(
         `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
@@ -175,7 +175,7 @@ export class AuthService
         ]);
       }
 
-      const [accessToken, newRefreshToken] = await Promise.all([
+      const [newAccessToken, newRefreshToken] = await Promise.all([
         this.signAcessToken({
           user_id,
           verify,
@@ -188,17 +188,19 @@ export class AuthService
         }),
       ]);
 
+      console.log('REFRESH TOKEN', { accessToken, newRefreshToken });
+
       await Promise.all([
         this.redisClient.del(
           `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,
         ),
         this.redisClient.set(
-          `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`,
+          `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${newAccessToken}`,
           user_id,
           'EX',
           Number(process.env.JWT_ACCESS_EXPIRATION_TIME) || 900,
         ),
-
+        this.redisClient.del(`${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`),
         this.redisClient.set(
           `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${newRefreshToken}`,
           user_id,

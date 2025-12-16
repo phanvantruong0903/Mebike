@@ -11,6 +11,8 @@ message User {
   string role = 6;
   string status = 7;
   string phone = 8;
+  string createdAt = 9; 
+  string updatedAt = 10;
 }
 
 

@@ -48,15 +48,15 @@ export class AuthResolver {
     return response;
   }
 
-  @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.REGISTER })
+  @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.REGISTER })
   async register(
     @Args('body') body: RegisterUserInput,
-  ): Promise<RegisterResponse> {
+  ): Promise<LoginResponse> {
     const response = await this.authService.register(body);
     await this.walletService.createWallet({
       accountId: (response.data as Account)?.id,
     });
-    return response;
+    return response as unknown as LoginResponse;
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.LOGIN })
@@ -69,13 +69,19 @@ export class AuthResolver {
   })
   async refreshToken(@Context() context: any): Promise<ResfreshTokenResponse> {
     const refreshToken = context.req.cookies['refreshToken'];
+    const accessToken = context.req.cookies['accessToken'];
 
     if (!refreshToken) {
       throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
         USER_MESSAGES.INVALID_REFRESH_TOKEN,
       ]);
     }
-    return this.authService.refreshToken(refreshToken);
+    if (!accessToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
+      ]);
+    }
+    return this.authService.refreshToken(refreshToken, accessToken);
   }
 
   @Mutation(() => ChangePasswordResponse, {

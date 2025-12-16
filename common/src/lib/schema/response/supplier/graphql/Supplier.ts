@@ -25,4 +25,10 @@ export class Supplier {
 
   @Field(() => String)
   status!: string;
+
+  @Field()
+  createdAt!: string;
+
+  @Field()
+  updatedAt!: string;
 }
