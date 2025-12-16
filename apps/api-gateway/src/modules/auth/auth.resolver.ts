@@ -48,15 +48,15 @@ export class AuthResolver {
     return response;
   }
 
-  @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.REGISTER })
+  @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.REGISTER })
   async register(
     @Args('body') body: RegisterUserInput,
-  ): Promise<RegisterResponse> {
+  ): Promise<LoginResponse> {
     const response = await this.authService.register(body);
     await this.walletService.createWallet({
       accountId: (response.data as Account)?.id,
     });
-    return response;
+    return response as unknown as LoginResponse;
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.LOGIN })

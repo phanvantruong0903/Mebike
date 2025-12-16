@@ -95,7 +95,7 @@ message RegisterUserRequest {
 message RegisterUserResponse {
   bool success = 1;
   string message = 2;
-  User data = 3;
+  Token data = 3;
   repeated string errors = 4;
   int32 statusCode = 5;
 }
