@@ -1,14 +1,19 @@
 import { Plugin } from '@nestjs/apollo';
-import {
+import type {
   ApolloServerPlugin,
   GraphQLRequestListener,
-} from 'apollo-server-plugin-base';
+  GraphQLRequestContextWillSendResponse,
+  BaseContext,
+} from '@apollo/server';
 
 @Plugin()
 export class HttpErrorStatusPlugin implements ApolloServerPlugin {
-  async requestDidStart(): Promise<GraphQLRequestListener> {
+  async requestDidStart(): Promise<GraphQLRequestListener<BaseContext>> {
     return {
-      willSendResponse: async ({ response }) => {
+      willSendResponse: async (
+        requestContext: GraphQLRequestContextWillSendResponse<BaseContext>,
+      ) => {
+        const { response } = requestContext;
         const errors = this.getErrors(response);
 
         if (errors && errors.length > 0) {
