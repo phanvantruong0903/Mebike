@@ -27,6 +27,7 @@ import {
   prismaAuth,
   LogoutDto,
   UserVerifyStatus,
+  VerifyEmailDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
@@ -289,5 +290,44 @@ export class AuthGrpcController {
     const { accessToken, refreshToken } = data;
     await this.authService.logout(accessToken, refreshToken);
     return grpcResponse(null, USER_MESSAGES.LOGOUT_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_EMAIL)
+  async verifyEmail(data: {
+    accountId: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { accountId } = data;
+    if (!accountId) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        USER_MESSAGES.ID_REQUIRED,
+      ]);
+    }
+
+    try {
+      await this.authService.verifyEmail(accountId);
+      return grpcResponse(null, USER_MESSAGES.RESET_PASSWORD_OTP_SENT);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_EMAIL_PROCESS)
+  async verifyEmailProcess(
+    data: VerifyEmailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      await this.authService.verifyEmailOtp(data);
+      return grpcResponse(null, USER_MESSAGES.OTP_VERIFIED_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message);
+    }
   }
 }

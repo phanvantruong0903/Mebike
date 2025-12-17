@@ -38,6 +38,7 @@ export const USER_MESSAGES = {
   INVALID_TOKEN: 'Invalid token',
   PASSWORD_NOT_MATCH: 'Password not match',
   ACCESS_TOKEN_REQUIRED: 'Access Token is required',
+  USER_VERIFY_SUCCESS: 'User verified successfully',
 };
 
 export const SUPPLIER_MESSAGES = {

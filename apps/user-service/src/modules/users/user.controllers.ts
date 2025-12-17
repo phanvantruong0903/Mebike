@@ -188,4 +188,10 @@ export class UserController {
     const result = await this.userService.getUserStat();
     return grpcResponse(result, USER_MESSAGES.GET_ALL_STATS_SUCCESS);
   }
+
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.USER_VERIFY)
+  async userVerify(data: { accountId: string }) {
+    const result = await this.userService.userVerify(data);
+    return grpcResponse(result, USER_MESSAGES.USER_VERIFY_SUCCESS);
+  }
 }

@@ -82,6 +82,9 @@ message UserStatsResponse {
   repeated string errors = 5;
 }
 
+message UserVerifyRequest {
+  string accountId = 1;
+}
 
 service UserService {
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);
@@ -89,6 +92,7 @@ service UserService {
   rpc GetAllUsers(GetAllUserRequest) returns (UsersResponse);
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
   rpc GetUserStats(Empty) returns (UserStatsResponse);
+  rpc UserVerify(UserVerifyRequest) returns (UserDetailResponse);
 }
 
 message Empty {}

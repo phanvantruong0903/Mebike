@@ -17,6 +17,11 @@ export class NotificationController {
     await this.sendEmailNotification(data);
   }
 
+  @EventPattern(KAFKA_TOPIC.VERIFY_EMAIL)
+  async sendVerifyEmail(@Payload() data: any) {
+    await this.sendEmailNotification(data);
+  }
+
   private async sendEmailNotification(data: any) {
     try {
       await this.mailerService.sendMail({

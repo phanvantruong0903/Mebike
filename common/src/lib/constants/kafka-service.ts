@@ -27,4 +27,5 @@ export const KAFKA_TOPIC = {
   STATION_UPDATED: 'station.updated',
   WELCOME_EMAIL: 'notification.send_email_welcome',
   WALLET_CREATED: 'wallet.created',
+  VERIFY_EMAIL: 'notification.send_email_verify_email',
 } as const;
