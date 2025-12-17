@@ -5,6 +5,7 @@ import {
   ConsulService,
   CONSULT_SERVICE_ID,
   GrpcExceptionFilter,
+  KAFKA_GROUP_ID,
 } from '@mebike/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
@@ -23,21 +24,8 @@ async function bootstrap() {
     port,
   );
 
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.GRPC,
-      options: {
-        package: ['payment', 'wallet', 'grpc.health.v1'],
-        protoPath: [
-          join(process.cwd(), 'common/src/lib/proto/payment.proto'),
-          join(process.cwd(), 'common/src/lib/proto/wallet.proto'),
-          join(process.cwd(), 'common/src/lib/proto/health.proto'),
-        ],
-        url: `0.0.0.0:${process.env.PAYMENT_SERVICE_PORT}`,
-      },
-    },
-  );
+  const app = await NestFactory.create(AppModule);
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -46,6 +34,34 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new GrpcExceptionFilter());
-  await app.listen();
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.GRPC,
+    options: {
+      package: ['payment', 'wallet', 'grpc.health.v1'],
+      protoPath: [
+        join(process.cwd(), 'common/src/lib/proto/payment.proto'),
+        join(process.cwd(), 'common/src/lib/proto/wallet.proto'),
+        join(process.cwd(), 'common/src/lib/proto/health.proto'),
+      ],
+      url: `0.0.0.0:${process.env.PAYMENT_SERVICE_PORT}`,
+    },
+  });
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+      },
+      consumer: {
+        groupId: KAFKA_GROUP_ID.PAYMENT_SERVICE,
+      },
+      subscribe: {
+        fromBeginning: true,
+      },
+    },
+  });
+  await app.startAllMicroservices();
 }
 bootstrap();

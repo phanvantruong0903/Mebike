@@ -127,18 +127,20 @@ export class AuthGrpcController {
 
     const account = user as Account;
 
-    this.kafkaClient.emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
-      key: account.id,
-      value: {
-        to: account?.email,
-        subject: 'OTP verification code',
-        template: 'reset-password',
-        data: {
-          email: account?.email,
-          otp: otpCode,
+    this.kafkaClient
+      .emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
+        key: account.id,
+        value: {
+          to: account?.email,
+          subject: 'OTP verification code',
+          template: 'reset-password',
+          data: {
+            email: account?.email,
+            otp: otpCode,
+          },
         },
-      },
-    });
+      })
+      .subscribe();
 
     return grpcResponse(null, USER_MESSAGES.RESET_PASSWORD_OTP_SENT);
   }
@@ -229,11 +231,22 @@ export class AuthGrpcController {
         role: role,
       };
 
-      this.kafkaClient.emit(KAFKA_TOPIC.USER_CREATED, {
-        key: user.id,
-        value: profileData,
-      });
+      this.kafkaClient
+        .emit(KAFKA_TOPIC.USER_CREATED, {
+          key: user.id,
+          value: profileData,
+        })
+        .subscribe();
 
+      this.kafkaClient
+        .emit(KAFKA_TOPIC.WALLET_CREATED, {
+          key: user.id,
+          value: user.id,
+        })
+        .subscribe();
+
+      // send welcome email
+      this.authService.welcomeEmail(user.id, user.email, data.name);
       if (shouldGenerateToken) {
         const { accessToken, refreshToken } =
           await this.authService.generateToken({

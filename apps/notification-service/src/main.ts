@@ -10,6 +10,10 @@ import { config as dotenvConfig } from 'dotenv';
 
 async function bootstrap() {
   dotenvConfig();
+  console.log(
+    'DEBUG: KAFKA_TOPIC keys:',
+    Object.keys(require('@mebike/common').KAFKA_TOPIC),
+  );
 
   const consulService = new ConsulService();
   const port = Number(process.env.NOTIFICATION_SERVICE_PORT) || 50053;

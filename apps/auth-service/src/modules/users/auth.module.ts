@@ -57,6 +57,7 @@ import { join } from 'node:path';
               },
               consumer: {
                 groupId: KAFKA_GROUP_ID.AUTH_SERVICE,
+                allowAutoTopicCreation: true,
               },
             },
           };

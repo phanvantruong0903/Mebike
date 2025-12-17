@@ -19,10 +19,12 @@ import {
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
   ResetPasswordDto,
+  KAFKA_TOPIC,
+  KAFKA_SERVICE,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
-import type { ClientGrpc } from '@nestjs/microservices';
+import type { ClientGrpc, ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Redis } from 'ioredis';
 
@@ -40,6 +42,8 @@ export class AuthService
     private readonly jwtService: JwtServiceCustom,
     @Inject(GRPC_PACKAGE.USER) private readonly client: ClientGrpc,
     @Inject(REDIS_CONSTANTS.REDIS_CLIENT) private readonly redisClient: Redis,
+    @Inject(KAFKA_SERVICE.AUTH_SERVICE)
+    private readonly kafkaClient: ClientKafka,
   ) {
     super(prismaAuth.user);
   }
@@ -431,5 +435,29 @@ export class AuthService
       this.redisClient.del(`${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`),
       this.redisClient.del(`${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`),
     ]);
+  }
+
+  async welcomeEmail(key: string, email: string, name: string) {
+    try {
+      this.kafkaClient
+        .emit(KAFKA_TOPIC.WELCOME_EMAIL, {
+          key: key,
+          value: {
+            to: email,
+            subject: 'Welcome to Mebike',
+            template: 'welcome',
+            data: {
+              name: name,
+            },
+          },
+        })
+        .subscribe();
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
   }
 }
