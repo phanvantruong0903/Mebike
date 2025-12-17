@@ -4,10 +4,10 @@ global:
 # accessLog:
 #   format: common
 #   filePath: /var/log/traefik/access.log
-log:
-  level: DEBUG
-  format: common
-  filePath: /var/log/traefik/traefik.log
+# log:
+#   level: DEBUG
+#   format: common
+#   filePath: /var/log/traefik/traefik.log
 api:
   dashboard: true
 entryPoints:
