@@ -365,11 +365,14 @@ services:
         condition: service_started
       payment-db:
         condition: service_started
+      kafka:
+        condition: service_healthy
     environment:
       - PAYMENT_SERVICE_PORT=50056
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@payment-db:5432/${PAYMENT_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
+      - KAFKA_BROKERS=kafka:29092
       - VNPAY_TMN_CODE=${VNPAY_TMN_CODE}
       - VNPAY_HASHSECRET=${VNPAY_HASHSECRET}
       - VNP_URL=${VNP_URL}
