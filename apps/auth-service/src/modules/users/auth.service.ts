@@ -19,15 +19,19 @@ import {
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
   ResetPasswordDto,
+  KAFKA_TOPIC,
+  KAFKA_SERVICE,
+  VerifyEmailDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
-import type { ClientGrpc } from '@nestjs/microservices';
+import type { ClientGrpc, ClientKafka } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Redis } from 'ioredis';
 
 interface UserServiceClient {
   GetUser(data: { id: string }): Observable<UserResponse>;
+  UserVerify(data: { accountId: string }): Observable<UserResponse>;
 }
 @Injectable()
 export class AuthService
@@ -40,6 +44,8 @@ export class AuthService
     private readonly jwtService: JwtServiceCustom,
     @Inject(GRPC_PACKAGE.USER) private readonly client: ClientGrpc,
     @Inject(REDIS_CONSTANTS.REDIS_CLIENT) private readonly redisClient: Redis,
+    @Inject(KAFKA_SERVICE.AUTH_SERVICE)
+    private readonly kafkaClient: ClientKafka,
   ) {
     super(prismaAuth.user);
   }
@@ -65,7 +71,7 @@ export class AuthService
 
       if (!findUser) {
         throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-          USER_MESSAGES.NOT_FOUND,
+          USER_MESSAGES.VALIDATION_FAILED,
         ]);
       }
 
@@ -431,5 +437,97 @@ export class AuthService
       this.redisClient.del(`${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${accessToken}`),
       this.redisClient.del(`${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`),
     ]);
+  }
+
+  async welcomeEmail(key: string, email: string, name: string) {
+    try {
+      this.kafkaClient
+        .emit(KAFKA_TOPIC.WELCOME_EMAIL, {
+          key: key,
+          value: {
+            to: email,
+            subject: 'Welcome to Mebike',
+            template: 'welcome',
+            data: {
+              name: name,
+            },
+          },
+        })
+        .subscribe();
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
+  }
+
+  async verifyEmail(accountId: string) {
+    const account = await prismaAuth.user.findUnique({
+      where: { id: accountId },
+      select: { email: true },
+    });
+    if (!account) {
+      throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    await this.redisClient.set(
+      `${REDIS_KEY_PREFIX.VERIFY_EMAIL}:${account.email}`,
+      otpCode,
+      'EX',
+      300,
+    );
+
+    try {
+      this.kafkaClient
+        .emit(KAFKA_TOPIC.VERIFY_EMAIL, {
+          key: accountId,
+          value: {
+            to: account.email,
+            subject: 'Verify your email',
+            template: 'verify-email',
+            data: {
+              email: account.email,
+              otp: otpCode,
+            },
+          },
+        })
+        .subscribe();
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
+  }
+
+  async verifyEmailOtp(data: VerifyEmailDto) {
+    const account = await prismaAuth.user.findUnique({
+      where: { id: data.accountId },
+      select: { email: true },
+    });
+    if (!account) {
+      throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+    }
+
+    const storedOtp = await this.redisClient.get(
+      `${REDIS_KEY_PREFIX.VERIFY_EMAIL}:${account.email}`,
+    );
+
+    if (storedOtp !== data.otp || !storedOtp) {
+      throwGrpcError(404, SERVER_MESSAGE.BAD_REQUEST, [
+        USER_MESSAGES.INVALID_OTP,
+      ]);
+    }
+
+    await this.redisClient.del(
+      `${REDIS_KEY_PREFIX.VERIFY_EMAIL}:${account.email}`,
+    );
+    await firstValueFrom(
+      this.userService.UserVerify({ accountId: data.accountId }),
+    );
   }
 }

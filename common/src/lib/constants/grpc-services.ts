@@ -31,6 +31,9 @@ export const USER_METHODS = {
   GET_ACCOUNT_BY_ACCOUNT_ID: 'GetAccountByAccountIds',
   GET_STATS: 'GetUserStats',
   LOGOUT: 'Logout',
+  VERIFY_EMAIL: 'VerifyEmail',
+  VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
+  USER_VERIFY: 'UserVerify',
 } as const;
 
 export const SUPPLIER_METHODS = {

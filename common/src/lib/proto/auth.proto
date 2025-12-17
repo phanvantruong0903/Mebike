@@ -159,6 +159,15 @@ message LogoutDto {
   string refreshToken = 2;
 }
 
+message VerifyEmailRequest {
+  string accountId = 1;
+}
+
+message VerifyEmailProcessRequest {
+  string accountId = 1;
+  string otp = 2;
+}
+
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
@@ -170,6 +179,8 @@ service AuthService {
   rpc ResetPassword(ResetPasswordDto) returns (ResetPasswordResponse);
   rpc GetAccountByAccountIds(GetAccountByAccountIdsRequest) returns (GetAccountByAccountIdsResponse);
   rpc Logout(LogoutDto) returns (UsersResponse);
+  rpc VerifyEmail (VerifyEmailRequest) returns (ChangePasswordResponse);
+  rpc VerifyEmailProcess (VerifyEmailProcessRequest) returns (ChangePasswordResponse);
 }
 
 message Empty {}

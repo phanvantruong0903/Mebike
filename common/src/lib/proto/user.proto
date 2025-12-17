@@ -13,6 +13,9 @@ message User {
   string phone = 8;
   string createdAt = 9; 
   string updatedAt = 10;
+  string address = 11;
+  string avatarUrl = 12;
+  string nfcCardUid = 13;
 }
 
 
@@ -21,6 +24,9 @@ message UpdateUserRequest {
   optional string name = 2;
   optional int32 YOB = 3;
   optional string phone = 4;
+  optional string address = 5;
+  optional string avatarUrl = 6;
+  optional string nfcCardUid = 7;
 }
 
 message GetUserRequest {
@@ -82,6 +88,9 @@ message UserStatsResponse {
   repeated string errors = 5;
 }
 
+message UserVerifyRequest {
+  string accountId = 1;
+}
 
 service UserService {
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);
@@ -89,6 +98,7 @@ service UserService {
   rpc GetAllUsers(GetAllUserRequest) returns (UsersResponse);
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
   rpc GetUserStats(Empty) returns (UserStatsResponse);
+  rpc UserVerify(UserVerifyRequest) returns (UserDetailResponse);
 }
 
 message Empty {}

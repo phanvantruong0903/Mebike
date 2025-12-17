@@ -27,6 +27,7 @@ import {
   prismaAuth,
   LogoutDto,
   UserVerifyStatus,
+  VerifyEmailDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
@@ -127,18 +128,20 @@ export class AuthGrpcController {
 
     const account = user as Account;
 
-    this.kafkaClient.emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
-      key: account.id,
-      value: {
-        to: account?.email,
-        subject: 'OTP verification code',
-        template: 'reset-password',
-        data: {
-          email: account?.email,
-          otp: otpCode,
+    this.kafkaClient
+      .emit(KAFKA_TOPIC.USER_RESET_PASSWORD, {
+        key: account.id,
+        value: {
+          to: account?.email,
+          subject: 'OTP verification code',
+          template: 'reset-password',
+          data: {
+            email: account?.email,
+            otp: otpCode,
+          },
         },
-      },
-    });
+      })
+      .subscribe();
 
     return grpcResponse(null, USER_MESSAGES.RESET_PASSWORD_OTP_SENT);
   }
@@ -229,11 +232,22 @@ export class AuthGrpcController {
         role: role,
       };
 
-      this.kafkaClient.emit(KAFKA_TOPIC.USER_CREATED, {
-        key: user.id,
-        value: profileData,
-      });
+      this.kafkaClient
+        .emit(KAFKA_TOPIC.USER_CREATED, {
+          key: user.id,
+          value: profileData,
+        })
+        .subscribe();
 
+      this.kafkaClient
+        .emit(KAFKA_TOPIC.WALLET_CREATED, {
+          key: user.id,
+          value: user.id,
+        })
+        .subscribe();
+
+      // send welcome email
+      this.authService.welcomeEmail(user.id, user.email, data.name);
       if (shouldGenerateToken) {
         const { accessToken, refreshToken } =
           await this.authService.generateToken({
@@ -276,5 +290,44 @@ export class AuthGrpcController {
     const { accessToken, refreshToken } = data;
     await this.authService.logout(accessToken, refreshToken);
     return grpcResponse(null, USER_MESSAGES.LOGOUT_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_EMAIL)
+  async verifyEmail(data: {
+    accountId: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { accountId } = data;
+    if (!accountId) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        USER_MESSAGES.ID_REQUIRED,
+      ]);
+    }
+
+    try {
+      await this.authService.verifyEmail(accountId);
+      return grpcResponse(null, USER_MESSAGES.RESET_PASSWORD_OTP_SENT);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_EMAIL_PROCESS)
+  async verifyEmailProcess(
+    data: VerifyEmailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      await this.authService.verifyEmailOtp(data);
+      return grpcResponse(null, USER_MESSAGES.OTP_VERIFIED_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message);
+    }
   }
 }

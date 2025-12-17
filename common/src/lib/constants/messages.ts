@@ -10,7 +10,7 @@ export const USER_MESSAGES = {
   NOT_FOUND: 'User not found',
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create User failed',
-  VALIDATION_FAILED: 'Username or Password incorrect',
+  VALIDATION_FAILED: 'Email or Password incorrect',
   LOGIN_SUCCESS: 'User Login Successfully',
   EMAIL_EXISTED: 'Email has been used',
   INVALID_DATA: 'Invalid Data',
@@ -38,6 +38,7 @@ export const USER_MESSAGES = {
   INVALID_TOKEN: 'Invalid token',
   PASSWORD_NOT_MATCH: 'Password not match',
   ACCESS_TOKEN_REQUIRED: 'Access Token is required',
+  USER_VERIFY_SUCCESS: 'User verified successfully',
 };
 
 export const SUPPLIER_MESSAGES = {
