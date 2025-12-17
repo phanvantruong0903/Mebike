@@ -69,7 +69,7 @@ export class AuthService
 
       if (!findUser) {
         throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-          USER_MESSAGES.NOT_FOUND,
+          USER_MESSAGES.VALIDATION_FAILED,
         ]);
       }
 
