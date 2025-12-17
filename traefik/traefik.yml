@@ -1,9 +1,9 @@
 global:
   checkNewVersion: true
   sendAnonymousUsage: true
-accessLog:
-  format: common
-  filePath: /var/log/traefik/access.log
+# accessLog:
+#   format: common
+#   filePath: /var/log/traefik/access.log
 log:
   level: DEBUG
   format: common
