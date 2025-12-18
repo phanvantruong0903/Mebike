@@ -127,6 +127,27 @@ export class AuthResolver {
     return this.authService.logout({ accessToken, refreshToken });
   }
 
+  @Mutation(() => ChangePasswordResponse, {
+    name: GRAPHQL_NAME_USER.VERIFY_EMAIL,
+  })
+  @UseGuards(JwtAuthGuard)
+  async verifyEmail(
+    @CurrentUser() user: UserProfile,
+  ): Promise<ChangePasswordResponse> {
+    return this.authService.verifyEmail(user.accountId);
+  }
+
+  @Mutation(() => ChangePasswordResponse, {
+    name: GRAPHQL_NAME_USER.VERIFY_EMAIL_PROCESS,
+  })
+  @UseGuards(JwtAuthGuard)
+  async verifyEmailProcess(
+    @CurrentUser() user: UserProfile,
+    @Args('otp') otp: string,
+  ): Promise<ChangePasswordResponse> {
+    return this.authService.verifyEmailProcess(user.accountId, otp);
+  }
+
   @Query(() => String)
   _healthCheck(): string {
     return 'API is running';
