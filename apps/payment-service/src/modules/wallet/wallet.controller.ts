@@ -35,7 +35,6 @@ export class WalletController {
   async createWallet(
     @Payload() accountId: string,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    console.log(accountId);
     const response = await this.walletService.createWallet(accountId);
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }

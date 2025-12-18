@@ -41,6 +41,11 @@ interface AuthServiceClient {
     ids: string[];
   }): Observable<{ data: Account[] }>;
   Logout(data: LogoutInput): Observable<UserResponse>;
+  VerifyEmail(data: { accountId: string }): Observable<ChangePasswordResponse>;
+  VerifyEmailProcess(data: {
+    accountId: string;
+    otp: string;
+  }): Observable<ChangePasswordResponse>;
 }
 
 @Injectable()
@@ -100,5 +105,15 @@ export class AuthService implements OnModuleInit {
 
   async logout(data: LogoutInput) {
     return await lastValueFrom(this.userService.Logout(data));
+  }
+
+  async verifyEmail(accountId: string) {
+    return await firstValueFrom(this.userService.VerifyEmail({ accountId }));
+  }
+
+  async verifyEmailProcess(accountId: string, otp: string) {
+    return await firstValueFrom(
+      this.userService.VerifyEmailProcess({ accountId, otp }),
+    );
   }
 }
