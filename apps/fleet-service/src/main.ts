@@ -12,7 +12,6 @@ import { join } from 'node:path';
 import { config as dotenvConfig } from 'dotenv';
 async function bootstrap() {
   dotenvConfig();
-  const app = await NestFactory.create(AppModule);
 
   const consulService = new ConsulService();
   const port = Number(process.env.FLEET_SERVICE_PORT) || 50054;
@@ -24,6 +23,8 @@ async function bootstrap() {
     host,
     port,
   );
+
+  const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
     new ValidationPipe({
