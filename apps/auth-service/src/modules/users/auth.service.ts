@@ -215,7 +215,7 @@ export class AuthService
         ),
       ]);
 
-      return { accessToken, refreshToken: newRefreshToken };
+      return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error: unknown) {
       if (error instanceof RpcException) {
         throw error;
