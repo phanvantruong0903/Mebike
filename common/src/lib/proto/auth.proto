@@ -52,6 +52,7 @@ message UsersResponse {
 
 message RefreshTokenRequest {
   string refreshToken = 1;
+  string accessToken = 2;
 }
 
 message RefreshToken{
@@ -94,7 +95,7 @@ message RegisterUserRequest {
 message RegisterUserResponse {
   bool success = 1;
   string message = 2;
-  User data = 3;
+  Token data = 3;
   repeated string errors = 4;
   int32 statusCode = 5;
 }
@@ -153,6 +154,20 @@ message GetAccountByAccountIdsResponse {
   int32 statusCode = 5;
 }
 
+message LogoutDto {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message VerifyEmailRequest {
+  string accountId = 1;
+}
+
+message VerifyEmailProcessRequest {
+  string accountId = 1;
+  string otp = 2;
+}
+
 service AuthService {
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
@@ -163,7 +178,9 @@ service AuthService {
   rpc VerifyOtp(VerifyOtpRequest) returns (VerifyOtpResponse);
   rpc ResetPassword(ResetPasswordDto) returns (ResetPasswordResponse);
   rpc GetAccountByAccountIds(GetAccountByAccountIdsRequest) returns (GetAccountByAccountIdsResponse);
-  rpc Logout(Empty) returns (UsersResponse);
+  rpc Logout(LogoutDto) returns (UsersResponse);
+  rpc VerifyEmail (VerifyEmailRequest) returns (ChangePasswordResponse);
+  rpc VerifyEmailProcess (VerifyEmailProcessRequest) returns (ChangePasswordResponse);
 }
 
 message Empty {}

@@ -11,4 +11,5 @@ export const REDIS_KEY_PREFIX = {
   ACCESS_TOKEN: 'access_token:',
   REFRESH_TOKEN: 'refresh_token:',
   STATION: 'station_geo:',
+  VERIFY_EMAIL: 'verify_email_otp:',
 };

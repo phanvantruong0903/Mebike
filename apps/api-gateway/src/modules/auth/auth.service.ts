@@ -24,7 +24,10 @@ import {
 interface AuthServiceClient {
   LoginUser(data: LoginInput): Observable<LoginResponse>;
   CreateUser(data: CreateUserInput): Observable<RegisterResponse>;
-  RefreshToken(refreshToken: object): Observable<ResfreshTokenResponse>;
+  RefreshToken(data: {
+    refreshToken: string;
+    accessToken: string;
+  }): Observable<ResfreshTokenResponse>;
   ChangePassword(
     data: ChangePasswordInput & { accountId: string },
   ): Observable<ChangePasswordResponse>;
@@ -38,6 +41,11 @@ interface AuthServiceClient {
     ids: string[];
   }): Observable<{ data: Account[] }>;
   Logout(data: LogoutInput): Observable<UserResponse>;
+  VerifyEmail(data: { accountId: string }): Observable<ChangePasswordResponse>;
+  VerifyEmailProcess(data: {
+    accountId: string;
+    otp: string;
+  }): Observable<ChangePasswordResponse>;
 }
 
 @Injectable()
@@ -64,9 +72,9 @@ export class AuthService implements OnModuleInit {
     return await firstValueFrom(this.userService.Register(data));
   }
 
-  async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string, accessToken: string) {
     return await firstValueFrom(
-      this.userService.RefreshToken({ refreshToken }),
+      this.userService.RefreshToken({ refreshToken, accessToken }),
     );
   }
 
@@ -97,5 +105,15 @@ export class AuthService implements OnModuleInit {
 
   async logout(data: LogoutInput) {
     return await lastValueFrom(this.userService.Logout(data));
+  }
+
+  async verifyEmail(accountId: string) {
+    return await firstValueFrom(this.userService.VerifyEmail({ accountId }));
+  }
+
+  async verifyEmailProcess(accountId: string, otp: string) {
+    return await firstValueFrom(
+      this.userService.VerifyEmailProcess({ accountId, otp }),
+    );
   }
 }

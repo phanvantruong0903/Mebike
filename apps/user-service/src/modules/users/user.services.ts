@@ -49,4 +49,11 @@ export class UserService extends BaseService<
 
     return result;
   }
+  async userVerify(data: { accountId: string }) {
+    const updatedProfile = await prismaUser.profile.update({
+      where: { accountId: data.accountId },
+      data: { verify: UserVerifyStatus.Verified },
+    });
+    return updatedProfile;
+  }
 }

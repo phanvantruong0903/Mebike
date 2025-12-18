@@ -19,4 +19,10 @@ export class Bike {
 
   @Field(() => BikeStatus)
   status!: BikeStatus;
+
+  @Field()
+  createdAt!: string;
+
+  @Field()
+  updatedAt!: string;
 }

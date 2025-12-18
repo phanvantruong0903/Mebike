@@ -19,3 +19,4 @@ coverage
 # Nx cache folders
 nx-cache
 apps/api-gateway/dist
+**/generated

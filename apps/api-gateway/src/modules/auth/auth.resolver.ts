@@ -36,14 +36,16 @@ export class AuthResolver {
   async createUser(
     @Args('body') body: CreateUserInput,
   ): Promise<RegisterResponse> {
-    return this.authService.createUser(body);
+    const response = await this.authService.createUser(body);
+    return response;
   }
 
-  @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.REGISTER })
+  @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.REGISTER })
   async register(
     @Args('body') body: RegisterUserInput,
-  ): Promise<RegisterResponse> {
-    return this.authService.register(body);
+  ): Promise<LoginResponse> {
+    const response = await this.authService.register(body);
+    return response as unknown as LoginResponse;
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.LOGIN })
@@ -56,13 +58,19 @@ export class AuthResolver {
   })
   async refreshToken(@Context() context: any): Promise<ResfreshTokenResponse> {
     const refreshToken = context.req.cookies['refreshToken'];
+    const accessToken = context.req.cookies['accessToken'];
 
     if (!refreshToken) {
       throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
         USER_MESSAGES.INVALID_REFRESH_TOKEN,
       ]);
     }
-    return this.authService.refreshToken(refreshToken);
+    if (!accessToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
+      ]);
+    }
+    return this.authService.refreshToken(refreshToken, accessToken);
   }
 
   @Mutation(() => ChangePasswordResponse, {
@@ -117,6 +125,27 @@ export class AuthResolver {
       ]);
     }
     return this.authService.logout({ accessToken, refreshToken });
+  }
+
+  @Mutation(() => ChangePasswordResponse, {
+    name: GRAPHQL_NAME_USER.VERIFY_EMAIL,
+  })
+  @UseGuards(JwtAuthGuard)
+  async verifyEmail(
+    @CurrentUser() user: UserProfile,
+  ): Promise<ChangePasswordResponse> {
+    return this.authService.verifyEmail(user.accountId);
+  }
+
+  @Mutation(() => ChangePasswordResponse, {
+    name: GRAPHQL_NAME_USER.VERIFY_EMAIL_PROCESS,
+  })
+  @UseGuards(JwtAuthGuard)
+  async verifyEmailProcess(
+    @CurrentUser() user: UserProfile,
+    @Args('otp') otp: string,
+  ): Promise<ChangePasswordResponse> {
+    return this.authService.verifyEmailProcess(user.accountId, otp);
   }
 
   @Query(() => String)

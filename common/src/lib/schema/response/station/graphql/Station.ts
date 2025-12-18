@@ -22,4 +22,10 @@ export class Station {
 
   @Field(() => Float, { nullable: true })
   distance?: number;
+
+  @Field()
+  createdAt!: string;
+
+  @Field()
+  updatedAt!: string;
 }

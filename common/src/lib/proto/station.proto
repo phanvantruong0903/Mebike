@@ -46,6 +46,8 @@ message Station {
   string longitude = 5;
   int32 capacity = 6;
   optional double distance = 7;
+  string createdAt = 8; 
+  string updatedAt = 9;
 }
 
 message StationList {

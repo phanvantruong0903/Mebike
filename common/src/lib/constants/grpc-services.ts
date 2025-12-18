@@ -3,6 +3,7 @@ export const GRPC_SERVICES = {
   USER: 'UserService',
   NOTIFICATION: 'NotificationService',
   FLEET: 'FleetService',
+  PAYMENT: 'PaymentService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -10,6 +11,7 @@ export const GRPC_PACKAGE = {
   USER: 'USER_PACKAGE',
   NOTIFICATION: 'NOTIFICATION_PACKAGE',
   FLEET: 'FLEET_PACKAGE',
+  PAYMENT: 'PAYMENT_PACKAGE',
 };
 
 export const USER_METHODS = {
@@ -29,6 +31,9 @@ export const USER_METHODS = {
   GET_ACCOUNT_BY_ACCOUNT_ID: 'GetAccountByAccountIds',
   GET_STATS: 'GetUserStats',
   LOGOUT: 'Logout',
+  VERIFY_EMAIL: 'VerifyEmail',
+  VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
+  USER_VERIFY: 'UserVerify',
 } as const;
 
 export const SUPPLIER_METHODS = {
@@ -53,4 +58,21 @@ export const BIKE_METHODS = {
   UPDATE: 'UpdateBike',
   GET_ALL: 'GetAllBikes',
   CHANGE_STATUS: 'ChangeBikeStatus',
+};
+
+export const PAYMENT_METHODS = {
+  CREATE_PAYMENT_URL: 'CreatePaymentUrl',
+  PAYMENT_CALLBACK: 'PaymentCallback',
+  CREATE_WALLET: 'CreateWallet',
+  DEBIT_RENTAL: 'DebitRental',
+  GET_WALLET: 'GetWallet',
+  GET_ALL_WALLET: 'GetAllWallets',
+  CHANGE_WALLET_STATUS: 'ChangeWalletStatus',
+};
+
+export const TRANSACTION_METHODS = {
+  GET_ONE: 'GetTransaction',
+  GET_ALL: 'GetAllTransactions',
+  CREATE_WITHDRAW: 'CreateWithdraw',
+  UPDATE_WITHDRAW_STATUS: 'UpdateWithdrawStatus',
 };

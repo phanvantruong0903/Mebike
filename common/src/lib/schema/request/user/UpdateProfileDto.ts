@@ -5,6 +5,7 @@ import {
   Min,
   MinLength,
   IsNotEmpty,
+  IsUrl,
 } from 'class-validator';
 
 export class UpdateProfileDto {
@@ -28,5 +29,13 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  search?: string;
+  address?: string;
+
+  @IsOptional()
+  @IsUrl()
+  avatarUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  nfcCardUid?: string;
 }
