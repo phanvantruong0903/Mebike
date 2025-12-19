@@ -117,4 +117,6 @@ export const RENTAL_MESSAGES = {
   GET_ALL_STATS_SUCCESS: 'Rental stats retrieved successfully',
   FIELD_NOT_FOUND: (field: string) => `${field} not found in rental`,
   INVALID_ID: 'Invalid id format',
+  GET_ONE_SUCCESS: 'Rental retrieved successfully',
+  GET_ONE_FAILED: 'Rental retrieved failed',
 };

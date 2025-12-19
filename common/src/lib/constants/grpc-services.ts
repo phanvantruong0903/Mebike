@@ -60,4 +60,6 @@ export const BIKE_METHODS = {
 export const RENTAL_METHODS = {
   CREATE: 'CreateRental',
   END: 'EndRental',
+  GET_ONE: 'GetRental',
+  GET_ALL: 'GetAllRentals',
 };

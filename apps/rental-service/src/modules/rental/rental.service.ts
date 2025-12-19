@@ -1,8 +1,7 @@
 import {
-  BikeStatus,
+  BaseService,
   CreateRentalDto,
   EndRentalDto,
-  prismaFleet,
   prismaRental,
   RENTAL_MESSAGES,
   RentalModel,
@@ -11,20 +10,17 @@ import {
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class RentalService {
-  async create(data: CreateRentalDto): Promise<RentalModel> {
-    const bike = await prismaFleet.bike.findUnique({
-      where: { id: data.bikeId },
-    });
-    if (!bike) {
-      throw new Error('Bike not found');
-    }
+export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
+  constructor() {
+    super(prismaRental.rental);
+  }
 
+  override async create(data: CreateRentalDto): Promise<RentalModel> {
     return await prismaRental.rental.create({
       data: {
         ...data,
         userId: data.accountId,
-        startStation: bike.stationId,
+        startStation: data.stationId,
       },
     });
   }
@@ -59,14 +55,15 @@ export class RentalService {
           status: RentalStatus.Completed,
         },
       }),
-      prismaFleet.bike.update({
-        where: { id: rental.bikeId },
-        data: {
-          status: BikeStatus.Available,
-        },
-      }),
     ]);
     return updatedRental;
+  }
+
+  async getOne(id: string): Promise<RentalModel | null> {
+    const rental = await prismaRental.rental.findUnique({
+      where: { id },
+    });
+    return rental;
   }
 
   generateDuration(start: Date, end: Date) {

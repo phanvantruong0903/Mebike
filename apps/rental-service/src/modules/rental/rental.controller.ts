@@ -2,9 +2,14 @@ import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RentalService } from './rental.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
+  BaseGrpcHandler,
+  buildSearchFilter,
   CreateRentalDto,
   EndRentalDto,
+  GetRentalDto,
+  GetRentalListDto,
   GRPC_SERVICES,
+  grpcPaginateResponse,
   grpcResponse,
   RENTAL_MESSAGES,
   RENTAL_METHODS,
@@ -14,7 +19,10 @@ import {
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class RentalController {
-  constructor(private readonly rentalService: RentalService) {}
+  private readonly baseHandler: BaseGrpcHandler<RentalModel, CreateRentalDto>;
+  constructor(private readonly rentalService: RentalService) {
+    this.baseHandler = new BaseGrpcHandler(this.rentalService, CreateRentalDto);
+  }
 
   @GrpcMethod(GRPC_SERVICES.RENTAL, RENTAL_METHODS.CREATE)
   async createRental(
@@ -48,6 +56,50 @@ export class RentalController {
       }
       const err = error as Error;
       throw new RpcException(err?.message || RENTAL_MESSAGES.CREATE_FAILED);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.RENTAL, RENTAL_METHODS.GET_ONE)
+  async getRental(
+    data: GetRentalDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.baseHandler.getOneById(data.id);
+
+      if (!result) {
+        throw new RpcException(RENTAL_MESSAGES.NOT_FOUND);
+      }
+
+      return grpcResponse<RentalModel>(result, RENTAL_MESSAGES.GET_ONE_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || RENTAL_MESSAGES.GET_ONE_FAILED);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.RENTAL, RENTAL_METHODS.GET_ALL)
+  async getAllRental(
+    data: GetRentalListDto,
+  ): Promise<ReturnType<typeof grpcPaginateResponse>> {
+    try {
+      const searchFields = ['startStation', 'endStation', 'status'];
+      const searchFilter = buildSearchFilter(data.search, searchFields);
+
+      const result = await this.baseHandler.getAllLogic(
+        data.page,
+        data.limit,
+        searchFilter,
+      );
+      return grpcPaginateResponse(result, RENTAL_MESSAGES.GET_ALL_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || RENTAL_MESSAGES.GET_ALL_FAIL);
     }
   }
 }
