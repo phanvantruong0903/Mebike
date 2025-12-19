@@ -48,16 +48,20 @@ message Bike {
   string updatedAt = 7;
 }
 
+message Pagination {
+  int32 total = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalPages = 4;
+}
+
 message BikeList {
   bool success = 1;
   string message = 2;
   repeated Bike data = 3;
-  int32 total = 4;
-  int32 page = 5;
-  int32 limit = 6;
-  int32 totalPages = 7;
-  int32 statusCode = 8;
-  repeated string errors = 9;
+  Pagination pagination = 4;
+  int32 statusCode = 5;
+  repeated string errors = 6;
 }
 
 message CreateBikeResponse {

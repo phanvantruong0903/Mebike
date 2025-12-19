@@ -1,9 +1,24 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
 
-type ClassType<T = any> = new (...args: any[]) => T;
+type ClassType<T = unknown> = new (...args: unknown[]) => T;
 
 interface ApiResponseOptions {
   isArray?: boolean;
+}
+
+@ObjectType()
+class PaginationMeta {
+  @Field(() => Int, { nullable: true })
+  total?: number;
+
+  @Field(() => Int, { nullable: true })
+  page?: number;
+
+  @Field(() => Int, { nullable: true })
+  limit?: number;
+
+  @Field(() => Int, { nullable: true })
+  totalPages?: number;
 }
 
 export function ApiResponseType<TItem>(
@@ -33,17 +48,8 @@ export function ApiResponseType<TItem>(
   if (isArray) {
     @ObjectType({ isAbstract: true })
     abstract class ApiPaginatedResponseClass extends ApiResponseClass {
-      @Field(() => Int, { nullable: true })
-      total?: number;
-
-      @Field(() => Int, { nullable: true })
-      page?: number;
-
-      @Field(() => Int, { nullable: true })
-      limit?: number;
-
-      @Field(() => Int, { nullable: true })
-      totalPages?: number;
+      @Field(() => PaginationMeta, { nullable: true })
+      pagination?: PaginationMeta;
     }
     return ApiPaginatedResponseClass;
   }
