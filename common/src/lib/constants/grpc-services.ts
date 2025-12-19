@@ -51,7 +51,8 @@ export const STATION_METHODS = {
   GET_ONE: 'GetStation',
   UPDATE: 'UpdateStation',
   GET_ALL: 'GetAllStations',
-};
+  GET_STATIONS_BY_IDS: 'GetStationsByIds',
+} as const;
 
 export const BIKE_METHODS = {
   CREATE: 'CreateBike',
