@@ -42,5 +42,6 @@ import { StationResolver } from './station.resolver';
     ]),
   ],
   providers: [StationService, StationResolver],
+  exports: [StationService],
 })
 export class StationModule {}

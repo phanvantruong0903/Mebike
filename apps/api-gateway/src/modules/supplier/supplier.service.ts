@@ -12,6 +12,7 @@ import {
   ChangeSupplierStatusInput,
   CreateSupplierInput,
   GetSupplierInput,
+  Supplier,
 } from '@mebike/common';
 
 interface SupplierServiceClient {
@@ -25,6 +26,7 @@ interface SupplierServiceClient {
   ): Observable<SupplierResponse>;
   GetSupplierStats(data: RegisterUserInput): Observable<SupplierStatsResponse>;
   CreateSupplier(data: CreateSupplierInput): Observable<SupplierResponse>;
+  GetSupplierByIds(data: { ids: string[] }): Observable<{ data: Supplier[] }>;
 }
 
 @Injectable()
@@ -69,5 +71,12 @@ export class SupplierService implements OnModuleInit {
 
   async getSupplierStats(data: RegisterUserInput) {
     return await firstValueFrom(this.fleetService.GetSupplierStats(data));
+  }
+
+  async getSupplierByIds(ids: string[]): Promise<Supplier[]> {
+    const response = await firstValueFrom(
+      this.fleetService.GetSupplierByIds({ ids }),
+    );
+    return response.data || [];
   }
 }

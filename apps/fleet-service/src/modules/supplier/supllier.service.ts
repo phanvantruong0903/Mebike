@@ -26,16 +26,19 @@ export class SupplierService extends BaseService<
       },
     });
 
-    const totalCount = stats.reduce((acc, curr) => acc + curr._count.id, 0);
+    const totalCount = stats.reduce(
+      (acc: number, curr: any) => acc + curr._count.id,
+      0,
+    );
 
     const result = {
       totalSupplier: totalCount,
       totalSupplierActive:
-        stats.find((item) => item.status === SupplierStatus.Active)?._count
+        stats.find((item: any) => item.status === SupplierStatus.Active)?._count
           .id ?? 0,
       totalSupplierInactive:
-        stats.find((item) => item.status === SupplierStatus.Inactive)?._count
-          .id ?? 0,
+        stats.find((item: any) => item.status === SupplierStatus.Inactive)
+          ?._count.id ?? 0,
     };
 
     return result;
