@@ -264,4 +264,15 @@ export class StationController {
       data.id,
     );
   }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.GET_STATIONS_BY_IDS)
+  async getStationsByIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const stations = await prismaFleet.station.findMany({
+      where: { id: { in: ids } },
+    });
+    return grpcResponse(stations, STATION_MESSAGES.GET_ALL_SUCCESS);
+  }
 }

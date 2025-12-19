@@ -204,4 +204,16 @@ export class SupplierController {
     const result = await this.supplierService.getSupplierStat();
     return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_STATS_SUCCESS);
   }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_SUPPLIERS_BY_IDS)
+  async getSupplierByIds(data: { ids: string[] }) {
+    const result = await prismaFleet.supplier.findMany({
+      where: {
+        id: {
+          in: data.ids,
+        },
+      },
+    });
+    return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
+  }
 }

@@ -43,6 +43,7 @@ export const SUPPLIER_METHODS = {
   GET_ALL: 'GetAllSuppliers',
   CHANGE_STATUS: 'ChangeSupplierStatus',
   GET_STATS: 'GetSupplierStats',
+  GET_SUPPLIERS_BY_IDS: 'GetSupplierByIds',
 } as const;
 
 export const STATION_METHODS = {
