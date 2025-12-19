@@ -13,6 +13,10 @@ export class RegisterUserDto {
   password!: string;
 
   @IsNotEmpty()
+  @MinLength(6)
+  confirmPassword!: string;
+
+  @IsNotEmpty()
   @MinLength(10, { message: 'Phone must be at least 10 characters' })
   phone!: string;
 

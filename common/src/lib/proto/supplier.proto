@@ -8,6 +8,8 @@ message Supplier {
   ContactInfo contactInfo = 3;
   string contactFee = 4;
   string status = 5;
+  string createdAt = 6; 
+  string updatedAt = 7;
 }
 
 message ContactInfo {

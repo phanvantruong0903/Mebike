@@ -30,4 +30,19 @@ export class UserProfile {
 
   @Field(() => Account, { nullable: true })
   userAccount?: Account;
+
+  @Field(() => String, { nullable: true })
+  address?: string;
+
+  @Field(() => String, { nullable: true })
+  avatarUrl?: string;
+
+  @Field(() => String, { nullable: true })
+  nfcCardUid?: string;
+
+  @Field()
+  createdAt!: string;
+
+  @Field()
+  updatedAt!: string;
 }

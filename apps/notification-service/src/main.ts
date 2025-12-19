@@ -7,6 +7,7 @@ import {
 } from '@mebike/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { config as dotenvConfig } from 'dotenv';
+import { join } from 'path';
 
 async function bootstrap() {
   dotenvConfig();
@@ -22,24 +23,31 @@ async function bootstrap() {
     port,
   );
 
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.KAFKA,
-      options: {
-        client: {
-          brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
-        },
-        consumer: {
-          groupId: KAFKA_GROUP_ID.NOTIFICATION_SERVICE,
-        },
-        subscribe: {
-          fromBeginning: true,
-        },
+  const app = await NestFactory.create(AppModule);
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.GRPC,
+    options: {
+      package: ['grpc.health.v1'],
+      protoPath: [join(process.cwd(), 'common/src/lib/proto/health.proto')],
+      url: `0.0.0.0:${process.env.NOTIFICATION_SERVICE_PORT}`,
+    },
+  });
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+      },
+      consumer: {
+        groupId: KAFKA_GROUP_ID.NOTIFICATION_SERVICE,
+      },
+      subscribe: {
+        fromBeginning: true,
       },
     },
-  );
+  });
 
-  await app.listen();
+  await app.startAllMicroservices();
 }
 bootstrap();

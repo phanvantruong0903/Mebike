@@ -44,6 +44,8 @@ message Bike {
   optional StationBike station = 3;
   optional SupplierBike supplier = 4;
   string status = 5;
+  string createdAt = 6; 
+  string updatedAt = 7;
 }
 
 message BikeList {

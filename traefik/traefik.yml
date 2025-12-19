@@ -1,24 +1,26 @@
 global:
   checkNewVersion: true
   sendAnonymousUsage: true
-accessLog:
-  format: common
-  filePath: /var/log/traefik/access.log
-log:
-  level: DEBUG
-  format: common
-  filePath: /var/log/traefik/traefik.log
+# accessLog:
+#   format: common
+#   filePath: /var/log/traefik/access.log
+# log:
+#   level: DEBUG
+#   format: common
+#   filePath: /var/log/traefik/traefik.log
 api:
   dashboard: true
 entryPoints:
   web:
     address: ':80'
-    http:
-      redirections:
-        entryPoint:
-          to: websecure
-          scheme: https
-          permanent: true
+    # Disable redirect for local development
+    # Uncomment below when you have domain and SSL
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure
+    #       scheme: https
+    #       permanent: true
   websecure:
     address: ':443'
     forwardedHeaders:

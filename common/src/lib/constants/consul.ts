@@ -3,5 +3,6 @@ export const CONSULT_SERVICE_ID = {
   USER: 'user-service',
   NOTIFICATION: 'notification-service',
   FLEET: 'fleet-service',
+  PAYMENT: 'payment-service',
   RENTAL: 'rental-service',
 };

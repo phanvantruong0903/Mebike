@@ -9,6 +9,20 @@ export class NotificationController {
 
   @EventPattern(KAFKA_TOPIC.USER_RESET_PASSWORD)
   async sendMail(@Payload() data: any) {
+    await this.sendEmailNotification(data);
+  }
+
+  @EventPattern(KAFKA_TOPIC.WELCOME_EMAIL)
+  async sendWelcomeEmail(@Payload() data: any) {
+    await this.sendEmailNotification(data);
+  }
+
+  @EventPattern(KAFKA_TOPIC.VERIFY_EMAIL)
+  async sendVerifyEmail(@Payload() data: any) {
+    await this.sendEmailNotification(data);
+  }
+
+  private async sendEmailNotification(data: any) {
     try {
       await this.mailerService.sendMail({
         to: data.to,

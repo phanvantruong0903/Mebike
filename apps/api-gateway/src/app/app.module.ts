@@ -3,14 +3,15 @@ import { AuthModule } from '../modules/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { formatError } from '../config/graphql.config';
-import {
-  ApolloServerPluginLandingPageDisabled,
-  ApolloServerPluginLandingPageLocalDefault,
-} from 'apollo-server-core';
+import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { UserModule } from '../modules/user/user.module';
 import { SupplierModule } from '../modules/supplier/supplier.module';
 import { StationModule } from '../modules/station/station.module';
 import { BikeModule } from '../modules/bike/bike.module';
+import { PaymentModule } from '../modules/payment/payment.module';
+import { WalletModule } from '../modules/wallet/wallet.module';
+import { HttpErrorStatusPlugin } from '../plugins/http-status.plugin';
 
 @Module({
   imports: [
@@ -35,6 +36,9 @@ import { BikeModule } from '../modules/bike/bike.module';
     SupplierModule,
     StationModule,
     BikeModule,
+    PaymentModule,
+    WalletModule,
   ],
+  providers: [HttpErrorStatusPlugin],
 })
 export class AppModule {}

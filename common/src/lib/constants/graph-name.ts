@@ -13,6 +13,8 @@ export const GRAPHQL_NAME_USER = {
   RESET_PASSWORD: 'ResetPassword',
   GET_STATS: 'GetUserStats',
   LOGOUT: 'LogoutUser',
+  VERIFY_EMAIL: 'VerifyEmail',
+  VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
 };
 
 export const GRAPHQL_NAME_SUPPLIER = {
@@ -37,4 +39,8 @@ export const GRAPHQL_NAME_BIKE = {
   CREATE: 'CreateBike',
   UPDATE: 'UpdateBike',
   CHANGE_STATUS: 'ChangeBikeStatus',
+};
+
+export const GRAPHQL_NAME_PAYMENT = {
+  CREATE: 'CreatePayment',
 };

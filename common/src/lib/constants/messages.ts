@@ -10,7 +10,7 @@ export const USER_MESSAGES = {
   NOT_FOUND: 'User not found',
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create User failed',
-  VALIDATION_FAILED: 'Username or Password incorrect',
+  VALIDATION_FAILED: 'Email or Password incorrect',
   LOGIN_SUCCESS: 'User Login Successfully',
   EMAIL_EXISTED: 'Email has been used',
   INVALID_DATA: 'Invalid Data',
@@ -23,9 +23,9 @@ export const USER_MESSAGES = {
   PASSWORRD_NOT_CHANGED: 'Password must be changed',
   USER_NOT_FOUND: 'User not found',
   GET_ALL_FAILED: 'Get all users failed',
-  INVALID_PASSWORD: 'Invalid Password',
+  INVALID_PASSWORD: 'Password is incorrect',
   CHANGE_PASSWORD_SUCCESS: 'Change password successfully',
-  PASSWORD_SAME: 'Password same',
+  PASSWORD_SAME: 'New password are the same with old password',
   USER_STATUS_INVALID: 'User status invalid',
   USER_FIRST_LOGIN: 'User must change password first time login',
   RESET_PASSWORD_SUCCESS: 'Email was sent successfully',
@@ -36,6 +36,9 @@ export const USER_MESSAGES = {
   INVALID_RESET_TOKEN: 'Invalid reset token',
   LOGOUT_SUCCESS: 'User logged out successfully',
   INVALID_TOKEN: 'Invalid token',
+  PASSWORD_NOT_MATCH: 'Password not match',
+  ACCESS_TOKEN_REQUIRED: 'Access Token is required',
+  USER_VERIFY_SUCCESS: 'User verified successfully',
 };
 
 export const SUPPLIER_MESSAGES = {
@@ -81,6 +84,36 @@ export const BIKE_MESSAGES = {
   VALIDATION_FAILED: 'Bike name or phone incorrect',
   UPDATE_FAIL: 'Update Bike failed',
   GET_ALL_STATS_SUCCESS: 'Bike stats retrieved successfully',
+};
+
+export const PAYMENT_MESSAGES = {
+  CREATE_SUCCESS: 'Payment created successfully',
+  WALLET_NOT_FOUND: 'Wallet not found',
+  AMOUNT_REQUIRED: 'Amount is required',
+  NOT_FOUND: 'Payment not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Payment failed',
+  VALIDATION_FAILED: 'Payment name or phone incorrect',
+  UPDATE_FAIL: 'Update Payment failed',
+  GET_ALL_STATS_SUCCESS: 'Payment stats retrieved successfully',
+  IP_ADDR_REQUIRED: 'IP address is required',
+  DEPOSIT_SUCCESS: 'Deposit successfully',
+  CHANGE_STATUS_SUCCESS: 'Change wallet status successfully',
+  NOT_ENOUGH_BALANCE: 'User does not have enough balance',
+  WALLET_BLOCKED: 'Wallet is blocked, Please contact support',
+  WALLET_EXISTED: 'User wallet existed',
+  DESCRIPTION_REQUIRED: 'Description is required',
+  ACCOUNT_ID_REQUIRED: 'Account ID is required',
+  AMOUNT_MUST_BE_POSITIVE: 'Amount must be positive',
+  TRANSACTION_TYPE_REQUIRED: 'Transaction type is required',
+  GET_WALLET_SUCCESS: 'Wallet retrieved successfully',
+  GET_ALL_WALLET_SUCCESS: 'Wallets retrieved successfully',
+  WITHDRAW_NOT_FOUND: 'Withdraw not found',
+  INVALID_STATUS: 'Invalid status',
+  GET_ALL_SUCCESS: 'Transactions retrieved successfully',
+  GET_ONE: 'Transaction retrieved successfully',
+  CREATE_WITHDRAW_SUCCESS: 'Withdraw created successfully',
+  UPDATE_WITHDRAW_SUCCESS: 'Withdraw updated successfully',
 };
 
 export const SERVER_MESSAGE = {

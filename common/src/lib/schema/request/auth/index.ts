@@ -4,3 +4,4 @@ export * from './UpdateUserDto';
 export * from './UserDto';
 export * from './RegisterUserDto';
 export * from './LogoutDto';
+export * from './VerifiEmailDto';

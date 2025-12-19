@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -19,7 +19,9 @@ import {
   UserProfile,
   VerifyOtpResponse,
   ResetPasswordInput,
-  LogoutInput,
+  throwGrpcError,
+  SERVER_MESSAGE,
+  USER_MESSAGES,
 } from '@mebike/common';
 import { RoleGuard } from './role.guard';
 import { Roles } from './role.decorator';
@@ -34,14 +36,16 @@ export class AuthResolver {
   async createUser(
     @Args('body') body: CreateUserInput,
   ): Promise<RegisterResponse> {
-    return this.authService.createUser(body);
+    const response = await this.authService.createUser(body);
+    return response;
   }
 
-  @Mutation(() => RegisterResponse, { name: GRAPHQL_NAME_USER.REGISTER })
+  @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.REGISTER })
   async register(
     @Args('body') body: RegisterUserInput,
-  ): Promise<RegisterResponse> {
-    return this.authService.register(body);
+  ): Promise<LoginResponse> {
+    const response = await this.authService.register(body);
+    return response as unknown as LoginResponse;
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.LOGIN })
@@ -52,10 +56,21 @@ export class AuthResolver {
   @Mutation(() => ResfreshTokenResponse, {
     name: GRAPHQL_NAME_USER.REFRESH_TOKEN,
   })
-  async refreshToken(
-    @Args('refreshToken') refreshToken: string,
-  ): Promise<ResfreshTokenResponse> {
-    return this.authService.refreshToken(refreshToken);
+  async refreshToken(@Context() context: any): Promise<ResfreshTokenResponse> {
+    const refreshToken = context.req.cookies['refreshToken'];
+    const accessToken = context.req.cookies['accessToken'];
+
+    if (!refreshToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.INVALID_REFRESH_TOKEN,
+      ]);
+    }
+    if (!accessToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
+      ]);
+    }
+    return this.authService.refreshToken(refreshToken, accessToken);
   }
 
   @Mutation(() => ChangePasswordResponse, {
@@ -100,11 +115,37 @@ export class AuthResolver {
   }
 
   @Mutation(() => UserResponse, { name: GRAPHQL_NAME_USER.LOGOUT })
+  async logout(@Context() data: any): Promise<UserResponse> {
+    const accessToken = data.req.cookies['accessToken'];
+    const refreshToken = data.req.cookies['refreshToken'];
+
+    if (!accessToken || !refreshToken) {
+      throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
+        USER_MESSAGES.INVALID_REFRESH_TOKEN,
+      ]);
+    }
+    return this.authService.logout({ accessToken, refreshToken });
+  }
+
+  @Mutation(() => ChangePasswordResponse, {
+    name: GRAPHQL_NAME_USER.VERIFY_EMAIL,
+  })
   @UseGuards(JwtAuthGuard)
-  async logout(
-    @Args('data', { type: () => LogoutInput }) data: LogoutInput,
-  ): Promise<UserResponse> {
-    return this.authService.logout(data);
+  async verifyEmail(
+    @CurrentUser() user: UserProfile,
+  ): Promise<ChangePasswordResponse> {
+    return this.authService.verifyEmail(user.accountId);
+  }
+
+  @Mutation(() => ChangePasswordResponse, {
+    name: GRAPHQL_NAME_USER.VERIFY_EMAIL_PROCESS,
+  })
+  @UseGuards(JwtAuthGuard)
+  async verifyEmailProcess(
+    @CurrentUser() user: UserProfile,
+    @Args('otp') otp: string,
+  ): Promise<ChangePasswordResponse> {
+    return this.authService.verifyEmailProcess(user.accountId, otp);
   }
 
   @Query(() => String)

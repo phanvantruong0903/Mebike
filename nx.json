@@ -59,7 +59,7 @@
         "common/**/*",
         "apps/notification-service-e2e/**/*",
         "apps/fleet-service-e2e/**/*",
-        "rental-service-e2e/**/*",
+        "apps/payment-service-e2e/**/*",
         "apps/rental-service-e2e/**/*"
       ]
     },

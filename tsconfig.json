@@ -34,6 +34,12 @@
       "path": "./apps/fleet-service"
     },
     {
+      "path": "./apps/payment-service-e2e"
+    },
+    {
+      "path": "./apps/payment-service"
+    },
+    {
       "path": "./apps/rental-service-e2e"
     },
     {

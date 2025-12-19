@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output = "../../../common/src/lib/prisma/user/generated"
+  provider      = "prisma-client-js"
+  output        = "../../../common/src/lib/prisma/user/generated"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -16,16 +16,19 @@ datasource db {
 }
 
 model Profile {
-  id        String           @id @default(uuid())
-  accountId String           @unique
-  name      String
-  YOB       Int
-  phone     String
-  role      Role             @default(USER)
-  verify    UserVerifyStatus @default(Unverified)
-  status    UserStatus       @default(Active)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id         String           @id @default(uuid())
+  accountId  String           @unique
+  name       String
+  address    String           @default("")
+  YOB        Int
+  phone      String
+  role       Role             @default(USER)
+  verify     UserVerifyStatus @default(Unverified)
+  nfcCardUid String?          @default("")
+  avatarUrl  String?          @default("")
+  status     UserStatus       @default(Active)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   @@map("profiles")
 }
