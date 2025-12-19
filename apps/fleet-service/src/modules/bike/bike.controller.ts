@@ -15,6 +15,7 @@ import {
   GetBikeDto,
   buildSearchFilter,
   ChangeBikeStatusDto,
+  STATION_MESSAGES,
 } from '@mebike/common';
 import { BikeService } from './bike.service';
 
@@ -62,13 +63,7 @@ export class BikeController {
         where: { id },
         include: {
           station: true,
-          supplier: {
-            select: {
-              id: true,
-              name: true,
-              contactInfo: true,
-            },
-          },
+          supplier: true,
         },
       });
       if (!result) {
@@ -93,6 +88,28 @@ export class BikeController {
     data: CreateBikeDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
+      const findStation = await prismaFleet.station.findUnique({
+        where: { id: data.stationId },
+        include: {
+          _count: {
+            select: { bikes: true },
+          },
+        },
+      });
+
+      if (!findStation) {
+        throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [
+          STATION_MESSAGES.NOT_FOUND,
+        ]);
+      }
+
+      const currentBikeCount = findStation._count.bikes;
+      if (currentBikeCount >= findStation.capacity) {
+        throwGrpcError(400, STATION_MESSAGES.STATION_FULL, [
+          STATION_MESSAGES.STATION_FULL,
+        ]);
+      }
+
       const result = await this.baseHandler.createLogic(data);
 
       return grpcResponse<BikeModel>(result, BIKE_MESSAGES.CREATE_SUCCESS);
@@ -117,6 +134,11 @@ export class BikeController {
         data.page,
         data.limit,
         searchFilter,
+        undefined,
+        {
+          station: true,
+          supplier: true,
+        },
       );
       return grpcPaginateResponse(result, BIKE_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {

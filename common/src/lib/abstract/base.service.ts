@@ -10,6 +10,7 @@ export abstract class BaseService<T, CreateDto = never, UpdateDto = never> {
     limit = 10,
     filter?: any,
     orderBy?: any,
+    include?: any,
   ): Promise<{
     data: T[];
     total: number;
@@ -26,6 +27,7 @@ export abstract class BaseService<T, CreateDto = never, UpdateDto = never> {
         skip,
         take: limit,
         orderBy: sort,
+        ...(include && { include }),
       }),
       this.model.count({
         where: filter,

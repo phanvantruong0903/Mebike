@@ -11,7 +11,7 @@ import { Type } from 'class-transformer';
 export class CreateStationDto {
   @IsString()
   @IsNotEmpty()
-  @MinLength(5, { message: 'Name must be at least 3 characters' })
+  @MinLength(5, { message: 'Name must be at least 5 characters' })
   name!: string;
 
   @IsString()
@@ -23,7 +23,7 @@ export class CreateStationDto {
   @Type(() => Number)
   @IsNumber()
   @Min(-85.05, { message: 'Latitude must be at least -85.05' })
-  @Max(85.05, { message: 'Latitude must be at most 90' })
+  @Max(85.05, { message: 'Latitude must be at most 85.05' })
   latitude!: number;
 
   @IsNotEmpty()
