@@ -86,7 +86,11 @@ export class StationController {
       const result = await prismaFleet.station.findUnique({
         where: { id },
         include: {
-          bikes: true,
+          bikes: {
+            include: {
+              supplier: true,
+            },
+          },
         },
       });
       if (!result) {
@@ -148,10 +152,6 @@ export class StationController {
           page,
           limit,
           searchFilter,
-          undefined,
-          {
-            bikes: true,
-          },
         );
         return grpcPaginateResponse(result, STATION_MESSAGES.GET_ALL_SUCCESS);
       }
