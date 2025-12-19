@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output = "../../../common/src/lib/prisma/fleet/generated"
+  provider      = "prisma-client-js"
+  output        = "../../../common/src/lib/prisma/fleet/generated"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -16,42 +16,43 @@ datasource db {
 }
 
 model Supplier {
-  id            String           @id @default(uuid())
-  name          String
-  contactInfo   Json 
-  contactFee    Decimal          @db.Decimal(8,4)
-  bikes         Bike[]
-  status        SupplierStatus   @default(Active)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id          String         @id @default(uuid())
+  name        String         @unique
+  contactInfo Json
+  contactFee  Decimal        @db.Decimal(8, 4)
+  bikes       Bike[]
+  status      SupplierStatus @default(Active)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@map("suppliers")
 }
 
 model Station {
-  id            String           @id @default(uuid())
-  name          String           @db.VarChar(255)
-  address       String           @db.Text
-  latitude      Decimal          @db.Decimal(10,6)
-  longitude     Decimal          @db.Decimal(11,6)
-  capacity      Int              @default(0)
-  bikes         Bike[]
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id        String   @id @default(uuid())
+  name      String   @unique @db.VarChar(255)
+  address   String   @db.Text
+  latitude  Decimal  @db.Decimal(10, 6)
+  longitude Decimal  @db.Decimal(11, 6)
+  capacity  Int      @default(0)
+  bikes     Bike[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@unique([latitude, longitude], name: "unique_station_location")
   @@map("stations")
 }
 
 model Bike {
-  id            String           @id @default(uuid())
-  chipId        String
-  stationId     String
-  station       Station          @relation(fields: [stationId], references: [id])
-  supplierId    String
-  supplier      Supplier         @relation(fields: [supplierId], references: [id])
-  status        BikeStatus       @default(Available)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id         String     @id @default(uuid())
+  chipId     String
+  stationId  String
+  station    Station    @relation(fields: [stationId], references: [id])
+  supplierId String
+  supplier   Supplier   @relation(fields: [supplierId], references: [id])
+  status     BikeStatus @default(Available)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@map("bikes")
 }

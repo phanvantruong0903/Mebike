@@ -43,6 +43,7 @@ export const SUPPLIER_METHODS = {
   GET_ALL: 'GetAllSuppliers',
   CHANGE_STATUS: 'ChangeSupplierStatus',
   GET_STATS: 'GetSupplierStats',
+  GET_SUPPLIERS_BY_IDS: 'GetSupplierByIds',
 } as const;
 
 export const STATION_METHODS = {
@@ -50,7 +51,8 @@ export const STATION_METHODS = {
   GET_ONE: 'GetStation',
   UPDATE: 'UpdateStation',
   GET_ALL: 'GetAllStations',
-};
+  GET_STATIONS_BY_IDS: 'GetStationsByIds',
+} as const;
 
 export const BIKE_METHODS = {
   CREATE: 'CreateBike',

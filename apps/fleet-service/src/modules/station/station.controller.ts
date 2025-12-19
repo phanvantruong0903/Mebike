@@ -148,6 +148,10 @@ export class StationController {
           page,
           limit,
           searchFilter,
+          undefined,
+          {
+            bikes: true,
+          },
         );
         return grpcPaginateResponse(result, STATION_MESSAGES.GET_ALL_SUCCESS);
       }
@@ -185,7 +189,7 @@ export class StationController {
 
       if (data.search) {
         const keyword = data.search.toLowerCase();
-        stations = stations.filter((s) => {
+        stations = stations.filter((s: StationModel) => {
           return (
             s.name.toLowerCase().includes(keyword) ||
             s.address.toLowerCase().includes(keyword)
@@ -207,7 +211,7 @@ export class StationController {
       }
 
       const stationMap = new Map(
-        stations.map((station) => [station.id, station]),
+        stations.map((station: StationModel) => [station.id, station]),
       );
 
       // ghép station info vào cái mảng paginated redis trả ra dạng [id, distance]
@@ -259,5 +263,16 @@ export class StationController {
       data.latitude,
       data.id,
     );
+  }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.GET_STATIONS_BY_IDS)
+  async getStationsByIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const stations = await prismaFleet.station.findMany({
+      where: { id: { in: ids } },
+    });
+    return grpcResponse(stations, STATION_MESSAGES.GET_ALL_SUCCESS);
   }
 }

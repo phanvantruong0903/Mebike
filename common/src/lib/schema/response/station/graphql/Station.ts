@@ -1,4 +1,5 @@
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Bike } from '../../bike';
 
 @ObjectType()
 export class Station {
@@ -22,6 +23,9 @@ export class Station {
 
   @Field(() => Float, { nullable: true })
   distance?: number;
+
+  @Field(() => [Bike])
+  bikes!: Bike[];
 
   @Field()
   createdAt!: string;

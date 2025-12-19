@@ -11,11 +11,17 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { BikeService } from './bike.service';
 import { BikeResolver } from './bike.resolver';
+import { SupplierModule } from '../supplier/supplier.module';
+import { StationModule } from '../station/station.module';
+import { StationDataloader } from './station.dataloader';
+import { SupplierDataloader } from './supplier.dataloader';
 
 @Module({
   imports: [
     ConsuleModule,
     RedisModule,
+    StationModule,
+    SupplierModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
@@ -38,6 +44,6 @@ import { BikeResolver } from './bike.resolver';
       },
     ]),
   ],
-  providers: [BikeService, BikeResolver],
+  providers: [BikeService, BikeResolver, StationDataloader, SupplierDataloader],
 })
 export class BikeModule {}

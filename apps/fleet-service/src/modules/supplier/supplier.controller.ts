@@ -85,6 +85,9 @@ export class SupplierController {
     try {
       const result = await prismaFleet.supplier.findUnique({
         where: { id },
+        include: {
+          bikes: true,
+        },
       });
       if (!result) {
         throwGrpcError(404, SUPPLIER_MESSAGES.NOT_FOUND, [
@@ -126,7 +129,7 @@ export class SupplierController {
         result,
         SUPPLIER_MESSAGES.CREATE_SUCCESS,
       );
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof RpcException) {
         throw error;
       }
@@ -146,7 +149,15 @@ export class SupplierController {
       const searchFilter = ['name', 'id'];
       const search = buildSearchFilter(data.search, searchFilter);
 
-      const result = await this.baseHandler.getAllLogic(page, limit, search);
+      const result = await this.baseHandler.getAllLogic(
+        page,
+        limit,
+        search,
+        undefined,
+        {
+          bikes: true,
+        },
+      );
       return grpcPaginateResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -192,5 +203,17 @@ export class SupplierController {
   async getUserStats() {
     const result = await this.supplierService.getSupplierStat();
     return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_STATS_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_SUPPLIERS_BY_IDS)
+  async getSupplierByIds(data: { ids: string[] }) {
+    const result = await prismaFleet.supplier.findMany({
+      where: {
+        id: {
+          in: data.ids,
+        },
+      },
+    });
+    return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
   }
 }

@@ -7,6 +7,7 @@ service FleetService {
   rpc GetStation (GetStationRequest) returns (StationDetailResponse);
   rpc UpdateStation (UpdateStationRequest) returns (UpdateStationResponse);
   rpc GetAllStations (GetAllStationsRequest) returns (StationList);
+  rpc GetStationsByIds (GetAllStationsByIdsRequest) returns (StationList);
 }
 
 message CreateStationRequest {
@@ -15,6 +16,10 @@ message CreateStationRequest {
   string latitude = 3;
   string longitude = 4;
   int32 capacity = 5;
+}
+
+message GetAllStationsByIdsRequest {
+  repeated string ids = 1;
 }
 
 message GetStationRequest {

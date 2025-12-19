@@ -9,6 +9,7 @@ import {
   GetStationInput,
   StationResponse,
   StationListResponse,
+  Station,
 } from '@mebike/common';
 
 interface StationServiceClient {
@@ -18,6 +19,7 @@ interface StationServiceClient {
   ): Observable<StationResponse>;
   GetAllStations(data: GetStationInput): Observable<StationListResponse>;
   CreateStation(data: CreateStationInput): Observable<StationResponse>;
+  GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
 }
 
 @Injectable()
@@ -54,5 +56,12 @@ export class StationService implements OnModuleInit {
 
   async getStation(data: { id: string }) {
     return await firstValueFrom(this.fleetService.GetStation(data));
+  }
+
+  async getStationByIds(ids: string[]): Promise<Station[]> {
+    const response = await firstValueFrom(
+      this.fleetService.GetStationsByIds({ ids }),
+    );
+    return response.data || [];
   }
 }

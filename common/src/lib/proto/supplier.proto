@@ -97,6 +97,10 @@ message CreateSupplierResponse {
   int32 statusCode = 5;
 }
 
+message GetSupplierByIdsRequest {
+  repeated string ids = 1;
+}
+
 service FleetService {
   rpc GetSupplier(GetSupplierRequest) returns (SupplierDetailResponse);
   rpc UpdateSupplier(UpdateSupplierRequest) returns (UpdateSupplierResponse);
@@ -104,6 +108,7 @@ service FleetService {
   rpc ChangeSupplierStatus(ChangeSupplierStatusRequest) returns (UpdateSupplierResponse);
   rpc GetSupplierStats(Empty) returns (SupplierStatsResponse);
   rpc CreateSupplier(CreateSupplierRequest) returns (CreateSupplierResponse);
+  rpc GetSupplierByIds(GetSupplierByIdsRequest) returns (SuppliersResponse);
 }
 
 message Empty {}

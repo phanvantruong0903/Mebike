@@ -69,6 +69,7 @@ export const STATION_MESSAGES = {
   VALIDATION_FAILED: 'Station name or phone incorrect',
   UPDATE_FAIL: 'Update Station failed',
   GET_ALL_STATS_SUCCESS: 'Station stats retrieved successfully',
+  STATION_FULL: 'Station is full',
 };
 
 export const BIKE_MESSAGES = {
