@@ -86,7 +86,11 @@ export class SupplierController {
       const result = await prismaFleet.supplier.findUnique({
         where: { id },
         include: {
-          bikes: true,
+          bikes: {
+            include: {
+              station: true,
+            },
+          },
         },
       });
       if (!result) {
@@ -149,15 +153,7 @@ export class SupplierController {
       const searchFilter = ['name', 'id'];
       const search = buildSearchFilter(data.search, searchFilter);
 
-      const result = await this.baseHandler.getAllLogic(
-        page,
-        limit,
-        search,
-        undefined,
-        {
-          bikes: true,
-        },
-      );
+      const result = await this.baseHandler.getAllLogic(page, limit, search);
       return grpcPaginateResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

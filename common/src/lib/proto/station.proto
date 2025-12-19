@@ -53,6 +53,24 @@ message Station {
   optional double distance = 7;
   string createdAt = 8; 
   string updatedAt = 9;
+  repeated BikeInStation bikes = 10;
+}
+
+message BikeInStation {
+  string id = 1;
+  string chipId = 2;
+  string status = 3;
+  optional SupplierInBike supplier = 4;
+  string createdAt = 5; 
+  string updatedAt = 6;
+}
+
+message SupplierInBike {
+  string id = 1;
+  string name = 2;
+  string contactFee = 3;
+  string createdAt = 4; 
+  string updatedAt = 6;
 }
 
 message StationList {
