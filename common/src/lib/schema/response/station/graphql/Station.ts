@@ -21,6 +21,27 @@ export class Station {
   @Field(() => Int)
   capacity!: number;
 
+  @Field(() => Int)
+  totalBike!: number;
+
+  @Field(() => Int)
+  availableBike!: number;
+
+  @Field(() => Int)
+  bookedBike!: number;
+
+  @Field(() => Int)
+  brokenBike!: number;
+
+  @Field(() => Int)
+  reservedBike!: number;
+
+  @Field(() => Int)
+  maintanedBike!: number;
+
+  @Field(() => Int)
+  unavailable!: number;
+
   @Field(() => Float, { nullable: true })
   distance?: number;
 
