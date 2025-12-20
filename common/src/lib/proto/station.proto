@@ -54,6 +54,13 @@ message Station {
   string createdAt = 8; 
   string updatedAt = 9;
   repeated BikeInStation bikes = 10;
+  int32 availableBike = 11;
+  int32 totalBike = 12;
+  int32 bookedBike = 13;
+  int32 brokenBike = 14;
+  int32 reservedBike = 15;
+  int32 maintanedBike = 16;
+  int32 unavailable = 17;
 }
 
 message BikeInStation {

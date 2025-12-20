@@ -24,6 +24,7 @@ import {
   REDIS_KEY_PREFIX,
   GetStationDto,
   buildSearchFilter,
+  BikeStatus,
 } from '@mebike/common';
 import { StationService } from './station.service';
 import Redis from 'ioredis';
@@ -148,12 +149,94 @@ export class StationController {
       const searchFilter = buildSearchFilter(search, searchFields);
 
       if (!longitude || !latitude) {
-        const result = await this.baseHandler.getAllLogic(
-          page,
-          limit,
-          searchFilter,
+        const [stations, total] = await Promise.all([
+          prismaFleet.station.findMany({
+            where: searchFilter,
+            skip: (page - 1) * limit,
+            take: limit,
+            include: {
+              _count: {
+                select: {
+                  bikes: true,
+                },
+              },
+            },
+          }),
+          prismaFleet.station.count({ where: searchFilter }),
+        ]);
+
+        const stationsWithCount = await Promise.all(
+          stations.map(async (station) => {
+            const [
+              availableBike,
+              bookedBike,
+              brokenBike,
+              reservedBike,
+              maintanedBike,
+              unavailable,
+            ] = await Promise.all([
+              prismaFleet.bike.count({
+                where: {
+                  stationId: station.id,
+                  status: BikeStatus.Available,
+                },
+              }),
+              prismaFleet.bike.count({
+                where: {
+                  stationId: station.id,
+                  status: BikeStatus.Booked,
+                },
+              }),
+              prismaFleet.bike.count({
+                where: {
+                  stationId: station.id,
+                  status: BikeStatus.Broken,
+                },
+              }),
+              prismaFleet.bike.count({
+                where: {
+                  stationId: station.id,
+                  status: BikeStatus.Reserved,
+                },
+              }),
+              prismaFleet.bike.count({
+                where: {
+                  stationId: station.id,
+                  status: BikeStatus.Maintained,
+                },
+              }),
+              prismaFleet.bike.count({
+                where: {
+                  stationId: station.id,
+                  status: BikeStatus.Unavailable,
+                },
+              }),
+            ]);
+
+            return {
+              ...station,
+              totalBike: station._count.bikes,
+              availableBike,
+              bookedBike,
+              brokenBike,
+              reservedBike,
+              maintanedBike,
+              unavailable,
+              _count: undefined,
+            };
+          }),
         );
-        return grpcPaginateResponse(result, STATION_MESSAGES.GET_ALL_SUCCESS);
+
+        return grpcPaginateResponse(
+          {
+            data: stationsWithCount,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+          },
+          STATION_MESSAGES.GET_ALL_SUCCESS,
+        );
       }
 
       // return dạng [[id, distance], [stationId, distance], ...]
@@ -181,22 +264,91 @@ export class StationController {
       }
 
       const stationIds = geoResult.map((item) => item[0]);
-      let stations = await prismaFleet.station.findMany({
+      const stations = await prismaFleet.station.findMany({
         where: {
           id: { in: stationIds },
         },
+        include: {
+          _count: {
+            select: {
+              bikes: true,
+            },
+          },
+        },
       });
+
+      let stationsWithCount = await Promise.all(
+        stations.map(async (station) => {
+          const [
+            availableBike,
+            bookedBike,
+            brokenBike,
+            reservedBike,
+            maintanedBike,
+            unavailable,
+          ] = await Promise.all([
+            prismaFleet.bike.count({
+              where: {
+                stationId: station.id,
+                status: BikeStatus.Available,
+              },
+            }),
+            prismaFleet.bike.count({
+              where: {
+                stationId: station.id,
+                status: BikeStatus.Booked,
+              },
+            }),
+            prismaFleet.bike.count({
+              where: {
+                stationId: station.id,
+                status: BikeStatus.Broken,
+              },
+            }),
+            prismaFleet.bike.count({
+              where: {
+                stationId: station.id,
+                status: BikeStatus.Reserved,
+              },
+            }),
+            prismaFleet.bike.count({
+              where: {
+                stationId: station.id,
+                status: BikeStatus.Maintained,
+              },
+            }),
+            prismaFleet.bike.count({
+              where: {
+                stationId: station.id,
+                status: BikeStatus.Unavailable,
+              },
+            }),
+          ]);
+
+          return {
+            ...station,
+            totalBike: station._count.bikes,
+            availableBike,
+            bookedBike,
+            brokenBike,
+            reservedBike,
+            maintanedBike,
+            unavailable,
+            _count: undefined,
+          };
+        }),
+      );
 
       if (data.search) {
         const keyword = data.search.toLowerCase();
-        stations = stations.filter((s: StationModel) => {
+        stationsWithCount = stationsWithCount.filter((s: any) => {
           return (
             s.name.toLowerCase().includes(keyword) ||
             s.address.toLowerCase().includes(keyword)
           );
         });
 
-        if (!stations.length) {
+        if (!stationsWithCount.length) {
           return grpcPaginateResponse(
             {
               data: [],
@@ -211,7 +363,7 @@ export class StationController {
       }
 
       const stationMap = new Map(
-        stations.map((station: StationModel) => [station.id, station]),
+        stationsWithCount.map((station: any) => [station.id, station]),
       );
 
       // ghép station info vào cái mảng paginated redis trả ra dạng [id, distance]
