@@ -3,6 +3,7 @@ import { RentalService } from './rental.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
+  buildFilter,
   buildSearchFilter,
   CreateRentalDto,
   EndRentalDto,
@@ -85,14 +86,18 @@ export class RentalController {
     data: GetRentalListDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const searchFields = ['startStation', 'endStation', 'status'];
-      const searchFilter = buildSearchFilter(data.search, searchFields);
+      const { page, limit, search, ...filterFields } = data;
+      const filter = buildFilter(filterFields);
 
-      const result = await this.baseHandler.getAllLogic(
-        data.page,
-        data.limit,
-        searchFilter,
-      );
+      const searchFields = ['startStation', 'endStation', 'status'];
+      const searchFilter = buildSearchFilter(search, searchFields);
+
+      const where = {
+        ...filter,
+        ...searchFilter,
+      };
+
+      const result = await this.baseHandler.getAllLogic(page, limit, where);
       return grpcPaginateResponse(result, RENTAL_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -100,6 +105,29 @@ export class RentalController {
       }
       const err = error as Error;
       throw new RpcException(err?.message || RENTAL_MESSAGES.GET_ALL_FAIL);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.RENTAL, RENTAL_METHODS.SUMMARIZE)
+  async summarizeRental(): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const [revenueSummary, hourlyRentalSummary] = await Promise.all([
+        this.rentalService.getTodayRevenueSummary(),
+        this.rentalService.getTodayRentalPerHour(),
+      ]);
+      return grpcResponse(
+        {
+          revenueSummary,
+          hourlyRentalSummary,
+        },
+        RENTAL_MESSAGES.SUMMARIZE_SUCCESS,
+      );
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || RENTAL_MESSAGES.SUMMARIZE_FAIL);
     }
   }
 }

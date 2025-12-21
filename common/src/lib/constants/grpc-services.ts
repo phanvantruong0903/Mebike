@@ -86,4 +86,5 @@ export const RENTAL_METHODS = {
   END: 'EndRental',
   GET_ONE: 'GetRental',
   GET_ALL: 'GetAllRentals',
+  SUMMARIZE: 'SummarizeRentals',
 };

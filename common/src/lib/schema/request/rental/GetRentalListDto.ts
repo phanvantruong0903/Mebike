@@ -15,4 +15,24 @@ export class GetRentalListDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
+  @IsOptional()
+  @IsString()
+  bikeId?: string;
+
+  @IsOptional()
+  @IsString()
+  startStation?: string;
+
+  @IsOptional()
+  @IsString()
+  endStation?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
 }

@@ -141,6 +141,8 @@ export const RENTAL_MESSAGES = {
   GET_ALL_FAIL: 'Rentals retrieved failed',
   GET_DETAIL_SUCCESS: 'Rental details retrieved successfully',
   DELETE_SUCCESS: 'Rental deleted successfully',
+  SUMMARIZE_SUCCESS: 'Rental summarized successfully',
+  SUMMARIZE_FAIL: 'Rental summarized failed',
   NOT_FOUND: 'Rental not found',
   NOT_FOUND_WITH_STATUS: (status: string) =>
     `Rental not found with status ${status}`,
