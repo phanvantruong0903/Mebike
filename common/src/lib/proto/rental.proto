@@ -3,8 +3,10 @@ syntax = "proto3";
 package rental;
 
 service RentalService {
-  rpc CreateRental (CreateRentalRequest) returns (CreateRentalResponse);
-  rpc EndRental (EndRentalRequest) returns (EndRentalResponse);
+  rpc CreateRental (CreateRentalRequest) returns (RentalResponse);
+  rpc EndRental (EndRentalRequest) returns (RentalResponse);
+  rpc GetRental (GetRentalRequest) returns (RentalResponse);
+  rpc GetRentalList (GetRentalListRequest) returns (RentalListResponse);
 }
 
 enum RentalStatus {
@@ -17,9 +19,9 @@ enum RentalStatus {
 message Rental {
   string id = 1;
   string userId = 2;
-  optional string bikeId = 3;
-  string startStation = 4;
-  optional string endStation = 5;
+  optional RentalBike bike = 3;
+  optional Station startStation = 4;
+  optional Station endStation = 5;
   string startTime = 6; // ISO 8601 string
   optional string endTime = 7; // ISO 8601 string
   int32 duration = 8;
@@ -30,18 +32,14 @@ message Rental {
   string updatedAt = 13; // ISO 8601 string
 }
 
+message RentalList {
+  repeated Rental data = 1;
+}
+
 message CreateRentalRequest {
   string accountId = 1;
   string bikeId = 2;
   optional string subscriptionId = 3;
-}
-
-message CreateRentalResponse {
-  bool success = 1;
-  string message = 2;
-  Rental data = 3;
-  repeated string errors = 4;
-  int32 statusCode = 5;
 }
 
 message EndRentalRequest {
@@ -49,10 +47,44 @@ message EndRentalRequest {
   string id = 2;
 }
 
-message EndRentalResponse {
+message GetRentalListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message GetRentalRequest {
+  string id = 1;
+}
+
+message RentalResponse {
   bool success = 1;
   string message = 2;
   Rental data = 3;
-  repeated string errors = 4;
-  int32 statusCode = 5;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}
+
+message RentalListResponse {
+  bool success = 1;
+  string message = 2;
+  RentalList data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  int32 statusCode = 8;
+  repeated string errors = 9;
+}
+
+message RentalBike {
+  string id = 1;
+  string chipId = 2;
+  optional Station station = 3;
+}
+
+message Station {
+  string id = 1;
+  optional string name = 2;
+  optional string address = 3;
 }
