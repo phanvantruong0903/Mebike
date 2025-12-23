@@ -9,6 +9,7 @@ import {
   UpdateStationInput,
   StationListResponse,
   GetStationInput,
+  UpdateStationStatusInput,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -34,10 +35,7 @@ export class StationResolver {
     @Args('body') body: UpdateStationInput,
     @Args('id') id: string,
   ): Promise<StationResponse> {
-    return this.stationService.updateStation({
-      id,
-      ...body,
-    });
+    return this.stationService.updateStation(id, body);
   }
 
   @Query(() => StationResponse, { name: GRAPQL_NAME_STATION.GET_ONE })
@@ -64,6 +62,15 @@ export class StationResolver {
       latitude,
       longitude,
     });
+  }
+
+  @Mutation(() => StationResponse, { name: GRAPQL_NAME_STATION.UPDATE_STATUS })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async updateStationStatus(
+    @Args('body') body: UpdateStationStatusInput,
+  ): Promise<StationResponse> {
+    return this.stationService.changeStationStatus(body);
   }
 
   @Query(() => String)

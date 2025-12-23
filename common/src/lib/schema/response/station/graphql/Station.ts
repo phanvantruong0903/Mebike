@@ -1,5 +1,6 @@
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Bike } from '../../bike';
+import { StationStatus } from '../../../../prisma/index';
 
 @ObjectType()
 export class Station {
@@ -21,26 +22,8 @@ export class Station {
   @Field(() => Int)
   capacity!: number;
 
-  @Field(() => Int)
-  totalBike!: number;
-
-  @Field(() => Int)
-  availableBike!: number;
-
-  @Field(() => Int)
-  bookedBike!: number;
-
-  @Field(() => Int)
-  brokenBike!: number;
-
-  @Field(() => Int)
-  reservedBike!: number;
-
-  @Field(() => Int)
-  maintanedBike!: number;
-
-  @Field(() => Int)
-  unavailable!: number;
+  @Field(() => Int, { nullable: true })
+  totalBike?: number;
 
   @Field(() => Float, { nullable: true })
   distance?: number;
@@ -53,4 +36,25 @@ export class Station {
 
   @Field()
   updatedAt!: string;
+
+  @Field(() => StationStatus)
+  status!: StationStatus;
+
+  @Field(() => Int, { nullable: true })
+  availableBike?: number;
+
+  @Field(() => Int, { nullable: true })
+  bookedBike?: number;
+
+  @Field(() => Int, { nullable: true })
+  brokenBike?: number;
+
+  @Field(() => Int, { nullable: true })
+  reservedBike?: number;
+
+  @Field(() => Int, { nullable: true })
+  maintanedBike?: number;
+
+  @Field(() => Int, { nullable: true })
+  unavailable?: number;
 }

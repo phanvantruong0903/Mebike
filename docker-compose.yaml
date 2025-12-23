@@ -263,10 +263,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
   user-service:
@@ -295,10 +295,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50052']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
 
@@ -328,10 +328,10 @@ services:
       - MAIL_FROM=${MAIL_FROM}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
 
@@ -359,10 +359,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
   
@@ -391,10 +391,10 @@ services:
       - VNP_RETURNURL=${VNP_RETURNURL}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50056']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
 

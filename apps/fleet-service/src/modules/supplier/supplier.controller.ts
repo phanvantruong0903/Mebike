@@ -196,7 +196,7 @@ export class SupplierController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_STATS)
-  async getUserStats() {
+  async getSupplierStats() {
     const result = await this.supplierService.getSupplierStat();
     return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_STATS_SUCCESS);
   }
