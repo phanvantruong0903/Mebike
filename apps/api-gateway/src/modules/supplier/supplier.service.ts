@@ -4,7 +4,6 @@ import { Observable, firstValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
-  RegisterUserInput,
   SupplierResponse,
   SupplierListResponse,
   SupplierStatsResponse,
@@ -24,7 +23,9 @@ interface SupplierServiceClient {
   ChangeSupplierStatus(
     data: ChangeSupplierStatusInput & { id: string },
   ): Observable<SupplierResponse>;
-  GetSupplierStats(data: RegisterUserInput): Observable<SupplierStatsResponse>;
+  GetSupplierStats(
+    data: Record<string, never>,
+  ): Observable<SupplierStatsResponse>;
   CreateSupplier(data: CreateSupplierInput): Observable<SupplierResponse>;
   GetSupplierByIds(data: { ids: string[] }): Observable<{ data: Supplier[] }>;
 }
@@ -69,8 +70,8 @@ export class SupplierService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.GetSupplier(data));
   }
 
-  async getSupplierStats(data: RegisterUserInput) {
-    return await firstValueFrom(this.fleetService.GetSupplierStats(data));
+  async getSupplierStats() {
+    return await firstValueFrom(this.fleetService.GetSupplierStats({}));
   }
 
   async getSupplierByIds(ids: string[]): Promise<Supplier[]> {

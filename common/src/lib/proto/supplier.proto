@@ -95,6 +95,13 @@ message SupplierStats {
   int32 totalSupplier = 1;
   int32 totalSupplierActive = 2;
   int32 totalSupplierInactive = 3;
+  int32 totalBike = 4;
+  int32 totalAvailableBike = 5;
+  int32 totalBookedBike = 6;
+  int32 totalBrokenBike = 7;
+  int32 totalReservedBike = 8;
+  int32 totalMaintainedBike = 9;
+  int32 totalUnAvailableBike = 10;
 }
 
 message SupplierStatsResponse {

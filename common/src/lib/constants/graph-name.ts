@@ -31,6 +31,7 @@ export const GRAPQL_NAME_STATION = {
   GET_ONE: 'Staion',
   CREATE: 'CreateStation',
   UPDATE: 'UpdateStation',
+  UPDATE_STATUS: 'UpdateStationStatus',
 };
 
 export const GRAPHQL_NAME_BIKE = {

@@ -25,6 +25,7 @@ import {
   GetStationDto,
   buildSearchFilter,
   BikeStatus,
+  UpdateStationStatusDto,
 } from '@mebike/common';
 import { StationService } from './station.service';
 import Redis from 'ioredis';
@@ -92,6 +93,11 @@ export class StationController {
               supplier: true,
             },
           },
+          _count: {
+            select: {
+              bikes: true,
+            },
+          },
         },
       });
       if (!result) {
@@ -100,8 +106,66 @@ export class StationController {
         ]);
       }
 
+      const [
+        availableBike,
+        bookedBike,
+        brokenBike,
+        reservedBike,
+        maintanedBike,
+        unavailable,
+      ] = await Promise.all([
+        prismaFleet.bike.count({
+          where: {
+            stationId: result.id,
+            status: BikeStatus.Available,
+          },
+        }),
+        prismaFleet.bike.count({
+          where: {
+            stationId: result.id,
+            status: BikeStatus.Booked,
+          },
+        }),
+        prismaFleet.bike.count({
+          where: {
+            stationId: result.id,
+            status: BikeStatus.Broken,
+          },
+        }),
+        prismaFleet.bike.count({
+          where: {
+            stationId: result.id,
+            status: BikeStatus.Reserved,
+          },
+        }),
+        prismaFleet.bike.count({
+          where: {
+            stationId: result.id,
+            status: BikeStatus.Maintained,
+          },
+        }),
+        prismaFleet.bike.count({
+          where: {
+            stationId: result.id,
+            status: BikeStatus.Unavailable,
+          },
+        }),
+      ]);
+
+      const stationWithCounts = {
+        ...result,
+        totalBike: result._count.bikes,
+        availableBike,
+        bookedBike,
+        brokenBike,
+        reservedBike,
+        maintanedBike,
+        unavailable,
+        _count: undefined,
+      };
+
       return grpcResponse<StationModel>(
-        result as unknown as StationModel,
+        stationWithCounts as unknown as StationModel,
         STATION_MESSAGES.GET_DETAIL_SUCCESS,
       );
     } catch (error) {
@@ -426,5 +490,34 @@ export class StationController {
       where: { id: { in: ids } },
     });
     return grpcResponse(stations, STATION_MESSAGES.GET_ALL_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.UPDATE_STATUS)
+  async updateStationStatus(data: UpdateStationStatusDto) {
+    try {
+      const { id, ...updatedData } = data;
+      const station = await prismaFleet.station.update({
+        where: { id },
+        data: updatedData,
+      });
+      return grpcResponse(station, STATION_MESSAGES.UPDATE_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2025'
+      ) {
+        throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [
+          STATION_MESSAGES.NOT_FOUND,
+        ]);
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message);
+    }
   }
 }
