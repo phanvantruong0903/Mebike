@@ -64,16 +64,20 @@ message SupplierDetailResponse {
   repeated string errors = 5;
 }
 
+message Pagination {
+  int32 total = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalPages = 4;
+}
+
 message SuppliersResponse {
   bool success = 1;
   string message = 2;
   repeated Supplier data = 3;
-  int32 total = 4;
-  int32 page = 5;
-  int32 limit = 6;
-  int32 totalPages = 7;
-  int32 statusCode = 8;
-  repeated string errors = 9;
+  Pagination pagination = 4;
+  int32 statusCode = 5;
+  repeated string errors = 6;
 }
 
 message GetAllSupplierRequest {
@@ -91,6 +95,13 @@ message SupplierStats {
   int32 totalSupplier = 1;
   int32 totalSupplierActive = 2;
   int32 totalSupplierInactive = 3;
+  int32 totalBike = 4;
+  int32 totalAvailableBike = 5;
+  int32 totalBookedBike = 6;
+  int32 totalBrokenBike = 7;
+  int32 totalReservedBike = 8;
+  int32 totalMaintainedBike = 9;
+  int32 totalUnAvailableBike = 10;
 }
 
 message SupplierStatsResponse {

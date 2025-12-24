@@ -8,6 +8,7 @@ service FleetService {
   rpc UpdateStation (UpdateStationRequest) returns (UpdateStationResponse);
   rpc GetAllStations (GetAllStationsRequest) returns (StationList);
   rpc GetStationsByIds (GetAllStationsByIdsRequest) returns (StationList);
+  rpc UpdateStationStatus (UpdateStationStatusRequest) returns (StationDetailResponse);
 }
 
 message CreateStationRequest {
@@ -16,6 +17,11 @@ message CreateStationRequest {
   string latitude = 3;
   string longitude = 4;
   int32 capacity = 5;
+}
+
+message UpdateStationStatusRequest {
+  string id = 1;
+  string status = 2;
 }
 
 message GetAllStationsByIdsRequest {
@@ -54,6 +60,14 @@ message Station {
   string createdAt = 8; 
   string updatedAt = 9;
   repeated BikeInStation bikes = 10;
+  optional int32 availableBike = 11;
+  optional int32 totalBike = 12;
+  optional int32 bookedBike = 13;
+  optional int32 brokenBike = 14;
+  optional int32 reservedBike = 15;
+  optional int32 maintanedBike = 16;
+  optional int32 unavailable = 17;
+  string status = 18;
 }
 
 message BikeInStation {
@@ -73,16 +87,20 @@ message SupplierInBike {
   string updatedAt = 6;
 }
 
+message Pagination {
+  int32 total = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalPages = 4;
+}
+
 message StationList {
   bool success = 1;
   string message = 2;
   repeated Station data = 3;
-  int32 total = 4;
-  int32 page = 5;
-  int32 limit = 6;
-  int32 totalPages = 7;
-  int32 statusCode = 8;
-  repeated string errors = 9;
+  Pagination pagination = 4;
+  int32 statusCode = 5;
+  repeated string errors = 6;
 }
 
 message CreateStationResponse {

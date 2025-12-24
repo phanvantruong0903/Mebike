@@ -222,15 +222,27 @@ services:
     labels:
       - 'traefik.enable=true'
       
-      - 'traefik.http.routers.api-gateway-http.rule=PathPrefix(`/graphql`)'
-      - 'traefik.http.routers.api-gateway-http.entrypoints=web'
-      - 'traefik.http.routers.api-gateway-http.middlewares=api-ratelimit,api-compress,api-retry'
-      - 'traefik.http.routers.api-gateway-http.priority=100'
+      # GraphQL routes (higher priority)
+      - 'traefik.http.routers.api-gateway-graphql-http.rule=PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway-graphql-http.entrypoints=web'
+      - 'traefik.http.routers.api-gateway-graphql-http.middlewares=api-ratelimit,api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-graphql-http.priority=100'
       
-      - 'traefik.http.routers.api-gateway-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
-      - 'traefik.http.routers.api-gateway-https.entrypoints=websecure'
-      - 'traefik.http.routers.api-gateway-https.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.api-gateway-https.middlewares=api-ratelimit,api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-graphql-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway-graphql-https.entrypoints=websecure'
+      - 'traefik.http.routers.api-gateway-graphql-https.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.api-gateway-graphql-https.middlewares=api-ratelimit,api-compress,api-retry'
+      
+      # REST API routes (lower priority for /api paths like VNPay callback)
+      - 'traefik.http.routers.api-gateway-rest-http.rule=PathPrefix(`/api`)'
+      - 'traefik.http.routers.api-gateway-rest-http.entrypoints=web'
+      - 'traefik.http.routers.api-gateway-rest-http.middlewares=api-ratelimit,api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-rest-http.priority=90'
+      
+      - 'traefik.http.routers.api-gateway-rest-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.api-gateway-rest-https.entrypoints=websecure'
+      - 'traefik.http.routers.api-gateway-rest-https.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.api-gateway-rest-https.middlewares=api-ratelimit,api-compress,api-retry'
       
       # Other Middlewares
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.average=100'
@@ -272,10 +284,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
   user-service:
@@ -304,10 +316,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50052']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
 
@@ -337,10 +349,10 @@ services:
       - MAIL_FROM=${MAIL_FROM}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
 
@@ -368,10 +380,10 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
 
@@ -400,10 +412,10 @@ services:
       - VNP_RETURNURL=${VNP_RETURNURL}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50056']
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
 

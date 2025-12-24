@@ -1,3 +1,4 @@
 export * from './CreateStrationInput';
-export * from './UpdateSupplierInput';
+export * from './UpdateStationStatusInput';
 export * from './GetStationInput';
+export * from './UpdateStationInput';

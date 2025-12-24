@@ -59,12 +59,20 @@ message GetTransactionsRequest {
   optional string search = 3;
 }
 
+message Pagination {
+  int32 total = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalPages = 4;
+}
+
 message GetTransactionsResponse {
   bool success = 1;
   string message = 2;
   repeated Transaction data = 3;
-  repeated string errors = 4;
-  int32 statusCode = 5;
+  Pagination pagination = 4;
+  repeated string errors = 5;
+  int32 statusCode = 6;
 }
 
 message CreateWithdrawRequest {

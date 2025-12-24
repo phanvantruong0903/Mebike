@@ -54,6 +54,7 @@ export const STATION_METHODS = {
   UPDATE: 'UpdateStation',
   GET_ALL: 'GetAllStations',
   GET_STATIONS_BY_IDS: 'GetStationsByIds',
+  UPDATE_STATUS: 'UpdateStationStatus',
 } as const;
 
 export const BIKE_METHODS = {
