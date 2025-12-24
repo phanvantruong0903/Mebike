@@ -28,7 +28,7 @@ export const GRAPHQL_NAME_SUPPLIER = {
 
 export const GRAPQL_NAME_STATION = {
   GET_ALL: 'Stations',
-  GET_ONE: 'Staion',
+  GET_ONE: 'Station',
   CREATE: 'CreateStation',
   UPDATE: 'UpdateStation',
   UPDATE_STATUS: 'UpdateStationStatus',
