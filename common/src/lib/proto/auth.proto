@@ -107,6 +107,7 @@ message ResetPasswordRequest {
 message ResetPasswordDto {
   string resetToken = 1;
   string newPassword = 2;
+  string confirmPassword = 3;
 }
 
 message ResetPasswordRequestResponse {
