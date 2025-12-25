@@ -79,7 +79,7 @@ services:
     restart: 'unless-stopped'
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${RENTAL_DB_NAME:-rental-db}
+      MYSQL_DATABASE: ${RENTAL_DB_NAME}
     ports:
       - '3306:3306'
     volumes:
@@ -435,7 +435,7 @@ services:
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - DATABASE_URL=mysql://root:${DB_PASSWORD}@rental-db:3306/${RENTAL_DB_NAME:-rental-db}
+      - DATABASE_URL=mysql://root:${DB_PASSWORD}@rental-db:3306/${RENTAL_DB_NAME}
       - RENTAL_SERVICE_PORT=50058
       - KAFKA_BROKERS=kafka:29092
       - REDIS_HOST=redis

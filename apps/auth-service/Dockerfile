@@ -23,8 +23,7 @@ COPY --from=builder /app/apps/auth-service/dist ./
 COPY apps/auth-service/prisma ./prisma
 COPY common/src/lib/proto ./common/src/lib/proto
 COPY --from=builder /app/common/src/lib/prisma ./common/src/lib/prisma
-COPY --from=builder /app/common/src/lib/prisma ./common/src/lib/prisma
 
-RUN npm install --omit=dev --legacy-peer-deps
+RUN npm install --omit=dev --legacy-peer-deps && npm install prisma@5.22.0
 
-CMD ["sh", "-c", "npx prisma@5.22.0 migrate deploy && node main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node main.js"]
