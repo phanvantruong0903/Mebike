@@ -6,5 +6,8 @@ export class ResetPasswordInput {
   newPassword!: string;
 
   @Field()
+  confirmPassword!: string;
+
+  @Field()
   resetToken!: string;
 }

@@ -22,6 +22,7 @@ import {
   KAFKA_TOPIC,
   KAFKA_SERVICE,
   VerifyEmailDto,
+  grpcResponse,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
@@ -336,6 +337,12 @@ export class AuthService
 
   async resetPassword(data: ResetPasswordDto) {
     try {
+      if (data.newPassword !== data.confirmPassword) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          USER_MESSAGES.PASSWORD_NOT_MATCH,
+        ]);
+      }
+
       const storedToken = await this.redisClient.get(
         `${REDIS_KEY_PREFIX.PASSWORD_RESET}:${data.resetToken}`,
       );
@@ -529,5 +536,25 @@ export class AuthService
     await firstValueFrom(
       this.userService.UserVerify({ accountId: data.accountId }),
     );
+  }
+
+  async deleteAccount(accountId: string) {
+    try {
+      const user = await prismaAuth.user.delete({
+        where: { id: accountId },
+      });
+
+      return grpcResponse(user, USER_MESSAGES.DELETE_SUCCESS);
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [err?.message]);
+    }
   }
 }
