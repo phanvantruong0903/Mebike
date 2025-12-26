@@ -19,6 +19,7 @@ import {
   Station,
   Bike,
   Supplier,
+  BikeStatus,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -83,7 +84,7 @@ export class BikeResolver {
   @Roles(Role.ADMIN)
   async changeBikeStatus(
     @Args('id') id: string,
-    @Args('status') status: number,
+    @Args('status') status: BikeStatus,
   ): Promise<BikeResponse> {
     return this.bikeService.changeBikeStatus({ id, status });
   }
