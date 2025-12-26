@@ -84,7 +84,7 @@ export class BikeResolver {
   @Roles(Role.ADMIN)
   async changeBikeStatus(
     @Args('id') id: string,
-    @Args('status') status: BikeStatus,
+    @Args('status', { type: () => BikeStatus }) status: BikeStatus,
   ): Promise<BikeResponse> {
     return this.bikeService.changeBikeStatus({ id, status });
   }
