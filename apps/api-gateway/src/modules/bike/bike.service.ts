@@ -9,6 +9,7 @@ import {
   CreateBikeInput,
   BikeResponse,
   BikeListResponse,
+  BikeStatus,
 } from '@mebike/common';
 
 interface BikeServiceClient {
@@ -18,7 +19,7 @@ interface BikeServiceClient {
   CreateBike(data: CreateBikeInput): Observable<BikeResponse>;
   ChangeBikeStatus(data: {
     id: string;
-    status: number;
+    status: BikeStatus;
   }): Observable<BikeResponse>;
 }
 
@@ -56,7 +57,7 @@ export class BikeService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.GetBike(data));
   }
 
-  async changeBikeStatus(data: { id: string; status: number }) {
+  async changeBikeStatus(data: { id: string; status: BikeStatus }) {
     return await firstValueFrom(this.fleetService.ChangeBikeStatus(data));
   }
 }
