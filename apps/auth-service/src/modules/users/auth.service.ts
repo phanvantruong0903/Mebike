@@ -547,7 +547,8 @@ export class AuthService
       return grpcResponse(user, USER_MESSAGES.DELETE_SUCCESS);
     } catch (error: any) {
       if (error?.code === 'P2025') {
-        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+        // Account not found - this is OK for Saga compensation
+        return grpcResponse(null, 'Account not found or already deleted');
       }
 
       if (error instanceof RpcException) {

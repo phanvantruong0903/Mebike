@@ -1,28 +1,27 @@
 import { Module } from '@nestjs/common';
-import { AuthGrpcController } from './auth.grpc.controller';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
+  GRPC_PACKAGE,
   ConsuleModule,
   ConsulService,
   CONSULT_SERVICE_ID,
-  GRPC_PACKAGE,
-  JwtSharedModule,
+  KAFKA_SERVICE,
   KAFKA_CLIENT_ID,
   KAFKA_GROUP_ID,
-  KAFKA_SERVICE,
+  JwtSharedModule,
   RedisModule,
 } from '@mebike/common';
-import { AuthService } from './auth.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'node:path';
-import { SagaModule } from '../../saga/saga.module';
+import { UserCreationActivity } from './activities';
+import { TemporalService } from './temporal-service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthService } from '../modules/users/auth.service';
 
 @Module({
   imports: [
     ConsuleModule,
     RedisModule,
     JwtSharedModule,
-    SagaModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
@@ -39,6 +38,12 @@ import { SagaModule } from '../../saga/saga.module';
               package: 'user',
               protoPath: join(process.cwd(), 'common/src/lib/proto/user.proto'),
               url: `${userService.address}:${userService.port}`,
+              channelOptions: {
+                'grpc.max_reconnect_backoff_ms': 5000,
+                'grpc.initial_reconnect_backoff_ms': 1000,
+              },
+              maxRetryAttempts: 5,
+              retryDelay: 3000,
             },
           };
         },
@@ -60,6 +65,12 @@ import { SagaModule } from '../../saga/saga.module';
                 'common/src/lib/proto/wallet.proto',
               ),
               url: `${paymentService.address}:${paymentService.port}`,
+              channelOptions: {
+                'grpc.max_reconnect_backoff_ms': 5000,
+                'grpc.initial_reconnect_backoff_ms': 1000,
+              },
+              maxRetryAttempts: 5,
+              retryDelay: 3000,
             },
           };
         },
@@ -88,8 +99,7 @@ import { SagaModule } from '../../saga/saga.module';
       },
     ]),
   ],
-  controllers: [AuthGrpcController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, UserCreationActivity, TemporalService],
+  exports: [TemporalService],
 })
-export class AuthModule {}
+export class SagaModule {}
