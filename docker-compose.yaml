@@ -305,6 +305,12 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - TEMPORAL_ADDRESS=temporal:7233
       - NODE_ENV=production
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
     networks:
       - mebike-network
   user-service:
