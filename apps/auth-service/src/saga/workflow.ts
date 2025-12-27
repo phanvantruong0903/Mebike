@@ -1,5 +1,4 @@
 import { proxyActivities } from '@temporalio/workflow';
-import { Role } from '@mebike/common';
 
 const {
   createUserProfile,
@@ -19,7 +18,7 @@ export interface UserCreationWorkflow {
   name: string;
   email: string;
   phone: string;
-  role: Role;
+  role: string;
   YOB: number;
 }
 
@@ -31,7 +30,7 @@ export async function userCreationWorkflow(
       createUserProfile({
         accountId: data.accountId,
         name: data.name,
-        role: data.role || Role.USER,
+        role: data.role || 'USER',
         phone: data.phone,
         YOB: data.YOB,
       }),

@@ -43,24 +43,17 @@ export class TemporalService
 
       const isProduction = process.env.NODE_ENV === 'production';
       const workflowsPath = isProduction
-        ? join(__dirname, 'workflow.js')
+        ? join(process.cwd(), 'src/saga/workflow.ts')
         : join(process.cwd(), 'apps/auth-service/src/saga/workflow.ts');
 
+      const { NativeConnection } = await import('@temporalio/worker');
+      const workerConnection = await NativeConnection.connect({
+        address: process.env.TEMPORAL_ADDRESS || 'localhost:7233',
+      });
+
       this.worker = await Worker.create({
+        connection: workerConnection,
         workflowsPath,
-        bundlerOptions: {
-          webpackConfigHook: (config) => {
-            config.resolve ??= {};
-            config.resolve.alias ??= {};
-            Object.assign(config.resolve.alias, {
-              '@mebike/common': join(
-                process.cwd(),
-                'common/src/lib/prisma/user/generated/enums.ts',
-              ),
-            });
-            return config;
-          },
-        },
         activities: {
           createUserProfile:
             activitiesInstance.createUserProfile.bind(activitiesInstance),
