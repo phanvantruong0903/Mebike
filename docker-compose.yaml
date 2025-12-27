@@ -289,8 +289,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      payment-service:
-        condition: service_healthy
       temporal:
         condition: service_started
     environment:
