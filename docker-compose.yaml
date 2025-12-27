@@ -289,6 +289,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      user-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
@@ -301,6 +305,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - TEMPORAL_ADDRESS=temporal:7233
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
       interval: 10s

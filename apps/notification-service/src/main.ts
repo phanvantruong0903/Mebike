@@ -16,13 +16,6 @@ async function bootstrap() {
   const port = Number(process.env.NOTIFICATION_SERVICE_PORT) || 50053;
   const host = consulService.getLocalIp();
 
-  await consulService.registerService(
-    CONSULT_SERVICE_ID.NOTIFICATION,
-    CONSULT_SERVICE_ID.NOTIFICATION,
-    host,
-    port,
-  );
-
   const app = await NestFactory.create(AppModule);
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
@@ -49,5 +42,12 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
+
+  await consulService.registerService(
+    CONSULT_SERVICE_ID.NOTIFICATION,
+    CONSULT_SERVICE_ID.NOTIFICATION,
+    host,
+    port,
+  );
 }
 bootstrap();

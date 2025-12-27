@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
-  ConsuleModule,
+  ConsulModule,
   ConsulService,
   CONSULT_SERVICE_ID,
   GRPC_PACKAGE,
@@ -12,12 +12,12 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConsuleModule,
+    ConsulModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
         name: GRPC_PACKAGE.PAYMENT,
-        imports: [ConsuleModule],
+        imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
           const service = await consulService.discoverService(

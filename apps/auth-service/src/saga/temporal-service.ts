@@ -30,7 +30,6 @@ export class TemporalService
   }
 
   async onApplicationBootstrap() {
-    // Start worker in background
     this.runWorker().catch((err) => {
       console.error('Failed to start Temporal worker:', err);
     });

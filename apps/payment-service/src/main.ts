@@ -17,13 +17,6 @@ async function bootstrap() {
   const port = Number(process.env.PAYMENT_SERVICE_PORT) || 50056;
   const host = consulService.getLocalIp();
 
-  await consulService.registerService(
-    CONSULT_SERVICE_ID.PAYMENT,
-    CONSULT_SERVICE_ID.PAYMENT,
-    host,
-    port,
-  );
-
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
@@ -63,5 +56,12 @@ async function bootstrap() {
     },
   });
   await app.startAllMicroservices();
+
+  await consulService.registerService(
+    CONSULT_SERVICE_ID.PAYMENT,
+    CONSULT_SERVICE_ID.PAYMENT,
+    host,
+    port,
+  );
 }
 bootstrap();

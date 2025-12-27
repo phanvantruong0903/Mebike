@@ -1,8 +1,6 @@
-import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
   GRPC_PACKAGE,
-  ConsuleModule,
+  ConsulModule,
   ConsulService,
   CONSULT_SERVICE_ID,
   KAFKA_SERVICE,
@@ -11,22 +9,25 @@ import {
   JwtSharedModule,
   RedisModule,
 } from '@mebike/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import { UserCreationActivity } from './activities';
 import { TemporalService } from './temporal-service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthService } from '../modules/users/auth.service';
+import { AuthModule } from '../modules/users/auth.module';
 
 @Module({
   imports: [
-    ConsuleModule,
+    ConsulModule,
     RedisModule,
     JwtSharedModule,
+    forwardRef(() => AuthModule),
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
         name: GRPC_PACKAGE.USER,
-        imports: [ConsuleModule],
+        imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
           const userService = await consulService.discoverService(
@@ -50,7 +51,7 @@ import { AuthService } from '../modules/users/auth.service';
       },
       {
         name: GRPC_PACKAGE.PAYMENT,
-        imports: [ConsuleModule],
+        imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
           const paymentService = await consulService.discoverService(
@@ -99,7 +100,7 @@ import { AuthService } from '../modules/users/auth.service';
       },
     ]),
   ],
-  providers: [AuthService, UserCreationActivity, TemporalService],
+  providers: [UserCreationActivity, TemporalService],
   exports: [TemporalService],
 })
 export class SagaModule {}
