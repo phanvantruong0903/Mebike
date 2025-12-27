@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  OnApplicationBootstrap,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Client, Connection } from '@temporalio/client';
 import { Worker } from '@temporalio/worker';
 import { UserCreationWorkflow, userCreationWorkflow } from './workflow';
@@ -7,7 +12,9 @@ import { ModuleRef } from '@nestjs/core';
 import { join } from 'node:path';
 
 @Injectable()
-export class TemporalService implements OnModuleInit, OnModuleDestroy {
+export class TemporalService
+  implements OnModuleInit, OnModuleDestroy, OnApplicationBootstrap
+{
   private client!: Client;
   private worker?: Worker;
 
@@ -22,31 +29,57 @@ export class TemporalService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  async onApplicationBootstrap() {
+    // Start worker in background
+    this.runWorker().catch((err) => {
+      console.error('Failed to start Temporal worker:', err);
+    });
+  }
+
   async runWorker() {
-    const activitiesInstance = this.moduleRef.get(UserCreationActivity, {
-      strict: false,
-    });
+    try {
+      const activitiesInstance = this.moduleRef.get(UserCreationActivity, {
+        strict: false,
+      });
 
-    this.worker = await Worker.create({
-      workflowsPath: join(
-        process.cwd(),
-        'apps/auth-service/src/saga/workflow.ts',
-      ),
-      activities: {
-        createUserProfile:
-          activitiesInstance.createUserProfile.bind(activitiesInstance),
-        createWallet: activitiesInstance.createWallet.bind(activitiesInstance),
-        sendWelcomeEmail:
-          activitiesInstance.sendWelcomeEmail.bind(activitiesInstance),
-        deleteUserProfile:
-          activitiesInstance.deleteUserProfile.bind(activitiesInstance),
-        deleteAccount:
-          activitiesInstance.deleteAccount.bind(activitiesInstance),
-      },
-      taskQueue: 'user-creation',
-    });
+      const isProduction = process.env.NODE_ENV === 'production';
+      const workflowsPath = isProduction
+        ? join(__dirname, 'workflow.js')
+        : join(process.cwd(), 'apps/auth-service/src/saga/workflow.ts');
 
-    await this.worker.run();
+      this.worker = await Worker.create({
+        workflowsPath,
+        bundlerOptions: {
+          webpackConfigHook: (config) => {
+            config.resolve ??= {};
+            config.resolve.alias ??= {};
+            Object.assign(config.resolve.alias, {
+              '@mebike/common': join(
+                process.cwd(),
+                'common/src/lib/prisma/user/generated/enums.ts',
+              ),
+            });
+            return config;
+          },
+        },
+        activities: {
+          createUserProfile:
+            activitiesInstance.createUserProfile.bind(activitiesInstance),
+          createWallet:
+            activitiesInstance.createWallet.bind(activitiesInstance),
+          sendWelcomeEmail:
+            activitiesInstance.sendWelcomeEmail.bind(activitiesInstance),
+          deleteUserProfile:
+            activitiesInstance.deleteUserProfile.bind(activitiesInstance),
+          deleteAccount:
+            activitiesInstance.deleteAccount.bind(activitiesInstance),
+        },
+        taskQueue: 'user-creation',
+      });
+      await this.worker.run();
+    } catch (error) {
+      console.error('Temporal worker error:', error);
+    }
   }
 
   async onModuleDestroy() {
