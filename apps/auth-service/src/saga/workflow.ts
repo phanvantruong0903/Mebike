@@ -26,6 +26,7 @@ export async function userCreationWorkflow(
   data: UserCreationWorkflow,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    let createdWallet = false;
     await Promise.all([
       createUserProfile({
         accountId: data.accountId,
@@ -37,17 +38,18 @@ export async function userCreationWorkflow(
       createWallet({
         accountId: data.accountId,
       }),
-      sendWelcomeEmail({
+    ]);
+    createdWallet = true;
+    if (createdWallet) {
+      await sendWelcomeEmail({
         key: data.accountId,
         email: data.email,
         name: data.name,
-      }),
-    ]);
+      });
+    }
 
     return { success: true };
   } catch (error) {
-    // Compensation: Always attempt to delete profile and account
-    // These operations are safe even if resources don't exist yet
     await deleteUserProfile({
       accountId: data.accountId,
     });
