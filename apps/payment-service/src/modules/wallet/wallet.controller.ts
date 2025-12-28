@@ -1,5 +1,5 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
-import { EventPattern, GrpcMethod, Payload } from '@nestjs/microservices';
+import { GrpcMethod } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
   buildSearchFilter,
@@ -8,7 +8,6 @@ import {
   GRPC_SERVICES,
   grpcPaginateResponse,
   grpcResponse,
-  KAFKA_TOPIC,
   PAYMENT_MESSAGES,
   PAYMENT_METHODS,
   WalletModel,

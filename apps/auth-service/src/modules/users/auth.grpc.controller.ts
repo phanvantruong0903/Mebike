@@ -10,7 +10,6 @@ import {
   grpcResponse,
   USER_MESSAGES,
   UserDto,
-  CreateProfileDto,
   LoginUserDto,
   CreateUserDto,
   User,
