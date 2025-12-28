@@ -306,7 +306,7 @@ services:
       - TEMPORAL_ADDRESS=temporal:7233
       - NODE_ENV=production
     healthcheck:
-      test: ['CMD-SHELL', 'pgrep -x node || exit 1']
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
       interval: 10s
       timeout: 5s
       retries: 15

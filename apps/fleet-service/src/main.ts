@@ -17,6 +17,13 @@ async function bootstrap() {
   const port = Number(process.env.FLEET_SERVICE_PORT) || 50054;
   const host = consulService.getLocalIp();
 
+  await consulService.registerService(
+    CONSULT_SERVICE_ID.FLEET,
+    CONSULT_SERVICE_ID.FLEET,
+    host,
+    port,
+  );
+
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
@@ -61,12 +68,5 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
-
-  await consulService.registerService(
-    CONSULT_SERVICE_ID.FLEET,
-    CONSULT_SERVICE_ID.FLEET,
-    host,
-    port,
-  );
 }
 bootstrap();

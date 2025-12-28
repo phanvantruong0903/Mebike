@@ -65,7 +65,17 @@ export class StationService implements OnModuleInit {
   }
 
   async getStation(data: { id: string }) {
-    return await firstValueFrom(this.fleetService.GetStation(data));
+    const response = await firstValueFrom(this.fleetService.GetStation(data));
+    const station = response.data as Station;
+    return {
+      ...response,
+      data: station
+        ? {
+            ...station,
+            bikes: station.bikes ?? [],
+          }
+        : station,
+    };
   }
 
   async getStationByIds(ids: string[]): Promise<Station[]> {

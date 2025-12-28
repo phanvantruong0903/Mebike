@@ -17,7 +17,7 @@ FROM docker.io/node:lts-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y openssl procps && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl procps netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/apps/auth-service/dist ./
 COPY apps/auth-service/prisma ./prisma

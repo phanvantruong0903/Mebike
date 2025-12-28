@@ -67,7 +67,17 @@ export class SupplierService implements OnModuleInit {
   }
 
   async getSupplier(data: { id: string }) {
-    return await firstValueFrom(this.fleetService.GetSupplier(data));
+    const response = await firstValueFrom(this.fleetService.GetSupplier(data));
+    const supplier = response.data as Supplier;
+    return {
+      ...response,
+      data: supplier
+        ? {
+            ...supplier,
+            bikes: supplier.bikes ?? [],
+          }
+        : supplier,
+    };
   }
 
   async getSupplierStats() {
