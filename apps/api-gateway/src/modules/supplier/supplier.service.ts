@@ -56,9 +56,15 @@ export class SupplierService implements OnModuleInit {
     const response = await firstValueFrom(
       this.fleetService.GetAllSuppliers(data),
     );
+    const suppliers = response.data as Supplier[];
     return {
       ...response,
-      data: response.data ?? [],
+      data: suppliers
+        ? suppliers.map((supplier) => ({
+            ...supplier,
+            bikes: supplier.bikes ?? [],
+          }))
+        : suppliers,
     };
   }
 
