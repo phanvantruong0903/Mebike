@@ -17,10 +17,10 @@ import {
   prismaUser,
   Profile,
   grpcPaginateResponse,
-  KAFKA_TOPIC,
   ChangeUserStatusDto,
   SERVER_MESSAGE,
   buildSearchFilter,
+  KAFKA_TOPIC,
 } from '@mebike/common';
 import { UserService } from './user.services';
 
@@ -109,19 +109,44 @@ export class UserController {
     }
   }
 
-  @EventPattern(KAFKA_TOPIC.USER_CREATED)
-  async createProfile(@Payload() data: any): Promise<Profile> {
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.CREATE)
+  async createUser(
+    data: CreateProfileDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const profileData = data.value || data;
-      const profile = await this.baseHandler.createLogic(profileData);
-
-      return profile;
+      const profile = await this.baseHandler.createLogic(data);
+      return grpcResponse(profile, USER_MESSAGES.CREATE_SCUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
       }
       const err = error as Error;
-      throw new RpcException(err?.message || USER_MESSAGES.CREATE_FAILED);
+      throwGrpcError(400, err?.message || USER_MESSAGES.CREATE_FAILED, [
+        err.message,
+      ]);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.DELETE)
+  async deleteUser(data: {
+    accountId: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      await prismaUser.profile.delete({
+        where: { accountId: data.accountId },
+      });
+      return grpcResponse(null, USER_MESSAGES.DELETE_SUCCESS);
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
+        throwGrpcError(404, USER_MESSAGES.NOT_FOUND, [USER_MESSAGES.NOT_FOUND]);
+      }
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throwGrpcError(400, err?.message || USER_MESSAGES.DELETE_FAILED, [
+        err.message,
+      ]);
     }
   }
 
@@ -193,5 +218,21 @@ export class UserController {
   async userVerify(data: { accountId: string }) {
     const result = await this.userService.userVerify(data);
     return grpcResponse(result, USER_MESSAGES.USER_VERIFY_SUCCESS);
+  }
+
+  @EventPattern(KAFKA_TOPIC.USER_CREATED)
+  async createProfile(@Payload() data: any): Promise<Profile> {
+    try {
+      const profileData = data.value || data;
+      const profile = await this.baseHandler.createLogic(profileData);
+
+      return profile;
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || USER_MESSAGES.CREATE_FAILED);
+    }
   }
 }

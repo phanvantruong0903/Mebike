@@ -3,7 +3,7 @@ syntax = "proto3";
 package wallet;
 
 service PaymentService {
-  rpc CreateWallet (CreateWalletRequest) returns (GetWalletResponse);
+  rpc CreateWallet (CreateWalletRequest) returns (CreateWalletResponse);
   rpc GetWallet (GetWalletRequest) returns (GetWalletResponse);
   rpc GetAllWallets (GetAllWalletsRequest) returns (GetAllWalletsResponse);
   rpc ChangeWalletStatus (ChangeWalletStatus) returns (GetWalletResponse);
@@ -11,6 +11,14 @@ service PaymentService {
 
 message CreateWalletRequest {
   string accountId = 1;
+}
+
+message CreateWalletResponse {
+  bool success = 1;
+  string message = 2;
+  Wallet data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message Wallet {

@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM docker.io/node:lts-alpine AS builder
 WORKDIR /app
 
 COPY ../../package*.json nx.json tsconfig.base.json ./
@@ -9,7 +9,7 @@ RUN npm install
 
 RUN npx nx build common
 
-FROM node:20-alpine AS runner
+FROM docker.io/node:lts-alpine AS runner
 WORKDIR /app
 
 COPY --from=builder /app/dist ./dist

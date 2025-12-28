@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UserService } from './user.services';
 import { UserController } from './user.controllers';
 import {
-  ConsuleModule,
+  ConsulModule,
   ConsulService,
   CONSULT_SERVICE_ID,
   GRPC_PACKAGE,
@@ -13,12 +13,12 @@ import { join } from 'node:path';
 
 @Module({
   imports: [
-    ConsuleModule,
+    ConsulModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
         name: GRPC_PACKAGE.AUTH,
-        imports: [ConsuleModule],
+        imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
           const authService = await consulService.discoverService(
