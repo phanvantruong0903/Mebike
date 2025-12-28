@@ -212,6 +212,8 @@ export class StationController {
       const searchFields = ['name', 'address', 'id'];
       const searchFilter = buildSearchFilter(search, searchFields);
 
+      const stats = await this.stationService.getStationStats();
+
       if (!longitude || !latitude) {
         const [stations, total] = await Promise.all([
           prismaFleet.station.findMany({
@@ -298,6 +300,7 @@ export class StationController {
             page,
             limit,
             totalPages: Math.ceil(total / limit),
+            ...stats,
           },
           STATION_MESSAGES.GET_ALL_SUCCESS,
         );
@@ -322,6 +325,7 @@ export class StationController {
             page: page,
             total: 0,
             totalPages: 0,
+            ...stats,
           },
           STATION_MESSAGES.GET_ALL_SUCCESS,
         );
@@ -420,6 +424,7 @@ export class StationController {
               page: page,
               total: 0,
               totalPages: 0,
+              ...stats,
             },
             STATION_MESSAGES.GET_ALL_SUCCESS,
           );
@@ -458,6 +463,7 @@ export class StationController {
           page: page,
           total: total,
           totalPages: Math.ceil(total / limit),
+          ...stats,
         },
         STATION_MESSAGES.GET_ALL_SUCCESS,
       );
@@ -519,5 +525,12 @@ export class StationController {
       const err = error as Error;
       throw new RpcException(err?.message);
     }
+  }
+
+  async getStationStats() {
+    const { activeStation, inactiveStation } =
+      await this.stationService.getStationStats();
+
+    return { activeStation, inactiveStation };
   }
 }

@@ -66,7 +66,7 @@ export class StationService implements OnModuleInit {
             ...station,
             bikes: station.bikes ?? [],
           }))
-        : stations,
+        : [],
     };
   }
 

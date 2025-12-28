@@ -57,4 +57,10 @@ export class Station {
 
   @Field(() => Int, { nullable: true })
   unavailable?: number;
+
+  @Field(() => Int, { nullable: true })
+  activeStation?: number;
+
+  @Field(() => Int, { nullable: true })
+  inactiveStation?: number;
 }
