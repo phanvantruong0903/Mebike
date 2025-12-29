@@ -55,12 +55,13 @@ export class StationResolver {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
-    const { latitude, longitude } = data || {};
+    const { latitude, longitude, search } = data || {};
     return this.stationService.getAllStation({
       page,
       limit,
       latitude,
       longitude,
+      search,
     });
   }
 

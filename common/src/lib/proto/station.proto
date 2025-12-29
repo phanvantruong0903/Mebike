@@ -101,6 +101,8 @@ message StationList {
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;
+  optional int32 activeStation = 7;
+  optional int32 inactiveStation = 8;
 }
 
 message CreateStationResponse {

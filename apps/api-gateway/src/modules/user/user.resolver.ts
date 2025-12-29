@@ -48,8 +48,9 @@ export class UserResolver {
   ): Promise<UserListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
+    const search = data?.search ?? '';
 
-    return this.userService.getAllUser({ page, limit });
+    return this.userService.getAllUser({ page, limit, search });
   }
 
   @Query(() => UserResponse, { name: GRAPHQL_NAME_USER.GET_ONE })

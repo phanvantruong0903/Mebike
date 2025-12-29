@@ -64,7 +64,7 @@ export class SupplierService implements OnModuleInit {
             ...supplier,
             bikes: supplier.bikes ?? [],
           }))
-        : suppliers,
+        : [],
     };
   }
 
