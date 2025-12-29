@@ -293,17 +293,19 @@ export class StationController {
           }),
         );
 
-        return grpcPaginateResponse(
-          {
-            data: stationsWithCount,
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            ...stats,
-          },
-          STATION_MESSAGES.GET_ALL_SUCCESS,
-        );
+        return {
+          ...grpcPaginateResponse(
+            {
+              data: stationsWithCount,
+              total,
+              page,
+              limit,
+              totalPages: Math.ceil(total / limit),
+            },
+            STATION_MESSAGES.GET_ALL_SUCCESS,
+          ),
+          ...stats,
+        };
       }
 
       // return dạng [[id, distance], [stationId, distance], ...]
@@ -318,17 +320,19 @@ export class StationController {
       )) as [string, string][];
 
       if (!geoResult.length) {
-        return grpcPaginateResponse(
-          {
-            data: [],
-            limit: limit,
-            page: page,
-            total: 0,
-            totalPages: 0,
-            ...stats,
-          },
-          STATION_MESSAGES.GET_ALL_SUCCESS,
-        );
+        return {
+          ...grpcPaginateResponse(
+            {
+              data: [],
+              limit: limit,
+              page: page,
+              total: 0,
+              totalPages: 0,
+            },
+            STATION_MESSAGES.GET_ALL_SUCCESS,
+          ),
+          ...stats,
+        };
       }
 
       const stationIds = geoResult.map((item) => item[0]);
@@ -417,17 +421,19 @@ export class StationController {
         });
 
         if (!stationsWithCount.length) {
-          return grpcPaginateResponse(
-            {
-              data: [],
-              limit: limit,
-              page: page,
-              total: 0,
-              totalPages: 0,
-              ...stats,
-            },
-            STATION_MESSAGES.GET_ALL_SUCCESS,
-          );
+          return {
+            ...grpcPaginateResponse(
+              {
+                data: [],
+                limit: limit,
+                page: page,
+                total: 0,
+                totalPages: 0,
+              },
+              STATION_MESSAGES.GET_ALL_SUCCESS,
+            ),
+            ...stats,
+          };
         }
       }
 
@@ -456,17 +462,19 @@ export class StationController {
       const total = result.length;
       const paginatedResult = result.slice((page - 1) * limit, page * limit);
 
-      return grpcPaginateResponse(
-        {
-          data: paginatedResult,
-          limit: limit,
-          page: page,
-          total: total,
-          totalPages: Math.ceil(total / limit),
-          ...stats,
-        },
-        STATION_MESSAGES.GET_ALL_SUCCESS,
-      );
+      return {
+        ...grpcPaginateResponse(
+          {
+            data: paginatedResult,
+            limit: limit,
+            page: page,
+            total: total,
+            totalPages: Math.ceil(total / limit),
+          },
+          STATION_MESSAGES.GET_ALL_SUCCESS,
+        ),
+        ...stats,
+      };
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;

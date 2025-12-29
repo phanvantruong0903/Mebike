@@ -67,6 +67,8 @@ export class StationService implements OnModuleInit {
             bikes: station.bikes ?? [],
           }))
         : [],
+      activeStation: response.activeStation,
+      inactiveStation: response.inactiveStation,
     };
   }
 
