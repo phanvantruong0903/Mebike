@@ -7,6 +7,8 @@ import {
   SupplierStatus,
   UpdateSupplierDto,
   prismaFleet,
+  throwGrpcError,
+  SUPPLIER_MESSAGES,
 } from '@mebike/common';
 
 @Injectable()
@@ -79,6 +81,100 @@ export class SupplierService extends BaseService<
           ?._count.id ?? 0,
     };
 
+    return result;
+  }
+
+  async getSupplierDetail(id: string) {
+    const result = await prismaFleet.supplier.findUnique({
+      where: { id },
+      include: {
+        bikes: {
+          include: {
+            station: true,
+          },
+        },
+      },
+    });
+    if (!result) {
+      throwGrpcError(404, SUPPLIER_MESSAGES.NOT_FOUND, [
+        SUPPLIER_MESSAGES.NOT_FOUND,
+      ]);
+    }
+
+    return result as unknown as SupplierModel;
+  }
+
+  async updateSupplier(
+    id: string,
+    data: UpdateSupplierDto & { address?: string; phone?: string },
+  ) {
+    const currentSupplier = await prismaFleet.supplier.findUnique({
+      where: { id },
+    });
+
+    if (!currentSupplier) {
+      throwGrpcError(404, SUPPLIER_MESSAGES.NOT_FOUND, [
+        SUPPLIER_MESSAGES.NOT_FOUND,
+      ]);
+    }
+
+    const oldContactInfo = (currentSupplier.contactInfo as any) || {};
+    const newContactInfo = {
+      ...oldContactInfo,
+    };
+
+    if (data.address) newContactInfo.address = data.address;
+    if (data.phone) newContactInfo.phone = data.phone;
+
+    const updateData: any = {
+      ...data,
+      contactInfo: newContactInfo,
+    };
+
+    delete updateData.address;
+    delete updateData.phone;
+
+    const result = await this.update(id, updateData);
+    return result;
+  }
+
+  async createSupplier(
+    data: CreateSupplierDto & {
+      address: string;
+      phone: string;
+    },
+  ) {
+    const supplierData = {
+      name: data.name,
+      contactFee: data.contactFee,
+      contactInfo: {
+        address: data.address,
+        phone: data.phone,
+      },
+    };
+    const result = await this.create(
+      supplierData as unknown as CreateSupplierDto,
+    );
+
+    return result;
+  }
+
+  async changeSupplierStatus(id: string, status: SupplierStatus) {
+    const profile = await prismaFleet.supplier.update({
+      where: { id },
+      data: { status },
+    });
+    return profile;
+  }
+
+  async getSuppliersByIds(ids: string[]) {
+    const result = await prismaFleet.supplier.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
     return result;
   }
 }

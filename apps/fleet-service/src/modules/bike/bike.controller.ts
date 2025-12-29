@@ -6,7 +6,6 @@ import {
   grpcResponse,
   throwGrpcError,
   grpcPaginateResponse,
-  prismaFleet,
   BIKE_METHODS,
   BIKE_MESSAGES,
   BikeModel,
@@ -15,7 +14,6 @@ import {
   GetBikeDto,
   buildSearchFilter,
   ChangeBikeStatusDto,
-  STATION_MESSAGES,
 } from '@mebike/common';
 import { BikeService } from './bike.service';
 
@@ -59,21 +57,8 @@ export class BikeController {
     id: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await prismaFleet.bike.findUnique({
-        where: { id },
-        include: {
-          station: true,
-          supplier: true,
-        },
-      });
-      if (!result) {
-        throwGrpcError(404, BIKE_MESSAGES.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
-      }
-
-      return grpcResponse<BikeModel>(
-        result as unknown as BikeModel,
-        BIKE_MESSAGES.GET_DETAIL_SUCCESS,
-      );
+      const result = await this.bikeService.getBikeDetail(id);
+      return grpcResponse<BikeModel>(result, BIKE_MESSAGES.GET_DETAIL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
@@ -88,30 +73,7 @@ export class BikeController {
     data: CreateBikeDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const findStation = await prismaFleet.station.findUnique({
-        where: { id: data.stationId },
-        include: {
-          _count: {
-            select: { bikes: true },
-          },
-        },
-      });
-
-      if (!findStation) {
-        throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [
-          STATION_MESSAGES.NOT_FOUND,
-        ]);
-      }
-
-      const currentBikeCount = findStation._count.bikes;
-      if (currentBikeCount >= findStation.capacity) {
-        throwGrpcError(400, STATION_MESSAGES.STATION_FULL, [
-          STATION_MESSAGES.STATION_FULL,
-        ]);
-      }
-
-      const result = await this.baseHandler.createLogic(data);
-
+      const result = await this.bikeService.createBike(data);
       return grpcResponse<BikeModel>(result, BIKE_MESSAGES.CREATE_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -156,10 +118,10 @@ export class BikeController {
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const { id, ...updatedData } = data;
-      const profile = await prismaFleet.bike.update({
-        where: { id },
-        data: updatedData,
-      });
+      const profile = await this.bikeService.changeBikeStatus(
+        id,
+        updatedData.status,
+      );
       return grpcResponse(profile, BIKE_MESSAGES.UPDATE_SUCCESS);
     } catch (error: unknown) {
       if (error instanceof RpcException) {

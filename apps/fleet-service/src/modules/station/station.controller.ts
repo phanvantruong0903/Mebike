@@ -12,7 +12,6 @@ import {
   grpcResponse,
   throwGrpcError,
   grpcPaginateResponse,
-  prismaFleet,
   STATION_METHODS,
   STATION_MESSAGES,
   StationModel,
@@ -23,8 +22,6 @@ import {
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
   GetStationDto,
-  buildSearchFilter,
-  BikeStatus,
   UpdateStationStatusDto,
 } from '@mebike/common';
 import { StationService } from './station.service';
@@ -85,87 +82,9 @@ export class StationController {
     id: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await prismaFleet.station.findUnique({
-        where: { id },
-        include: {
-          bikes: {
-            include: {
-              supplier: true,
-            },
-          },
-          _count: {
-            select: {
-              bikes: true,
-            },
-          },
-        },
-      });
-      if (!result) {
-        throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [
-          STATION_MESSAGES.NOT_FOUND,
-        ]);
-      }
-
-      const [
-        availableBike,
-        bookedBike,
-        brokenBike,
-        reservedBike,
-        maintanedBike,
-        unavailable,
-      ] = await Promise.all([
-        prismaFleet.bike.count({
-          where: {
-            stationId: result.id,
-            status: BikeStatus.Available,
-          },
-        }),
-        prismaFleet.bike.count({
-          where: {
-            stationId: result.id,
-            status: BikeStatus.Booked,
-          },
-        }),
-        prismaFleet.bike.count({
-          where: {
-            stationId: result.id,
-            status: BikeStatus.Broken,
-          },
-        }),
-        prismaFleet.bike.count({
-          where: {
-            stationId: result.id,
-            status: BikeStatus.Reserved,
-          },
-        }),
-        prismaFleet.bike.count({
-          where: {
-            stationId: result.id,
-            status: BikeStatus.Maintained,
-          },
-        }),
-        prismaFleet.bike.count({
-          where: {
-            stationId: result.id,
-            status: BikeStatus.Unavailable,
-          },
-        }),
-      ]);
-
-      const stationWithCounts = {
-        ...result,
-        totalBike: result._count.bikes,
-        availableBike,
-        bookedBike,
-        brokenBike,
-        reservedBike,
-        maintanedBike,
-        unavailable,
-        _count: undefined,
-      };
-
+      const result = await this.stationService.getStationDetail(id);
       return grpcResponse<StationModel>(
-        stationWithCounts as unknown as StationModel,
+        result,
         STATION_MESSAGES.GET_DETAIL_SUCCESS,
       );
     } catch (error) {
@@ -208,272 +127,19 @@ export class StationController {
     data: GetStationDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit, longitude, latitude, search } = data;
-      const searchFields = ['name', 'address', 'id'];
-      const searchFilter = buildSearchFilter(search, searchFields);
-
-      const stats = await this.stationService.getStationStats();
-
-      if (!longitude || !latitude) {
-        const [stations, total] = await Promise.all([
-          prismaFleet.station.findMany({
-            where: searchFilter,
-            skip: (page - 1) * limit,
-            take: limit,
-            include: {
-              _count: {
-                select: {
-                  bikes: true,
-                },
-              },
-            },
-          }),
-          prismaFleet.station.count({ where: searchFilter }),
-        ]);
-
-        const stationsWithCount = await Promise.all(
-          stations.map(async (station) => {
-            const [
-              availableBike,
-              bookedBike,
-              brokenBike,
-              reservedBike,
-              maintanedBike,
-              unavailable,
-            ] = await Promise.all([
-              prismaFleet.bike.count({
-                where: {
-                  stationId: station.id,
-                  status: BikeStatus.Available,
-                },
-              }),
-              prismaFleet.bike.count({
-                where: {
-                  stationId: station.id,
-                  status: BikeStatus.Booked,
-                },
-              }),
-              prismaFleet.bike.count({
-                where: {
-                  stationId: station.id,
-                  status: BikeStatus.Broken,
-                },
-              }),
-              prismaFleet.bike.count({
-                where: {
-                  stationId: station.id,
-                  status: BikeStatus.Reserved,
-                },
-              }),
-              prismaFleet.bike.count({
-                where: {
-                  stationId: station.id,
-                  status: BikeStatus.Maintained,
-                },
-              }),
-              prismaFleet.bike.count({
-                where: {
-                  stationId: station.id,
-                  status: BikeStatus.Unavailable,
-                },
-              }),
-            ]);
-
-            return {
-              ...station,
-              totalBike: station._count.bikes,
-              availableBike,
-              bookedBike,
-              brokenBike,
-              reservedBike,
-              maintanedBike,
-              unavailable,
-              _count: undefined,
-            };
-          }),
-        );
-
-        return {
-          ...grpcPaginateResponse(
-            {
-              data: stationsWithCount,
-              total,
-              page,
-              limit,
-              totalPages: Math.ceil(total / limit),
-            },
-            STATION_MESSAGES.GET_ALL_SUCCESS,
-          ),
-          ...stats,
-        };
-      }
-
-      // return dạng [[id, distance], [stationId, distance], ...]
-      const geoResult = (await this.redisClient.georadius(
-        REDIS_KEY_PREFIX.STATION,
-        longitude,
-        latitude,
-        500,
-        'km',
-        'WITHDIST',
-        'ASC',
-      )) as [string, string][];
-
-      if (!geoResult.length) {
-        return {
-          ...grpcPaginateResponse(
-            {
-              data: [],
-              limit: limit,
-              page: page,
-              total: 0,
-              totalPages: 0,
-            },
-            STATION_MESSAGES.GET_ALL_SUCCESS,
-          ),
-          ...stats,
-        };
-      }
-
-      const stationIds = geoResult.map((item) => item[0]);
-      const stations = await prismaFleet.station.findMany({
-        where: {
-          id: { in: stationIds },
-        },
-        include: {
-          _count: {
-            select: {
-              bikes: true,
-            },
-          },
-        },
-      });
-
-      let stationsWithCount = await Promise.all(
-        stations.map(async (station) => {
-          const [
-            availableBike,
-            bookedBike,
-            brokenBike,
-            reservedBike,
-            maintanedBike,
-            unavailable,
-          ] = await Promise.all([
-            prismaFleet.bike.count({
-              where: {
-                stationId: station.id,
-                status: BikeStatus.Available,
-              },
-            }),
-            prismaFleet.bike.count({
-              where: {
-                stationId: station.id,
-                status: BikeStatus.Booked,
-              },
-            }),
-            prismaFleet.bike.count({
-              where: {
-                stationId: station.id,
-                status: BikeStatus.Broken,
-              },
-            }),
-            prismaFleet.bike.count({
-              where: {
-                stationId: station.id,
-                status: BikeStatus.Reserved,
-              },
-            }),
-            prismaFleet.bike.count({
-              where: {
-                stationId: station.id,
-                status: BikeStatus.Maintained,
-              },
-            }),
-            prismaFleet.bike.count({
-              where: {
-                stationId: station.id,
-                status: BikeStatus.Unavailable,
-              },
-            }),
-          ]);
-
-          return {
-            ...station,
-            totalBike: station._count.bikes,
-            availableBike,
-            bookedBike,
-            brokenBike,
-            reservedBike,
-            maintanedBike,
-            unavailable,
-            _count: undefined,
-          };
-        }),
-      );
-
-      if (data.search) {
-        const keyword = data.search.toLowerCase();
-        stationsWithCount = stationsWithCount.filter((s: any) => {
-          return (
-            s.name.toLowerCase().includes(keyword) ||
-            s.address.toLowerCase().includes(keyword)
-          );
-        });
-
-        if (!stationsWithCount.length) {
-          return {
-            ...grpcPaginateResponse(
-              {
-                data: [],
-                limit: limit,
-                page: page,
-                total: 0,
-                totalPages: 0,
-              },
-              STATION_MESSAGES.GET_ALL_SUCCESS,
-            ),
-            ...stats,
-          };
-        }
-      }
-
-      const stationMap = new Map(
-        stationsWithCount.map((station: any) => [station.id, station]),
-      );
-
-      // ghép station info vào cái mảng paginated redis trả ra dạng [id, distance]
-      const result = geoResult
-        .map((item) => {
-          const id = item[0];
-          const distance = Number.parseFloat(item[1]);
-          const station = stationMap.get(id);
-
-          if (!station) {
-            return null;
-          }
-
-          return {
-            ...station,
-            distance,
-          };
-        })
-        .filter((item) => item !== null);
-
-      const total = result.length;
-      const paginatedResult = result.slice((page - 1) * limit, page * limit);
-
+      const result = await this.stationService.getAllStations(data);
       return {
         ...grpcPaginateResponse(
           {
-            data: paginatedResult,
-            limit: limit,
-            page: page,
-            total: total,
-            totalPages: Math.ceil(total / limit),
+            data: result.data,
+            total: result.total,
+            page: result.page,
+            limit: result.limit,
+            totalPages: result.totalPages,
           },
           STATION_MESSAGES.GET_ALL_SUCCESS,
         ),
-        ...stats,
+        ...result.stats,
       };
     } catch (error) {
       if (error instanceof RpcException) {
@@ -500,9 +166,7 @@ export class StationController {
     ids: string[];
   }): Promise<ReturnType<typeof grpcResponse>> {
     const { ids } = data;
-    const stations = await prismaFleet.station.findMany({
-      where: { id: { in: ids } },
-    });
+    const stations = await this.stationService.getStationsByIds(ids);
     return grpcResponse(stations, STATION_MESSAGES.GET_ALL_SUCCESS);
   }
 
@@ -510,10 +174,10 @@ export class StationController {
   async updateStationStatus(data: UpdateStationStatusDto) {
     try {
       const { id, ...updatedData } = data;
-      const station = await prismaFleet.station.update({
-        where: { id },
-        data: updatedData,
-      });
+      const station = await this.stationService.updateStationStatus(
+        id,
+        updatedData.status,
+      );
       return grpcResponse(station, STATION_MESSAGES.UPDATE_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
