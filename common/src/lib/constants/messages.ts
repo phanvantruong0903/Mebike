@@ -39,6 +39,7 @@ export const USER_MESSAGES = {
   PASSWORD_NOT_MATCH: 'Password not match',
   ACCESS_TOKEN_REQUIRED: 'Access Token is required',
   USER_VERIFY_SUCCESS: 'User verified successfully',
+  DELETE_FAILED: 'Delete User failed',
 };
 
 export const SUPPLIER_MESSAGES = {
@@ -69,6 +70,7 @@ export const STATION_MESSAGES = {
   VALIDATION_FAILED: 'Station name or phone incorrect',
   UPDATE_FAIL: 'Update Station failed',
   GET_ALL_STATS_SUCCESS: 'Station stats retrieved successfully',
+  STATION_FULL: 'Station is full',
 };
 
 export const BIKE_MESSAGES = {
@@ -114,6 +116,7 @@ export const PAYMENT_MESSAGES = {
   GET_ONE: 'Transaction retrieved successfully',
   CREATE_WITHDRAW_SUCCESS: 'Withdraw created successfully',
   UPDATE_WITHDRAW_SUCCESS: 'Withdraw updated successfully',
+  CREATE_WALLET_SUCCESS: 'Wallet created successfully',
 };
 
 export const SERVER_MESSAGE = {

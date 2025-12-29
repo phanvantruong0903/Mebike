@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthGrpcController } from './auth.grpc.controller';
 import {
-  ConsuleModule,
+  ConsulModule,
   ConsulService,
   CONSULT_SERVICE_ID,
   GRPC_PACKAGE,
@@ -12,20 +12,22 @@ import {
   RedisModule,
 } from '@mebike/common';
 import { AuthService } from './auth.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SagaModule } from '../../saga/saga.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 
 @Module({
   imports: [
-    ConsuleModule,
-    RedisModule,
     JwtSharedModule,
+    RedisModule,
+    ConsulModule,
+    forwardRef(() => SagaModule),
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
         name: GRPC_PACKAGE.USER,
-        imports: [ConsuleModule],
+        imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
           const userService = await consulService.discoverService(
@@ -37,6 +39,12 @@ import { join } from 'node:path';
               package: 'user',
               protoPath: join(process.cwd(), 'common/src/lib/proto/user.proto'),
               url: `${userService.address}:${userService.port}`,
+              channelOptions: {
+                'grpc.max_reconnect_backoff_ms': 5000,
+                'grpc.initial_reconnect_backoff_ms': 1000,
+              },
+              maxRetryAttempts: 5,
+              retryDelay: 3000,
             },
           };
         },
@@ -67,5 +75,6 @@ import { join } from 'node:path';
   ],
   controllers: [AuthGrpcController],
   providers: [AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}

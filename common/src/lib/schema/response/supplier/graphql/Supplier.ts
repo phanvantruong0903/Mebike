@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Bike } from '../../bike';
 
 @ObjectType()
 export class ContactInfo {
@@ -25,6 +26,9 @@ export class Supplier {
 
   @Field(() => String)
   status!: string;
+
+  @Field(() => [Bike])
+  bikes!: Bike[];
 
   @Field()
   createdAt!: string;

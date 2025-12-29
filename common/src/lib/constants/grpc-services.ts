@@ -34,6 +34,7 @@ export const USER_METHODS = {
   VERIFY_EMAIL: 'VerifyEmail',
   VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
   USER_VERIFY: 'UserVerify',
+  DELETE: 'DeleteUser',
 } as const;
 
 export const SUPPLIER_METHODS = {
@@ -43,6 +44,7 @@ export const SUPPLIER_METHODS = {
   GET_ALL: 'GetAllSuppliers',
   CHANGE_STATUS: 'ChangeSupplierStatus',
   GET_STATS: 'GetSupplierStats',
+  GET_SUPPLIERS_BY_IDS: 'GetSupplierByIds',
 } as const;
 
 export const STATION_METHODS = {
@@ -50,7 +52,9 @@ export const STATION_METHODS = {
   GET_ONE: 'GetStation',
   UPDATE: 'UpdateStation',
   GET_ALL: 'GetAllStations',
-};
+  GET_STATIONS_BY_IDS: 'GetStationsByIds',
+  UPDATE_STATUS: 'UpdateStationStatus',
+} as const;
 
 export const BIKE_METHODS = {
   CREATE: 'CreateBike',

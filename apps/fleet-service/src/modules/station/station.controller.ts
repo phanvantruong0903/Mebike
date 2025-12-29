@@ -12,7 +12,6 @@ import {
   grpcResponse,
   throwGrpcError,
   grpcPaginateResponse,
-  prismaFleet,
   STATION_METHODS,
   STATION_MESSAGES,
   StationModel,
@@ -23,7 +22,7 @@ import {
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
   GetStationDto,
-  buildSearchFilter,
+  UpdateStationStatusDto,
 } from '@mebike/common';
 import { StationService } from './station.service';
 import Redis from 'ioredis';
@@ -83,20 +82,9 @@ export class StationController {
     id: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await prismaFleet.station.findUnique({
-        where: { id },
-        include: {
-          bikes: true,
-        },
-      });
-      if (!result) {
-        throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [
-          STATION_MESSAGES.NOT_FOUND,
-        ]);
-      }
-
+      const result = await this.stationService.getStationDetail(id);
       return grpcResponse<StationModel>(
-        result as unknown as StationModel,
+        result,
         STATION_MESSAGES.GET_DETAIL_SUCCESS,
       );
     } catch (error) {
@@ -139,108 +127,20 @@ export class StationController {
     data: GetStationDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit, longitude, latitude, search } = data;
-      const searchFields = ['name', 'address', 'id'];
-      const searchFilter = buildSearchFilter(search, searchFields);
-
-      if (!longitude || !latitude) {
-        const result = await this.baseHandler.getAllLogic(
-          page,
-          limit,
-          searchFilter,
-        );
-        return grpcPaginateResponse(result, STATION_MESSAGES.GET_ALL_SUCCESS);
-      }
-
-      // return dạng [[id, distance], [stationId, distance], ...]
-      const geoResult = (await this.redisClient.georadius(
-        REDIS_KEY_PREFIX.STATION,
-        longitude,
-        latitude,
-        500,
-        'km',
-        'WITHDIST',
-        'ASC',
-      )) as [string, string][];
-
-      if (!geoResult.length) {
-        return grpcPaginateResponse(
+      const result = await this.stationService.getAllStations(data);
+      return {
+        ...grpcPaginateResponse(
           {
-            data: [],
-            limit: limit,
-            page: page,
-            total: 0,
-            totalPages: 0,
+            data: result.data,
+            total: result.total,
+            page: result.page,
+            limit: result.limit,
+            totalPages: result.totalPages,
           },
           STATION_MESSAGES.GET_ALL_SUCCESS,
-        );
-      }
-
-      const stationIds = geoResult.map((item) => item[0]);
-      let stations = await prismaFleet.station.findMany({
-        where: {
-          id: { in: stationIds },
-        },
-      });
-
-      if (data.search) {
-        const keyword = data.search.toLowerCase();
-        stations = stations.filter((s) => {
-          return (
-            s.name.toLowerCase().includes(keyword) ||
-            s.address.toLowerCase().includes(keyword)
-          );
-        });
-
-        if (!stations.length) {
-          return grpcPaginateResponse(
-            {
-              data: [],
-              limit: limit,
-              page: page,
-              total: 0,
-              totalPages: 0,
-            },
-            STATION_MESSAGES.GET_ALL_SUCCESS,
-          );
-        }
-      }
-
-      const stationMap = new Map(
-        stations.map((station) => [station.id, station]),
-      );
-
-      // ghép station info vào cái mảng paginated redis trả ra dạng [id, distance]
-      const result = geoResult
-        .map((item) => {
-          const id = item[0];
-          const distance = Number.parseFloat(item[1]);
-          const station = stationMap.get(id);
-
-          if (!station) {
-            return null;
-          }
-
-          return {
-            ...station,
-            distance,
-          };
-        })
-        .filter((item) => item !== null);
-
-      const total = result.length;
-      const paginatedResult = result.slice((page - 1) * limit, page * limit);
-
-      return grpcPaginateResponse(
-        {
-          data: paginatedResult,
-          limit: limit,
-          page: page,
-          total: total,
-          totalPages: Math.ceil(total / limit),
-        },
-        STATION_MESSAGES.GET_ALL_SUCCESS,
-      );
+        ),
+        ...result.stats,
+      };
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
@@ -259,5 +159,50 @@ export class StationController {
       data.latitude,
       data.id,
     );
+  }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.GET_STATIONS_BY_IDS)
+  async getStationsByIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const stations = await this.stationService.getStationsByIds(ids);
+    return grpcResponse(stations, STATION_MESSAGES.GET_ALL_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.UPDATE_STATUS)
+  async updateStationStatus(data: UpdateStationStatusDto) {
+    try {
+      const { id, ...updatedData } = data;
+      const station = await this.stationService.updateStationStatus(
+        id,
+        updatedData.status,
+      );
+      return grpcResponse(station, STATION_MESSAGES.UPDATE_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2025'
+      ) {
+        throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [
+          STATION_MESSAGES.NOT_FOUND,
+        ]);
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message);
+    }
+  }
+
+  async getStationStats() {
+    const { activeStation, inactiveStation } =
+      await this.stationService.getStationStats();
+
+    return { activeStation, inactiveStation };
   }
 }

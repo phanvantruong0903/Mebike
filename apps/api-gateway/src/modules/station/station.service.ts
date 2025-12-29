@@ -4,20 +4,26 @@ import { Observable, firstValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
-  UpdateSupplierInput,
   CreateStationInput,
   GetStationInput,
   StationResponse,
   StationListResponse,
+  Station,
+  UpdateStationInput,
+  UpdateStationStatusInput,
 } from '@mebike/common';
 
 interface StationServiceClient {
   GetStation(data: { id: string }): Observable<StationResponse>;
   UpdateStation(
-    data: UpdateSupplierInput & { id: string },
+    data: UpdateStationInput & { id: string },
   ): Observable<StationResponse>;
   GetAllStations(data: GetStationInput): Observable<StationListResponse>;
   CreateStation(data: CreateStationInput): Observable<StationResponse>;
+  GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
+  UpdateStationStatus(
+    data: UpdateStationStatusInput,
+  ): Observable<StationResponse>;
 }
 
 @Injectable()
@@ -38,21 +44,52 @@ export class StationService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.CreateStation(data));
   }
 
-  async updateStation(data: UpdateSupplierInput & { id: string }) {
-    return await firstValueFrom(this.fleetService.UpdateStation(data));
+  async updateStation(id: string, data: UpdateStationInput) {
+    return await firstValueFrom(
+      this.fleetService.UpdateStation({ id, ...data }),
+    );
+  }
+
+  async changeStationStatus(data: UpdateStationStatusInput) {
+    return await firstValueFrom(this.fleetService.UpdateStationStatus(data));
   }
 
   async getAllStation(data: GetStationInput) {
     const response = await firstValueFrom(
       this.fleetService.GetAllStations(data),
     );
+    const stations = response.data as Station[];
     return {
       ...response,
-      data: response.data ?? [],
+      data: stations
+        ? stations.map((station) => ({
+            ...station,
+            bikes: station.bikes ?? [],
+          }))
+        : [],
+      activeStation: response.activeStation,
+      inactiveStation: response.inactiveStation,
     };
   }
 
   async getStation(data: { id: string }) {
-    return await firstValueFrom(this.fleetService.GetStation(data));
+    const response = await firstValueFrom(this.fleetService.GetStation(data));
+    const station = response.data as Station;
+    return {
+      ...response,
+      data: station
+        ? {
+            ...station,
+            bikes: station.bikes ?? [],
+          }
+        : station,
+    };
+  }
+
+  async getStationByIds(ids: string[]): Promise<Station[]> {
+    const response = await firstValueFrom(
+      this.fleetService.GetStationsByIds({ ids }),
+    );
+    return response.data || [];
   }
 }

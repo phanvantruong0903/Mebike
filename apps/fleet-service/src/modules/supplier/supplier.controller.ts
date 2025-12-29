@@ -9,7 +9,6 @@ import {
   SERVER_MESSAGE,
   CreateSupplierDto,
   UpdateSupplierDto,
-  prismaFleet,
   SUPPLIER_METHODS,
   SUPPLIER_MESSAGES,
   ChangeSupplierStatusDto,
@@ -41,28 +40,11 @@ export class SupplierController {
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const { id, address, phone, ...rest } = data;
-      const currentSupplier = await this.baseHandler.getOneById(id);
-
-      if (!currentSupplier) {
-        throwGrpcError(404, SUPPLIER_MESSAGES.NOT_FOUND, [
-          SUPPLIER_MESSAGES.NOT_FOUND,
-        ]);
-      }
-
-      const oldContactInfo = (currentSupplier.contactInfo as any) || {};
-      const newContactInfo = {
-        ...oldContactInfo,
-      };
-
-      if (address) newContactInfo.address = address;
-      if (phone) newContactInfo.phone = phone;
-
-      const updateData: any = {
+      const result = await this.supplierService.updateSupplier(id, {
         ...rest,
-        contactInfo: newContactInfo,
-      };
-
-      const result = await this.baseHandler.updateLogic(id, updateData);
+        address,
+        phone,
+      });
       return grpcResponse<SupplierModel>(
         result,
         SUPPLIER_MESSAGES.UPDATE_SUCCESS,
@@ -83,17 +65,9 @@ export class SupplierController {
     id: string;
   }): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await prismaFleet.supplier.findUnique({
-        where: { id },
-      });
-      if (!result) {
-        throwGrpcError(404, SUPPLIER_MESSAGES.NOT_FOUND, [
-          SUPPLIER_MESSAGES.NOT_FOUND,
-        ]);
-      }
-
+      const result = await this.supplierService.getSupplierDetail(id);
       return grpcResponse<SupplierModel>(
-        result as unknown as SupplierModel,
+        result,
         SUPPLIER_MESSAGES.GET_DETAIL_SUCCESS,
       );
     } catch (error) {
@@ -110,23 +84,12 @@ export class SupplierController {
     data: CreateSupplierDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const supplierData = {
-        name: data.name,
-        contactFee: data.contactFee,
-        contactInfo: {
-          address: data.address,
-          phone: data.phone,
-        },
-      };
-      const result = await this.baseHandler.createLogic(
-        supplierData as unknown as CreateSupplierDto,
-      );
-
+      const result = await this.supplierService.createSupplier(data as any);
       return grpcResponse<SupplierModel>(
         result,
         SUPPLIER_MESSAGES.CREATE_SUCCESS,
       );
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof RpcException) {
         throw error;
       }
@@ -163,10 +126,10 @@ export class SupplierController {
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const { id, ...updatedData } = data;
-      const profile = await prismaFleet.supplier.update({
-        where: { id },
-        data: updatedData,
-      });
+      const profile = await this.supplierService.changeSupplierStatus(
+        id,
+        updatedData.status,
+      );
       return grpcResponse(profile, SUPPLIER_MESSAGES.UPDATE_SUCCESS);
     } catch (error: unknown) {
       if (error instanceof RpcException) {
@@ -189,8 +152,14 @@ export class SupplierController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_STATS)
-  async getUserStats() {
+  async getSupplierStats() {
     const result = await this.supplierService.getSupplierStat();
     return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_STATS_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_SUPPLIERS_BY_IDS)
+  async getSupplierByIds(data: { ids: string[] }) {
+    const result = await this.supplierService.getSuppliersByIds(data.ids);
+    return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
   }
 }

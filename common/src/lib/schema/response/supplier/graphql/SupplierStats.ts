@@ -10,4 +10,25 @@ export class SupplierStats {
 
   @Field(() => Int)
   totalSupplierInactive!: number;
+
+  @Field(() => Int)
+  totalBike!: number;
+
+  @Field(() => Int)
+  totalAvailableBike!: number;
+
+  @Field(() => Int)
+  totalBookedBike!: number;
+
+  @Field(() => Int)
+  totalBrokenBike!: number;
+
+  @Field(() => Int)
+  totalReservedBike!: number;
+
+  @Field(() => Int)
+  totalMaintainedBike!: number;
+
+  @Field(() => Int)
+  totalUnAvailableBike!: number;
 }

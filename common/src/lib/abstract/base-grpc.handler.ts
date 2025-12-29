@@ -27,6 +27,17 @@ export class BaseGrpcHandler<
       // Lỗi field unique trùng
       if (error?.code === 'P2002') {
         const fields: string[] = error.meta?.target ?? [];
+
+        const isLocationDuplicated =
+          Array.isArray(fields) &&
+          fields.includes('latitude') &&
+          fields.includes('longitude');
+
+        if (isLocationDuplicated) {
+          throwGrpcError(409, SERVER_MESSAGE.UNIQUE_CONSTRAINT_FAILED, [
+            'Station at this location (latitude, longitude) already exists',
+          ]);
+        }
         const messages = fields.map((field) => {
           switch (field) {
             case 'email':
@@ -57,6 +68,7 @@ export class BaseGrpcHandler<
     limit = 10,
     filter?: any,
     orderBy?: any,
+    include?: any,
   ): Promise<{
     data: T[];
     total: number;
@@ -64,7 +76,7 @@ export class BaseGrpcHandler<
     limit: number;
     totalPages: number;
   }> {
-    return await this.service.findAll(page, limit, filter, orderBy);
+    return await this.service.findAll(page, limit, filter, orderBy, include);
   }
 
   async getOneById(id: string): Promise<T | null> {
@@ -97,6 +109,17 @@ export class BaseGrpcHandler<
     } catch (error: any) {
       if (error?.code === 'P2002') {
         const fields: string[] = error.meta?.target ?? [];
+        const isLocationDuplicated =
+          Array.isArray(fields) &&
+          fields.includes('latitude') &&
+          fields.includes('longitude');
+
+        if (isLocationDuplicated) {
+          throwGrpcError(409, SERVER_MESSAGE.UNIQUE_CONSTRAINT_FAILED, [
+            'Station at this location (latitude, longitude) already exists',
+          ]);
+        }
+
         const messages = fields.map((field) => {
           switch (field) {
             case 'email':

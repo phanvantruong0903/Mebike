@@ -57,7 +57,7 @@ export type WalletModel = PaymentPrismaInternal.Wallet;
 export type WalletHistoryModel = PaymentPrismaInternal.WalletHistory;
 export type WithdrawModel = PaymentPrismaInternal.Withdraw;
 export { Role, UserVerifyStatus, UserStatus } from './user/generated';
-export { SupplierStatus, BikeStatus } from './fleet/generated';
+export { SupplierStatus, BikeStatus, StationStatus } from './fleet/generated';
 export {
   TransactionType,
   TransactionStatus,

@@ -10,6 +10,7 @@ import {
   SupplierListResponse,
   GetSupplierInput,
   ChangeSupplierStatusInput,
+  SupplierStatsResponse,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -59,8 +60,9 @@ export class SupplierResolver {
   ): Promise<SupplierListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
+    const search = data?.search ?? '';
 
-    return this.supplierService.getAllSuppliers({ page, limit });
+    return this.supplierService.getAllSuppliers({ page, limit, search });
   }
 
   @Mutation(() => SupplierResponse, {
@@ -72,6 +74,15 @@ export class SupplierResolver {
     @Args('body') body: ChangeSupplierStatusInput,
   ): Promise<SupplierResponse> {
     return this.supplierService.changeSupplierStatus(body);
+  }
+
+  @Query(() => SupplierStatsResponse, {
+    name: GRAPHQL_NAME_SUPPLIER.GET_STATS,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async getSupplierStats(): Promise<SupplierStatsResponse> {
+    return this.supplierService.getSupplierStats();
   }
 
   @Query(() => String)

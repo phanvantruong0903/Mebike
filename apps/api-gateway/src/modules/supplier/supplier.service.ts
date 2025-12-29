@@ -4,7 +4,6 @@ import { Observable, firstValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
-  RegisterUserInput,
   SupplierResponse,
   SupplierListResponse,
   SupplierStatsResponse,
@@ -12,6 +11,7 @@ import {
   ChangeSupplierStatusInput,
   CreateSupplierInput,
   GetSupplierInput,
+  Supplier,
 } from '@mebike/common';
 
 interface SupplierServiceClient {
@@ -23,8 +23,11 @@ interface SupplierServiceClient {
   ChangeSupplierStatus(
     data: ChangeSupplierStatusInput & { id: string },
   ): Observable<SupplierResponse>;
-  GetSupplierStats(data: RegisterUserInput): Observable<SupplierStatsResponse>;
+  GetSupplierStats(
+    data: Record<string, never>,
+  ): Observable<SupplierStatsResponse>;
   CreateSupplier(data: CreateSupplierInput): Observable<SupplierResponse>;
+  GetSupplierByIds(data: { ids: string[] }): Observable<{ data: Supplier[] }>;
 }
 
 @Injectable()
@@ -53,9 +56,15 @@ export class SupplierService implements OnModuleInit {
     const response = await firstValueFrom(
       this.fleetService.GetAllSuppliers(data),
     );
+    const suppliers = response.data as Supplier[];
     return {
       ...response,
-      data: response.data ?? [],
+      data: suppliers
+        ? suppliers.map((supplier) => ({
+            ...supplier,
+            bikes: supplier.bikes ?? [],
+          }))
+        : [],
     };
   }
 
@@ -64,10 +73,27 @@ export class SupplierService implements OnModuleInit {
   }
 
   async getSupplier(data: { id: string }) {
-    return await firstValueFrom(this.fleetService.GetSupplier(data));
+    const response = await firstValueFrom(this.fleetService.GetSupplier(data));
+    const supplier = response.data as Supplier;
+    return {
+      ...response,
+      data: supplier
+        ? {
+            ...supplier,
+            bikes: supplier.bikes ?? [],
+          }
+        : supplier,
+    };
   }
 
-  async getSupplierStats(data: RegisterUserInput) {
-    return await firstValueFrom(this.fleetService.GetSupplierStats(data));
+  async getSupplierStats() {
+    return await firstValueFrom(this.fleetService.GetSupplierStats({}));
+  }
+
+  async getSupplierByIds(ids: string[]): Promise<Supplier[]> {
+    const response = await firstValueFrom(
+      this.fleetService.GetSupplierByIds({ ids }),
+    );
+    return response.data || [];
   }
 }

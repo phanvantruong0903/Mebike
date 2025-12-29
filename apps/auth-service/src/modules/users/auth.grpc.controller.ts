@@ -10,7 +10,6 @@ import {
   grpcResponse,
   USER_MESSAGES,
   UserDto,
-  CreateProfileDto,
   LoginUserDto,
   CreateUserDto,
   User,
@@ -31,6 +30,7 @@ import {
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
+import { TemporalService } from '../../saga/temporal-service';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -43,6 +43,7 @@ export class AuthGrpcController {
     @Inject(REDIS_CONSTANTS.REDIS_CLIENT)
     private readonly redis: Redis,
     private readonly authService: AuthService,
+    private readonly temporalService: TemporalService,
   ) {
     this.baseHandler = new BaseGrpcHandler(this.authService, CreateUserDto);
   }
@@ -223,31 +224,15 @@ export class AuthGrpcController {
 
       user = await this.baseHandler.createLogic(userData);
 
-      // Step 2: Create User Profile Record
-      const profileData: CreateProfileDto = {
-        YOB: data.YOB,
-        name: data.name,
+      await this.temporalService.startUserCreationWorkflow({
         accountId: user.id,
+        role,
+        email: data.email,
+        name: data.name,
         phone: data.phone,
-        role: role,
-      };
+        YOB: data.YOB,
+      });
 
-      this.kafkaClient
-        .emit(KAFKA_TOPIC.USER_CREATED, {
-          key: user.id,
-          value: profileData,
-        })
-        .subscribe();
-
-      this.kafkaClient
-        .emit(KAFKA_TOPIC.WALLET_CREATED, {
-          key: user.id,
-          value: user.id,
-        })
-        .subscribe();
-
-      // send welcome email
-      this.authService.welcomeEmail(user.id, user.email, data.name);
       if (shouldGenerateToken) {
         const { accessToken, refreshToken } =
           await this.authService.generateToken({
@@ -264,6 +249,9 @@ export class AuthGrpcController {
 
       return grpcResponse(user, USER_MESSAGES.CREATE_SCUCCESS);
     } catch (error) {
+      if (user) {
+        await this.baseHandler.deleteLogic(user.id);
+      }
       if (error instanceof RpcException) {
         throw error;
       }

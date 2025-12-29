@@ -43,10 +43,12 @@ export function grpcPaginateResponse<T>(
     success: true,
     message,
     data: result.data.length == 0 ? [] : result.data,
-    total: result.total,
-    page: result.page,
-    limit: result.limit,
-    totalPages: result.totalPages,
+    pagination: {
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      totalPages: result.totalPages,
+    },
     statusCode,
   };
 }

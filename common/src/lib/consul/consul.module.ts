@@ -5,4 +5,4 @@ import { ConsulService } from './consul.service';
   providers: [ConsulService],
   exports: [ConsulService],
 })
-export class ConsuleModule {}
+export class ConsulModule {}
