@@ -62,5 +62,6 @@
       "options": { "typecheck": { "targetName": "typecheck" } }
     }
   ],
-  "targetDefaults": { "test": { "dependsOn": ["^build"] } }
+  "targetDefaults": { "test": { "dependsOn": ["^build"] } },
+  "nxCloudId": "69537b0734bb55830a5052c4"
 }
