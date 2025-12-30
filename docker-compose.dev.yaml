@@ -1,0 +1,459 @@
+services:
+  consul:
+    image: hashicorp/consul:1.16
+    container_name: consul
+    restart: 'unless-stopped'
+    ports:
+      - '8500:8500'
+    command: 'agent -dev -client=0.0.0.0'
+    networks:
+      - mebike-network
+  
+  auth-db:
+    image: postgres:16-alpine
+    container_name: auth-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+    ports:
+      - '5433:5432'
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    networks:
+      - mebike-network
+
+  user-db:
+    image: postgres:16-alpine
+    container_name: user-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+    ports:
+      - '5434:5432'
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    networks:
+      - mebike-network
+  
+  fleet-db:
+    image: postgres:16-alpine
+    container_name: fleet-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${FLEET_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+    ports:
+      - '5435:5432'
+    volumes:
+      - fleet_data:/var/lib/postgresql/data
+    networks:
+      - mebike-network
+  
+  payment-db:
+    image: postgres:16-alpine
+    container_name: payment-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${PAYMENT_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+    ports:
+      - '5437:5432'
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+    networks:
+      - mebike-network
+
+  temporal-db:
+    image: postgres:16-alpine
+    container_name: temporal-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${TEMPORAL_DB_NAME}
+      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+    networks:
+      - mebike-network
+
+  temporal:
+    image: temporalio/auto-setup:latest
+    container_name: temporal
+    restart: 'unless-stopped'
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PWD=${DB_PASSWORD}
+      - POSTGRES_SEEDS=temporal-db
+      - TEMPORAL_ADDRESS=temporal:7233
+    ports:
+      - "7233:7233"
+    depends_on:
+      - temporal-db
+    networks:
+      - mebike-network
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    container_name: temporal-ui
+    ports:
+      - "8081:8080"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    depends_on:
+      - temporal
+    networks:
+      - mebike-network
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: 'unless-stopped'
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--log.level=INFO"
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-mebike.local}`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=web"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+    networks:
+      - mebike-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKAJS_NO_PARTITIONER_WARNING: "1"
+
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - kafka_data:/var/lib/kafka
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - mebike-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: 'unless-stopped'
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: Mebike-Cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.kafka-ui.rule=Host(`kafka.localhost`)'
+      - 'traefik.http.routers.kafka-ui.entrypoints=web'
+      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
+    networks:
+      - mebike-network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: 'unless-stopped'
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - mebike-network
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: api-gateway
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      auth-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      fleet-service:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - PORT=3000
+      - NODE_ENV=development
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    labels:
+      - 'traefik.enable=true'
+      
+      # GraphQL routes
+      - 'traefik.http.routers.api-gateway-graphql-http.rule=PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway-graphql-http.entrypoints=web'
+      - 'traefik.http.routers.api-gateway-graphql-http.middlewares=api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-graphql-http.priority=100'
+      
+      # GraphQL routes
+      - 'traefik.http.routers.api-gateway-graphql-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway-graphql-https.entrypoints=websecure'
+      - 'traefik.http.routers.api-gateway-graphql-https.middlewares=api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-graphql-https.priority=100'
+      
+      # REST API routes
+      - 'traefik.http.routers.api-gateway-rest-http.rule=PathPrefix(`/api`)'
+      - 'traefik.http.routers.api-gateway-rest-http.entrypoints=web'
+      - 'traefik.http.routers.api-gateway-rest-http.middlewares=api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-rest-http.priority=90'
+      
+      # REST API routes
+      - 'traefik.http.routers.api-gateway-rest-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.api-gateway-rest-https.entrypoints=websecure'
+      - 'traefik.http.routers.api-gateway-rest-https.middlewares=api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-rest-https.priority=90'
+      
+      # Middlewares
+      - 'traefik.http.middlewares.api-compress.compress=true'
+      - 'traefik.http.middlewares.api-retry.retry.attempts=3'
+
+      # Service
+      - 'traefik.http.services.api-gateway.loadbalancer.server.port=3000'
+    networks:
+      - mebike-network
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    container_name: auth-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      auth-db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@auth-db:5432/${AUTH_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
+      - AUTH_SERVICE_PORT=50051
+      - KAFKA_BROKERS=kafka:29092
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - DEFAULT_USER_PASSWORD=${DEFAULT_USER_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - TEMPORAL_ADDRESS=temporal:7233
+      - NODE_ENV=development
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+    networks:
+      - mebike-network
+
+  user-service:
+    build:
+      context: .
+      dockerfile: apps/user-service/Dockerfile
+    container_name: user-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      user-db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
+      - USER_SERVICE_PORT=50052
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50052']
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    networks:
+      - mebike-network
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification-service/Dockerfile
+    container_name: notification-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - NOTIFICATION_SERVICE_PORT=50053
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    networks:
+      - mebike-network
+
+  fleet-service:
+    build:
+      context: .
+      dockerfile: apps/fleet-service/Dockerfile
+    container_name: fleet-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      fleet-db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@fleet-db:5432/${FLEET_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
+      - FLEET_SERVICE_PORT=50054
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    networks:
+      - mebike-network
+  
+  payment-service:
+    build:
+      context: .
+      dockerfile: apps/payment-service/Dockerfile
+    container_name: payment-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      payment-db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - PAYMENT_SERVICE_PORT=50056
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@payment-db:5432/${PAYMENT_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
+      - KAFKA_BROKERS=kafka:29092
+      - VNPAY_TMN_CODE=${VNPAY_TMN_CODE}
+      - VNPAY_HASHSECRET=${VNPAY_HASHSECRET}
+      - VNP_URL=${VNP_URL}
+      - VNP_RETURNURL=${VNP_RETURNURL}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50056']
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+    networks:
+      - mebike-network
+
+networks:
+  mebike-network:
+    driver: bridge
+
+volumes:
+  auth_data:
+  user_data:
+  kafka_data:
+  fleet_data:
+  payment_data:
+  temporal_data:
