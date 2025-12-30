@@ -85,23 +85,34 @@ export class SupplierService extends BaseService<
   }
 
   async getSupplierDetail(id: string) {
-    const result = await prismaFleet.supplier.findUnique({
-      where: { id },
-      include: {
-        bikes: {
-          include: {
-            station: true,
+    const [result, stats] = await Promise.all([
+      prismaFleet.supplier.findUnique({
+        where: { id },
+        include: {
+          bikes: {
+            include: {
+              station: true,
+            },
           },
         },
-      },
-    });
+      }),
+      this.getSupplierStats(id),
+    ]);
     if (!result) {
       throwGrpcError(404, SUPPLIER_MESSAGES.NOT_FOUND, [
         SUPPLIER_MESSAGES.NOT_FOUND,
       ]);
     }
 
-    return result as unknown as SupplierModel;
+    return {
+      ...result,
+      totalBikes: stats.totalBikes,
+      availableBikes: stats.availableBikes,
+      bookedBikes: stats.bookedBikes,
+      reservedBikes: stats.reservedBikes,
+      maintainedBikes: stats.maintainedBikes,
+      unavailableBikes: stats.unavailableBikes,
+    };
   }
 
   async updateSupplier(
@@ -176,5 +187,44 @@ export class SupplierService extends BaseService<
       },
     });
     return result;
+  }
+
+  async getSupplierStats(id: string) {
+    const [
+      totalBikes,
+      availableBikes,
+      bookedBikes,
+      reservedBikes,
+      maintainedBikes,
+      unavailableBikes,
+    ] = await Promise.all([
+      prismaFleet.bike.count({
+        where: { supplierId: id },
+      }),
+      prismaFleet.bike.count({
+        where: { supplierId: id, status: BikeStatus.Available },
+      }),
+      prismaFleet.bike.count({
+        where: { supplierId: id, status: BikeStatus.Booked },
+      }),
+      prismaFleet.bike.count({
+        where: { supplierId: id, status: BikeStatus.Reserved },
+      }),
+      prismaFleet.bike.count({
+        where: { supplierId: id, status: BikeStatus.Maintained },
+      }),
+      prismaFleet.bike.count({
+        where: { supplierId: id, status: BikeStatus.Unavailable },
+      }),
+    ]);
+
+    return {
+      totalBikes,
+      availableBikes,
+      bookedBikes,
+      reservedBikes,
+      maintainedBikes,
+      unavailableBikes,
+    };
   }
 }

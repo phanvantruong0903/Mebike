@@ -76,6 +76,7 @@ services:
   temporal-db:
     image: postgres:16-alpine
     container_name: temporal-db
+    restart: 'unless-stopped'
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -87,6 +88,7 @@ services:
   temporal:
     image: temporalio/auto-setup:latest
     container_name: temporal
+    restart: 'unless-stopped'
     environment:
       - DB=postgres12
       - DB_PORT=5432
@@ -135,7 +137,7 @@ services:
       - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
       - "traefik.http.routers.traefik-dashboard.entrypoints=web"
       - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      # - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
       - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
       - "traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}"
     networks:
@@ -243,26 +245,18 @@ services:
       - 'traefik.enable=true'
       
       # GraphQL routes (higher priority)
-      - 'traefik.http.routers.api-gateway-graphql-http.rule=PathPrefix(`/graphql`)'
-      - 'traefik.http.routers.api-gateway-graphql-http.entrypoints=web'
-      - 'traefik.http.routers.api-gateway-graphql-http.middlewares=api-ratelimit,api-compress,api-retry'
-      - 'traefik.http.routers.api-gateway-graphql-http.priority=100'
-      
-      - 'traefik.http.routers.api-gateway-graphql-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
-      - 'traefik.http.routers.api-gateway-graphql-https.entrypoints=websecure'
-      - 'traefik.http.routers.api-gateway-graphql-https.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.api-gateway-graphql-https.middlewares=api-ratelimit,api-compress,api-retry'
+      - 'traefik.http.routers.api-gateway-graphql.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
+      - 'traefik.http.routers.api-gateway-graphql.entrypoints=websecure'
+      - 'traefik.http.routers.api-gateway-graphql.tls.certresolver=cloudflare'
+      - "traefik.http.routers.api-gateway-graphql.priority=100"
+      - 'traefik.http.routers.api-gateway-graphql.middlewares=api-ratelimit,api-compress,api-retry'
       
       # REST API routes (lower priority for /api paths like VNPay callback)
-      - 'traefik.http.routers.api-gateway-rest-http.rule=PathPrefix(`/api`)'
-      - 'traefik.http.routers.api-gateway-rest-http.entrypoints=web'
-      - 'traefik.http.routers.api-gateway-rest-http.middlewares=api-ratelimit,api-compress,api-retry'
-      - 'traefik.http.routers.api-gateway-rest-http.priority=90'
-      
-      - 'traefik.http.routers.api-gateway-rest-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/api`)'
-      - 'traefik.http.routers.api-gateway-rest-https.entrypoints=websecure'
-      - 'traefik.http.routers.api-gateway-rest-https.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.api-gateway-rest-https.middlewares=api-ratelimit,api-compress,api-retry'
+      - "traefik.http.routers.api-gateway-vnpay.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/api/payment/vnpay_return`)"
+      - "traefik.http.routers.api-gateway-vnpay.entrypoints=websecure"
+      - "traefik.http.routers.api-gateway-vnpay.tls.certresolver=cloudflare"
+      - "traefik.http.routers.api-gateway-vnpay.priority=90"
+      - "traefik.http.routers.api-gateway-vnpay.middlewares=api-compress"
       
       # Other Middlewares
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.average=100'
