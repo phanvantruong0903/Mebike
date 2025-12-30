@@ -17,7 +17,7 @@ export class PaymentController {
     try {
       await this.paymentService.depositCallback({
         accountId,
-        amount: Number(amount),
+        amount: Number(amount) / 100,
         description: orderInfo,
       });
       const redirectUrl = 'https://facebook.com';
