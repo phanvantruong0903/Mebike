@@ -88,6 +88,7 @@ services:
   temporal:
     image: temporalio/auto-setup:latest
     container_name: temporal
+    restart: 'unless-stopped'
     environment:
       - DB=postgres12
       - DB_PORT=5432
