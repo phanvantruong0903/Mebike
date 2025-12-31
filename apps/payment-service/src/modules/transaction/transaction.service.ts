@@ -19,10 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const VALID_WITHDRAW_TRANSITIONS: Record<WithdrawStatus, WithdrawStatus[]> = {
   [WithdrawStatus.PENDING]: [WithdrawStatus.APPROVED, WithdrawStatus.REJECTED],
-  [WithdrawStatus.APPROVED]: [
-    WithdrawStatus.COMPLETED,
-    WithdrawStatus.REJECTED,
-  ],
+  [WithdrawStatus.APPROVED]: [WithdrawStatus.COMPLETED],
   [WithdrawStatus.COMPLETED]: [],
   [WithdrawStatus.REJECTED]: [],
 };
@@ -91,6 +88,12 @@ export class TransactionService extends BaseService<
       ]);
     }
 
+    if (data.status === WithdrawStatus.REJECTED && !data.reason) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.REASON_REQUIRED,
+      ]);
+    }
+
     const currentStatus = findWithdraw.status;
     const allowedNextStatus = VALID_WITHDRAW_TRANSITIONS[currentStatus];
     if (!allowedNextStatus.includes(data.status)) {
@@ -110,9 +113,34 @@ export class TransactionService extends BaseService<
         ]);
       }
 
+      if (wallet.status !== WalletStatus.ACTIVE) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          PAYMENT_MESSAGES.WALLET_BLOCKED,
+        ]);
+      }
+
+      if (wallet.balance.lessThan(findWithdraw.amount)) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
+        ]);
+      }
+
       const balanceBefore = wallet.balance;
       const balanceAfter = wallet.balance.sub(findWithdraw.amount);
       const transactionId = uuidv4();
+
+      await prismaPayment.transaction.create({
+        data: {
+          id: transactionId,
+          accountId: findWithdraw.accountId,
+          type: TransactionType.WITHDRAWAL,
+          status: TransactionStatus.SUCCESS,
+          amount: findWithdraw.amount,
+          paymentMethod: PaymentMethod.BALANCE,
+          description:
+            findWithdraw.reason || `Withdrawal ${findWithdraw.amount}`,
+        },
+      });
 
       const [updatedWithdraw] = await Promise.all([
         prismaPayment.withdraw.update({
@@ -124,7 +152,7 @@ export class TransactionService extends BaseService<
         }),
         prismaPayment.walletHistory.create({
           data: {
-            walletId: findWithdraw.accountId,
+            walletId: wallet.id,
             transactionId,
             type: TransactionType.WITHDRAWAL,
             amount: findWithdraw.amount,
@@ -138,18 +166,6 @@ export class TransactionService extends BaseService<
             balance: {
               decrement: findWithdraw.amount,
             },
-          },
-        }),
-        prismaPayment.transaction.create({
-          data: {
-            id: transactionId,
-            accountId: findWithdraw.accountId,
-            type: TransactionType.WITHDRAWAL,
-            status: TransactionStatus.SUCCESS,
-            amount: findWithdraw.amount,
-            paymentMethod: PaymentMethod.BALANCE,
-            description:
-              findWithdraw.reason || `Withdrawal ${findWithdraw.amount}`,
           },
         }),
       ]);

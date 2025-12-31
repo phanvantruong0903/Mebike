@@ -117,6 +117,7 @@ export const PAYMENT_MESSAGES = {
   CREATE_WITHDRAW_SUCCESS: 'Withdraw created successfully',
   UPDATE_WITHDRAW_SUCCESS: 'Withdraw updated successfully',
   CREATE_WALLET_SUCCESS: 'Wallet created successfully',
+  REASON_REQUIRED: 'Reason is required',
 };
 
 export const SERVER_MESSAGE = {

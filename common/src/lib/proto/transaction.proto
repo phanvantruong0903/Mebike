@@ -88,7 +88,7 @@ message CreateWithdrawRequest {
 message WithdrawResponse {
   bool success = 1;
   string message = 2;
-  repeated Withdraw data = 3;
+  Withdraw data = 3;
   repeated string errors = 4;
   int32 statusCode = 5;
 }
