@@ -9,6 +9,7 @@ import './modules/user/graphql/enum';
 import './modules/supplier/graphql/enum';
 import './modules/bike/graphql/enum';
 import './modules/station/graphql/enum';
+import './modules/transaction/graphql/enum';
 
 async function bootstrap() {
   dotenv.config();

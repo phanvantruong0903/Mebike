@@ -12,6 +12,7 @@ import { BikeModule } from '../modules/bike/bike.module';
 import { PaymentModule } from '../modules/payment/payment.module';
 import { WalletModule } from '../modules/wallet/wallet.module';
 import { HttpErrorStatusPlugin } from '../plugins/http-status.plugin';
+import { TransactionModule } from '../modules/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { HttpErrorStatusPlugin } from '../plugins/http-status.plugin';
     BikeModule,
     PaymentModule,
     WalletModule,
+    TransactionModule,
   ],
   providers: [HttpErrorStatusPlugin],
 })

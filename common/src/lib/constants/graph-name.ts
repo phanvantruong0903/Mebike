@@ -45,3 +45,10 @@ export const GRAPHQL_NAME_BIKE = {
 export const GRAPHQL_NAME_PAYMENT = {
   CREATE: 'CreatePayment',
 };
+
+export const GRAPHQL_NAME_TRANSACTION = {
+  UPDATE_WITHDRAW_STATUS: 'UpdateWithdrawStatus',
+  GET_ONE: 'GetTransaction',
+  GET_ALL: 'GetAllTransactions',
+  CREATE_WITHDRAW: 'CreateWithdraw',
+};

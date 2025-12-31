@@ -32,8 +32,13 @@ export class TransactionController {
   async getAllTransaction(
     data: GetTransactionDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
-    const searchFields = ['id', 'accountId'];
-    const searchFilter = buildSearchFilter(data.accountId, searchFields);
+    const searchFields = ['id'];
+    let searchFilter = buildSearchFilter(data.search, searchFields);
+
+    searchFilter = {
+      ...searchFilter,
+      ...(data.accountId && { accountId: data.accountId }),
+    };
 
     const result = await this.baseGrpcHandler.getAllLogic(
       data.page,

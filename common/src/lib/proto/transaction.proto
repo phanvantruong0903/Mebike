@@ -5,7 +5,7 @@ package transaction;
 service PaymentService {
   rpc GetAllTransactions (GetTransactionsRequest) returns (GetTransactionsResponse);
   rpc GetTransaction (GetTransactionRequest) returns (GetTransactionResponse);
-  rpc CreateWithdraw (CreateWithdrawRequest) returns (GetAllWalletsResponse);
+  rpc CreateWithdraw (CreateWithdrawRequest) returns (WithdrawResponse);
   rpc UpdateWithdrawStatus (UpdateWalletStatusRequest) returns (WithdrawResponse);
 }
 
@@ -15,14 +15,14 @@ message Transaction {
   string type = 3;
   string status = 4;
   int32 amount = 5;
-  string32 paymentMethod = 6;
+  string paymentMethod = 6;
   string description = 7;
   string createdAt = 8; 
   string updatedAt = 9;
 }
 
 message Withdraw {
-  string id = 1
+  string id = 1;
   string accountId = 2;
   string bank = 3;
   string accountOwner = 4;
@@ -57,6 +57,7 @@ message GetTransactionsRequest {
   int32 page = 1;
   int32 limit = 2;
   optional string search = 3;
+  optional string accountId = 4;
 }
 
 message Pagination {

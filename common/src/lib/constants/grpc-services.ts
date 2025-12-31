@@ -4,6 +4,7 @@ export const GRPC_SERVICES = {
   NOTIFICATION: 'NotificationService',
   FLEET: 'FleetService',
   PAYMENT: 'PaymentService',
+  TRANSACTION: 'TransactionService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -12,6 +13,7 @@ export const GRPC_PACKAGE = {
   NOTIFICATION: 'NOTIFICATION_PACKAGE',
   FLEET: 'FLEET_PACKAGE',
   PAYMENT: 'PAYMENT_PACKAGE',
+  TRANSACTION: 'TRANSACTION_PACKAGE',
 };
 
 export const USER_METHODS = {
