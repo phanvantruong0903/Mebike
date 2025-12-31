@@ -10,6 +10,7 @@ import {
   GetTransactionInput,
   UserProfile,
   CreateWithDrawInput,
+  WithdrawResponse,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -20,14 +21,14 @@ import { CurrentUser } from '../auth/current-user.decorator';
 export class TransactionResolver {
   constructor(private readonly transactionService: TransactionService) {}
 
-  @Mutation(() => TransactionResponse, {
+  @Mutation(() => WithdrawResponse, {
     name: GRAPHQL_NAME_TRANSACTION.UPDATE_WITHDRAW_STATUS,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async updateWithdrawStatus(
     @Args('body') body: UpdateWithDrawStatusInput,
-  ): Promise<TransactionResponse> {
+  ): Promise<WithdrawResponse> {
     return this.transactionService.updateWithdrawStatus(body);
   }
 
@@ -67,7 +68,7 @@ export class TransactionResolver {
     });
   }
 
-  @Mutation(() => TransactionResponse, {
+  @Mutation(() => WithdrawResponse, {
     name: GRAPHQL_NAME_TRANSACTION.CREATE_WITHDRAW,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -75,7 +76,7 @@ export class TransactionResolver {
   async createWithdrawTransaction(
     @Args('body') body: CreateWithDrawInput,
     @CurrentUser() user: UserProfile,
-  ): Promise<TransactionResponse> {
+  ): Promise<WithdrawResponse> {
     return this.transactionService.createWithdraw(body, user.accountId);
   }
 

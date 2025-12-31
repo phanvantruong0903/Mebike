@@ -8,6 +8,7 @@ import {
   TransactionListResponse,
   TransactionResponse,
   UpdateWithDrawStatusInput,
+  WithdrawResponse,
 } from '@mebike/common';
 
 interface PaymentServiceClient {
@@ -25,10 +26,10 @@ interface PaymentServiceClient {
     accountNumber: string;
     amount: number;
     note?: string;
-  }): Observable<TransactionResponse>;
+  }): Observable<WithdrawResponse>;
   UpdateWithdrawStatus(
     data: UpdateWithDrawStatusInput,
-  ): Observable<TransactionResponse>;
+  ): Observable<WithdrawResponse>;
 }
 
 @Injectable()
