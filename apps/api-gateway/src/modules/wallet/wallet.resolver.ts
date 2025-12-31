@@ -3,8 +3,6 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
-  TransactionResponse,
-  TransactionListResponse,
   UserProfile,
   UpdateWalletStatusInput,
   GetWalletInput,
