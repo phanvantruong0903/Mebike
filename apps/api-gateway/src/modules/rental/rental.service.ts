@@ -24,7 +24,7 @@ export class RentalService implements OnModuleInit {
   private rentalService!: RentalServiceClient;
 
   constructor(
-    @Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc,
+    @Inject(GRPC_PACKAGE.RENTAL) private readonly client: ClientGrpc,
   ) {}
 
   onModuleInit() {

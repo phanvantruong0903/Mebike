@@ -45,5 +45,6 @@ import { SupplierDataloader } from './supplier.dataloader';
     ]),
   ],
   providers: [BikeService, BikeResolver, StationDataloader, SupplierDataloader],
+  exports: [BikeService],
 })
 export class BikeModule {}
