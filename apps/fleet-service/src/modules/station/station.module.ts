@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import {
-  ConsuleModule,
+  ConsulModule,
   JwtSharedModule,
   KAFKA_CLIENT_ID,
   KAFKA_GROUP_ID,
@@ -14,7 +14,7 @@ import { StationController } from './station.controller';
 
 @Module({
   imports: [
-    ConsuleModule,
+    ConsulModule,
     RedisModule,
     JwtSharedModule,
     ConfigModule.forRoot({ isGlobal: true }),

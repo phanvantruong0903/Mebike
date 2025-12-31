@@ -68,6 +68,7 @@ message UsersResponse {
 message GetAllUserRequest {
   int32 page = 1;
   int32 limit = 2;
+  optional string search = 3;
 }
 
 message ChangeStatusRequest {
@@ -97,12 +98,42 @@ message UserVerifyRequest {
 }
 
 service UserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
   rpc GetUser(GetUserRequest) returns (UserDetailResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
   rpc GetAllUsers(GetAllUserRequest) returns (UsersResponse);
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
   rpc GetUserStats(Empty) returns (UserStatsResponse);
   rpc UserVerify(UserVerifyRequest) returns (UserDetailResponse);
+}
+
+message CreateUserRequest {
+  string accountId = 1;
+  string name = 2;
+  int32 YOB = 3;
+  string phone = 4;
+  optional string role = 5;
+}
+
+message CreateUserResponse {
+  bool success = 1;
+  string message = 2;
+  User data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message DeleteUserRequest {
+  string accountId = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+  string message = 2;
+  User data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
 }
 
 message Empty {}

@@ -58,14 +58,32 @@ export class StationService implements OnModuleInit {
     const response = await firstValueFrom(
       this.fleetService.GetAllStations(data),
     );
+    const stations = response.data as Station[];
     return {
       ...response,
-      data: response.data ?? [],
+      data: stations
+        ? stations.map((station) => ({
+            ...station,
+            bikes: station.bikes ?? [],
+          }))
+        : [],
+      activeStation: response.activeStation,
+      inactiveStation: response.inactiveStation,
     };
   }
 
   async getStation(data: { id: string }) {
-    return await firstValueFrom(this.fleetService.GetStation(data));
+    const response = await firstValueFrom(this.fleetService.GetStation(data));
+    const station = response.data as Station;
+    return {
+      ...response,
+      data: station
+        ? {
+            ...station,
+            bikes: station.bikes ?? [],
+          }
+        : station,
+    };
   }
 
   async getStationByIds(ids: string[]): Promise<Station[]> {

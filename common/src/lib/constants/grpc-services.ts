@@ -36,6 +36,7 @@ export const USER_METHODS = {
   VERIFY_EMAIL: 'VerifyEmail',
   VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
   USER_VERIFY: 'UserVerify',
+  DELETE: 'DeleteUser',
 } as const;
 
 export const SUPPLIER_METHODS = {

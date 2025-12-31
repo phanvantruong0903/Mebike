@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import {
-  ConsuleModule,
+  ConsulModule,
   ConsulService,
   CONSULT_SERVICE_ID,
   GRPC_PACKAGE,
@@ -18,7 +18,7 @@ import { SupplierDataloader } from './supplier.dataloader';
 
 @Module({
   imports: [
-    ConsuleModule,
+    ConsulModule,
     RedisModule,
     StationModule,
     SupplierModule,
@@ -26,7 +26,7 @@ import { SupplierDataloader } from './supplier.dataloader';
     ClientsModule.registerAsync([
       {
         name: GRPC_PACKAGE.FLEET,
-        imports: [ConsuleModule],
+        imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
           const fleetService = await consulService.discoverService(

@@ -56,9 +56,15 @@ export class SupplierService implements OnModuleInit {
     const response = await firstValueFrom(
       this.fleetService.GetAllSuppliers(data),
     );
+    const suppliers = response.data as Supplier[];
     return {
       ...response,
-      data: response.data ?? [],
+      data: suppliers
+        ? suppliers.map((supplier) => ({
+            ...supplier,
+            bikes: supplier.bikes ?? [],
+          }))
+        : [],
     };
   }
 
@@ -67,7 +73,17 @@ export class SupplierService implements OnModuleInit {
   }
 
   async getSupplier(data: { id: string }) {
-    return await firstValueFrom(this.fleetService.GetSupplier(data));
+    const response = await firstValueFrom(this.fleetService.GetSupplier(data));
+    const supplier = response.data as Supplier;
+    return {
+      ...response,
+      data: supplier
+        ? {
+            ...supplier,
+            bikes: supplier.bikes ?? [],
+          }
+        : supplier,
+    };
   }
 
   async getSupplierStats() {

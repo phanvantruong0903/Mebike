@@ -60,8 +60,9 @@ export class SupplierResolver {
   ): Promise<SupplierListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
+    const search = data?.search ?? '';
 
-    return this.supplierService.getAllSuppliers({ page, limit });
+    return this.supplierService.getAllSuppliers({ page, limit, search });
   }
 
   @Mutation(() => SupplierResponse, {

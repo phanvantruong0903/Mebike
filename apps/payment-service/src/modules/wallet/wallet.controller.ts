@@ -1,5 +1,5 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
-import { EventPattern, GrpcMethod, Payload } from '@nestjs/microservices';
+import { GrpcMethod } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
   buildSearchFilter,
@@ -8,7 +8,6 @@ import {
   GRPC_SERVICES,
   grpcPaginateResponse,
   grpcResponse,
-  KAFKA_TOPIC,
   PAYMENT_MESSAGES,
   PAYMENT_METHODS,
   WalletModel,
@@ -31,12 +30,12 @@ export class WalletController {
     );
   }
 
-  @EventPattern(KAFKA_TOPIC.WALLET_CREATED)
-  async createWallet(
-    @Payload() accountId: string,
-  ): Promise<ReturnType<typeof grpcResponse>> {
-    const response = await this.walletService.createWallet(accountId);
-    return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.CREATE_WALLET)
+  async createWalletGrpc(data: {
+    accountId: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const response = await this.walletService.createWallet(data.accountId);
+    return grpcResponse(response, PAYMENT_MESSAGES.CREATE_WALLET_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.GET_WALLET)

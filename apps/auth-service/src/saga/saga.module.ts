@@ -1,28 +1,28 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { AuthGrpcController } from './auth.grpc.controller';
 import {
+  GRPC_PACKAGE,
   ConsulModule,
   ConsulService,
   CONSULT_SERVICE_ID,
-  GRPC_PACKAGE,
-  JwtSharedModule,
+  KAFKA_SERVICE,
   KAFKA_CLIENT_ID,
   KAFKA_GROUP_ID,
-  KAFKA_SERVICE,
+  JwtSharedModule,
   RedisModule,
 } from '@mebike/common';
-import { AuthService } from './auth.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SagaModule } from '../../saga/saga.module';
+import { forwardRef, Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
+import { UserCreationActivity } from './activities';
+import { TemporalService } from './temporal-service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from '../modules/users/auth.module';
 
 @Module({
   imports: [
-    JwtSharedModule,
-    RedisModule,
     ConsulModule,
-    forwardRef(() => SagaModule),
+    RedisModule,
+    JwtSharedModule,
+    forwardRef(() => AuthModule),
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
@@ -39,6 +39,33 @@ import { join } from 'node:path';
               package: 'user',
               protoPath: join(process.cwd(), 'common/src/lib/proto/user.proto'),
               url: `${userService.address}:${userService.port}`,
+              channelOptions: {
+                'grpc.max_reconnect_backoff_ms': 5000,
+                'grpc.initial_reconnect_backoff_ms': 1000,
+              },
+              maxRetryAttempts: 5,
+              retryDelay: 3000,
+            },
+          };
+        },
+      },
+      {
+        name: GRPC_PACKAGE.PAYMENT,
+        imports: [ConsulModule],
+        inject: [ConsulService],
+        useFactory: async (consulService: ConsulService) => {
+          const paymentService = await consulService.discoverService(
+            CONSULT_SERVICE_ID.PAYMENT,
+          );
+          return {
+            transport: Transport.GRPC,
+            options: {
+              package: 'wallet',
+              protoPath: join(
+                process.cwd(),
+                'common/src/lib/proto/wallet.proto',
+              ),
+              url: `${paymentService.address}:${paymentService.port}`,
               channelOptions: {
                 'grpc.max_reconnect_backoff_ms': 5000,
                 'grpc.initial_reconnect_backoff_ms': 1000,
@@ -73,8 +100,7 @@ import { join } from 'node:path';
       },
     ]),
   ],
-  controllers: [AuthGrpcController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [UserCreationActivity, TemporalService],
+  exports: [TemporalService],
 })
-export class AuthModule {}
+export class SagaModule {}
