@@ -6,12 +6,14 @@ import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
   UpdateWalletStatusInput,
+  WalletListResponse,
+  WalletResponse,
 } from '@mebike/common';
 
 interface WalletServiceClient {
-  ChangeWalletStatus(data: UpdateWalletStatusInput): Observable<any>;
-  GetAllWallet(data: GetWalletInput): Observable<any>;
-  GetWallet(data: { accountId: string }): Observable<any>;
+  ChangeWalletStatus(data: UpdateWalletStatusInput): Observable<WalletResponse>;
+  GetAllWallet(data: GetWalletInput): Observable<WalletListResponse>;
+  GetWallet(data: { accountId: string }): Observable<WalletResponse>;
 }
 
 @Injectable()

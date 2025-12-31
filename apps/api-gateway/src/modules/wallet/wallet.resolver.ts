@@ -3,15 +3,14 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
-  UpdateWithDrawStatusInput,
   TransactionResponse,
-  GRAPHQL_NAME_TRANSACTION,
   TransactionListResponse,
-  GetTransactionInput,
   UserProfile,
   UpdateWalletStatusInput,
   GetWalletInput,
   GRAPHQL_NAME_WALLET,
+  WalletResponse,
+  WalletListResponse,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -22,31 +21,31 @@ import { CurrentUser } from '../auth/current-user.decorator';
 export class WalletResolver {
   constructor(private readonly walletService: WalletService) {}
 
-  @Mutation(() => TransactionResponse, {
+  @Mutation(() => WalletResponse, {
     name: GRAPHQL_NAME_WALLET.UPDATE_STATUS,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async updateWalletStatus(
     @Args('body') body: UpdateWalletStatusInput,
-  ): Promise<TransactionResponse> {
+  ): Promise<WalletResponse> {
     return this.walletService.changeWalletStatus(body);
   }
 
-  @Query(() => TransactionResponse, { name: GRAPHQL_NAME_WALLET.GET_ONE })
+  @Query(() => WalletResponse, { name: GRAPHQL_NAME_WALLET.GET_ONE })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN, Role.USER)
   async getWallet(
     @Args('accountId') accountId: string,
     @CurrentUser() user: UserProfile,
-  ): Promise<TransactionResponse> {
+  ): Promise<WalletResponse> {
     if (user.role === Role.USER) {
       accountId = user.accountId;
     }
     return this.walletService.getWallet({ accountId });
   }
 
-  @Query(() => TransactionListResponse, {
+  @Query(() => WalletListResponse, {
     name: GRAPHQL_NAME_WALLET.GET_ALL,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
@@ -58,7 +57,7 @@ export class WalletResolver {
       defaultValue: {},
     })
     data: GetWalletInput,
-  ): Promise<TransactionListResponse> {
+  ): Promise<WalletListResponse> {
     return this.walletService.getAllWallet(data);
   }
 
