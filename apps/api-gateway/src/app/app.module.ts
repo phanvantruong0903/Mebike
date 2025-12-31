@@ -13,6 +13,7 @@ import { PaymentModule } from '../modules/payment/payment.module';
 import { WalletModule } from '../modules/wallet/wallet.module';
 import { HttpErrorStatusPlugin } from '../plugins/http-status.plugin';
 import { TransactionModule } from '../modules/transaction/transaction.module';
+import { RentalModule } from '../modules/rental/rental.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TransactionModule } from '../modules/transaction/transaction.module';
     PaymentModule,
     WalletModule,
     TransactionModule,
+    RentalModule,
   ],
   providers: [HttpErrorStatusPlugin],
 })

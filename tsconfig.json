@@ -38,6 +38,12 @@
     },
     {
       "path": "./apps/payment-service"
+    },
+    {
+      "path": "./apps/rental-service-e2e"
+    },
+    {
+      "path": "./apps/rental-service"
     }
   ]
 }

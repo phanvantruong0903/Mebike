@@ -44,7 +44,7 @@ async function bootstrap() {
           join(process.cwd(), 'common/src/lib/proto/user.proto'),
           join(process.cwd(), 'common/src/lib/proto/health.proto'),
         ],
-        url: `0.0.0.0:${process.env.USER_SERVICE_PORT}`,
+        url: `0.0.0.0:${port}`,
       },
     },
     { inheritAppConfig: true },

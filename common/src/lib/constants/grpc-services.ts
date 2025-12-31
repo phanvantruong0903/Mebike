@@ -5,6 +5,7 @@ export const GRPC_SERVICES = {
   FLEET: 'FleetService',
   PAYMENT: 'PaymentService',
   TRANSACTION: 'TransactionService',
+  RENTAL: 'RentalService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -14,6 +15,7 @@ export const GRPC_PACKAGE = {
   FLEET: 'FLEET_PACKAGE',
   PAYMENT: 'PAYMENT_PACKAGE',
   TRANSACTION: 'TRANSACTION_PACKAGE',
+  RENTAL: 'RENTAL_PACKAGE',
 };
 
 export const USER_METHODS = {
@@ -81,4 +83,12 @@ export const TRANSACTION_METHODS = {
   GET_ALL: 'GetAllTransactions',
   CREATE_WITHDRAW: 'CreateWithdraw',
   UPDATE_WITHDRAW_STATUS: 'UpdateWithdrawStatus',
+};
+
+export const RENTAL_METHODS = {
+  CREATE: 'CreateRental',
+  END: 'EndRental',
+  GET_ONE: 'GetRental',
+  GET_ALL: 'GetAllRentals',
+  SUMMARIZE: 'SummarizeRentals',
 };

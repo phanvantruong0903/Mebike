@@ -58,3 +58,10 @@ export const GRAPHQL_NAME_WALLET = {
   GET_ONE: 'GetWallet',
   UPDATE_STATUS: 'UpdateWalletStatus',
 };
+
+export const GRAPHQL_NAME_RENTAL = {
+  GET_ALL: 'Rentals',
+  GET_ONE: 'Rental',
+  CREATE: 'CreateRental',
+  END: 'EndRental',
+};

@@ -13,3 +13,13 @@ export function buildSearchFilter(
     })),
   };
 }
+
+export function buildFilter(filters: object) {
+  if (!filters) return {};
+
+  return {
+    AND: Object.entries(filters).map(([key, value]) => ({
+      [key]: value,
+    })),
+  };
+}

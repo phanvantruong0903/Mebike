@@ -25,6 +25,6 @@ COPY apps/auth-service/src/saga ./src/saga
 COPY common/src/lib/proto ./common/src/lib/proto
 COPY --from=builder /app/common/src ./common/src
 
-RUN npm install --omit=dev --legacy-peer-deps
+RUN npm install --omit=dev --legacy-peer-deps && npm install prisma@5.22.0
 
-CMD ["sh", "-c", "npx prisma@5.22.0 migrate deploy && node main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node main.js"]

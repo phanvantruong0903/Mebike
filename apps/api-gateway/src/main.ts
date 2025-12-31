@@ -11,6 +11,7 @@ import './modules/bike/graphql/enum';
 import './modules/station/graphql/enum';
 import './modules/transaction/graphql/enum';
 import './modules/wallet/graphql/enum';
+import './modules/rental/graphql/enum';
 
 async function bootstrap() {
   dotenv.config();
