@@ -52,3 +52,9 @@ export const GRAPHQL_NAME_TRANSACTION = {
   GET_ALL: 'GetAllTransactions',
   CREATE_WITHDRAW: 'CreateWithdraw',
 };
+
+export const GRAPHQL_NAME_WALLET = {
+  GET_ALL: 'GetAllWallets',
+  GET_ONE: 'GetWallet',
+  UPDATE_STATUS: 'UpdateWalletStatus',
+};

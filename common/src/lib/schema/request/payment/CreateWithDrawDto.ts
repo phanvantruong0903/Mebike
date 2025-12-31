@@ -33,9 +33,5 @@ export class CreateWithDrawDto {
 
   @IsString()
   @IsOptional()
-  reason?: string;
-
-  @IsString()
-  @IsOptional()
   note?: string;
 }

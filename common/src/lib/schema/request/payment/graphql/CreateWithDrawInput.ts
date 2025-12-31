@@ -15,8 +15,5 @@ export class CreateWithDrawInput {
   amount!: number;
 
   @Field(() => String, { nullable: true })
-  reason?: string;
-
-  @Field(() => String, { nullable: true })
   note?: string;
 }

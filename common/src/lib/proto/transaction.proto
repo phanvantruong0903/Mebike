@@ -14,7 +14,7 @@ message Transaction {
   string accountId = 2;
   string type = 3;
   string status = 4;
-  int32 amount = 5;
+  double amount = 5;
   string paymentMethod = 6;
   string description = 7;
   string createdAt = 8; 
@@ -27,7 +27,7 @@ message Withdraw {
   string bank = 3;
   string accountOwner = 4;
   string accountNumber = 5;
-  int32 amount = 6;
+  double amount = 6;
   optional string reason = 7;
   optional string note = 8;
   string status = 9;
@@ -81,7 +81,7 @@ message CreateWithdrawRequest {
   string bank = 2;
   string accountOwner = 3;
   string accountNumber = 4;
-  int32 amount = 5;
+  double amount = 5;
   string note = 6;
 }
 

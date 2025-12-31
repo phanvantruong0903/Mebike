@@ -54,10 +54,9 @@ export class TransactionService implements OnModuleInit {
     const response = await lastValueFrom(
       this.paymentService.GetAllTransactions(data),
     );
-    const transaction = response.data;
     return {
       ...response,
-      data: transaction || [],
+      data: response.data ?? [],
     };
   }
 
