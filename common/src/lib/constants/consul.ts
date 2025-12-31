@@ -4,4 +4,5 @@ export const CONSULT_SERVICE_ID = {
   NOTIFICATION: 'notification-service',
   FLEET: 'fleet-service',
   PAYMENT: 'payment-service',
+  RENTAL: 'rental-service',
 };

@@ -45,3 +45,10 @@ export const GRAPHQL_NAME_BIKE = {
 export const GRAPHQL_NAME_PAYMENT = {
   CREATE: 'CreatePayment',
 };
+
+export const GRAPHQL_NAME_RENTAL = {
+  GET_ALL: 'Rentals',
+  GET_ONE: 'Rental',
+  CREATE: 'CreateRental',
+  END: 'EndRental',
+};
