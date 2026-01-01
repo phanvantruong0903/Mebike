@@ -14,6 +14,7 @@ import {
   TRANSACTION_METHODS,
   TransactionModel,
   UpdateWithDrawStatusDto,
+  Withdraw,
 } from '@mebike/common';
 
 @Controller()
@@ -91,19 +92,7 @@ export class TransactionController {
   async getAllWithdraw(
     data: GetAllWithdrawDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
-    const searchFields = ['id'];
-    let searchFilter = buildSearchFilter(data.search, searchFields);
-
-    searchFilter = {
-      ...searchFilter,
-      ...(data.accountId && { accountId: data.accountId }),
-    };
-
-    const result = await this.baseGrpcHandler.getAllLogic(
-      data.page,
-      data.limit,
-      searchFilter,
-    );
+    const result = await this.transactionService.getAllWithdraws(data);
     return grpcPaginateResponse(
       result,
       PAYMENT_MESSAGES.GET_ALL_WITHDRAW_SUCCESS,
@@ -111,7 +100,7 @@ export class TransactionController {
   }
 
   @GrpcMethod(GRPC_SERVICES.PAYMENT, TRANSACTION_METHODS.GET_ONE_WITHDRAW)
-  async getWithdrawDetail(id: string) {
+  async getWithdrawDetail({ id }: { id: string }) {
     const withdraw = await this.transactionService.getWithdrawDetail(id);
     return grpcResponse(withdraw, PAYMENT_MESSAGES.GET_ONE_WITHDRAW_SUCCESS);
   }

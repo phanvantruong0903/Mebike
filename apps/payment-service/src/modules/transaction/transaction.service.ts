@@ -1,5 +1,6 @@
 import {
   BaseService,
+  buildSearchFilter,
   CreateWithDrawDto,
   GetAllWithdrawDto,
   PAYMENT_MESSAGES,
@@ -190,24 +191,31 @@ export class TransactionService extends BaseService<
   }
 
   async getAllWithdraws(data: GetAllWithdrawDto) {
-    const response = await prismaPayment.withdraw.findMany({
-      where: {
-        accountId: data.accountId,
-      },
-      skip: (data.page - 1) * data.limit,
-      take: data.limit,
-    });
+    const searchFields = ['id'];
+    let searchFilter = buildSearchFilter(data.search, searchFields);
+
+    searchFilter = {
+      ...searchFilter,
+      ...(data.accountId && { accountId: data.accountId }),
+    };
+
+    const [response, total] = await Promise.all([
+      prismaPayment.withdraw.findMany({
+        where: searchFilter,
+        skip: (data.page - 1) * data.limit,
+        take: data.limit,
+      }),
+      prismaPayment.withdraw.count({
+        where: searchFilter,
+      }),
+    ]);
+
     return {
       data: response,
-      pagination: {
-        page: data.page,
-        limit: data.limit,
-        total: await prismaPayment.withdraw.count({
-          where: {
-            accountId: data.accountId,
-          },
-        }),
-      },
+      total,
+      page: data.page,
+      limit: data.limit,
+      totalPages: Math.ceil(total / data.limit),
     };
   }
 }
