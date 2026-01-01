@@ -12,7 +12,7 @@ import {
 
 interface WalletServiceClient {
   ChangeWalletStatus(data: UpdateWalletStatusInput): Observable<WalletResponse>;
-  GetAllWallet(data: GetWalletInput): Observable<WalletListResponse>;
+  GetAllWallets(data: GetWalletInput): Observable<WalletListResponse>;
   GetWallet(data: { accountId: string }): Observable<WalletResponse>;
 }
 
@@ -35,7 +35,7 @@ export class WalletService implements OnModuleInit {
   }
 
   async getAllWallet(data: GetWalletInput) {
-    return await firstValueFrom(this.paymentService.GetAllWallet(data));
+    return await firstValueFrom(this.paymentService.GetAllWallets(data));
   }
 
   async getWallet(data: { accountId: string }) {

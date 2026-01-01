@@ -1,13 +1,20 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom, Observable } from 'rxjs';
+import { GraphQLError } from 'graphql';
 import {
   CreateWithDrawInput,
   GRPC_PACKAGE,
   GRPC_SERVICES,
+  PAYMENT_MESSAGES,
+  Role,
   TransactionListResponse,
+  TransactionModel,
   TransactionResponse,
   UpdateWithDrawStatusInput,
+  UserProfile,
+  WithdrawListResponse,
+  WithdrawModel,
   WithdrawResponse,
 } from '@mebike/common';
 
@@ -30,6 +37,13 @@ interface PaymentServiceClient {
   UpdateWithdrawStatus(
     data: UpdateWithDrawStatusInput,
   ): Observable<WithdrawResponse>;
+  GetAllWithdraws(data: {
+    page: number;
+    limit: number;
+    search?: string;
+    accountId?: string;
+  }): Observable<WithdrawListResponse>;
+  GetWithdraw(data: { id: string }): Observable<WithdrawResponse>;
 }
 
 @Injectable()
@@ -61,8 +75,22 @@ export class TransactionService implements OnModuleInit {
     };
   }
 
-  async getTransactionDetail(data: { id: string }) {
-    return await lastValueFrom(this.paymentService.GetTransaction(data));
+  async getTransactionDetail(data: { id: string }, user: UserProfile) {
+    const response = await lastValueFrom(
+      this.paymentService.GetTransaction(data),
+    );
+
+    const transaction = response.data as unknown as TransactionModel;
+
+    if (user.role !== Role.ADMIN && transaction?.accountId !== user.accountId) {
+      throw new GraphQLError(PAYMENT_MESSAGES.FORBIDDEN, {
+        extensions: {
+          statusCode: 403,
+        },
+      });
+    }
+
+    return response;
   }
 
   async createWithdraw(data: CreateWithDrawInput, accountId: string) {
@@ -74,7 +102,38 @@ export class TransactionService implements OnModuleInit {
     );
   }
 
+  async getAllWithdraw(data: {
+    page: number;
+    limit: number;
+    search?: string;
+    accountId?: string;
+  }) {
+    const response = await lastValueFrom(
+      this.paymentService.GetAllWithdraws(data),
+    );
+    return {
+      ...response,
+      data: response.data ?? [],
+    };
+  }
+
   async updateWithdrawStatus(data: UpdateWithDrawStatusInput) {
     return await lastValueFrom(this.paymentService.UpdateWithdrawStatus(data));
+  }
+
+  async getWithdrawDetail(id: string, user: UserProfile) {
+    const response = await lastValueFrom(
+      this.paymentService.GetWithdraw({ id }),
+    );
+
+    const withdraw = response.data as unknown as WithdrawModel;
+    if (user.role !== Role.ADMIN && withdraw?.accountId !== user.accountId) {
+      throw new GraphQLError(PAYMENT_MESSAGES.FORBIDDEN, {
+        extensions: {
+          statusCode: 403,
+        },
+      });
+    }
+    return response;
   }
 }

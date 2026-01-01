@@ -34,13 +34,18 @@ export class WalletResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN, Role.USER)
   async getWallet(
-    @Args('accountId') accountId: string,
+    @Args('accountId', { type: () => String, nullable: true })
+    accountId: string | null,
     @CurrentUser() user: UserProfile,
   ): Promise<WalletResponse> {
-    if (user.role === Role.USER) {
-      accountId = user.accountId;
+    let userId = '';
+    if (user.role === Role.ADMIN) {
+      userId = accountId || user.accountId;
+    } else {
+      userId = user.accountId;
     }
-    return this.walletService.getWallet({ accountId });
+
+    return this.walletService.getWallet({ accountId: userId });
   }
 
   @Query(() => WalletListResponse, {
@@ -56,7 +61,11 @@ export class WalletResolver {
     })
     data: GetWalletInput,
   ): Promise<WalletListResponse> {
-    return this.walletService.getAllWallet(data);
+    const page = data?.page ?? 1;
+    const limit = data?.limit ?? 10;
+    const search = data?.search ?? '';
+
+    return this.walletService.getAllWallet({ page, limit, search });
   }
 
   @Query(() => String)

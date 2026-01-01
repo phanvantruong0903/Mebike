@@ -7,6 +7,20 @@ service PaymentService {
   rpc GetTransaction (GetTransactionRequest) returns (GetTransactionResponse);
   rpc CreateWithdraw (CreateWithdrawRequest) returns (WithdrawResponse);
   rpc UpdateWithdrawStatus (UpdateWalletStatusRequest) returns (WithdrawResponse);
+  rpc GetAllWithdraws (GetTransactionsRequest) returns (GetAllWithdrawsResponse);
+  rpc GetWithdraw (GetWithdrawRequest) returns (WithdrawResponse);
+}
+
+message GetWithdrawRequest {
+  string id = 1;
+}
+
+message GetWithdrawResponse {
+  bool success = 1;
+  string message = 2;
+  Withdraw data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
 }
 
 message Transaction {
@@ -51,6 +65,15 @@ message GetTransactionResponse {
   Transaction data = 3;
   repeated string errors = 4;
   int32 statusCode = 5;
+}
+
+message GetAllWithdrawsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Withdraw data = 3;
+  Pagination pagination = 4;
+  repeated string errors = 5;
+  int32 statusCode = 6;
 }
 
 message GetTransactionsRequest {

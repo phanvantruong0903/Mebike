@@ -83,6 +83,8 @@ export const TRANSACTION_METHODS = {
   GET_ALL: 'GetAllTransactions',
   CREATE_WITHDRAW: 'CreateWithdraw',
   UPDATE_WITHDRAW_STATUS: 'UpdateWithdrawStatus',
+  GET_ALL_WITHDRAW: 'GetAllWithdraws',
+  GET_ONE_WITHDRAW: 'GetWithdraw',
 };
 
 export const RENTAL_METHODS = {

@@ -11,6 +11,7 @@ import {
   UserProfile,
   CreateWithDrawInput,
   WithdrawResponse,
+  WithdrawListResponse,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -35,8 +36,11 @@ export class TransactionResolver {
   @Query(() => TransactionResponse, { name: GRAPHQL_NAME_TRANSACTION.GET_ONE })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN, Role.USER)
-  async getTransaction(@Args('id') id: string): Promise<TransactionResponse> {
-    return this.transactionService.getTransactionDetail({ id });
+  async getTransaction(
+    @Args('id') id: string,
+    @CurrentUser() user: UserProfile,
+  ): Promise<TransactionResponse> {
+    return this.transactionService.getTransactionDetail({ id }, user);
   }
 
   @Query(() => TransactionListResponse, {
@@ -78,6 +82,47 @@ export class TransactionResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawResponse> {
     return this.transactionService.createWithdraw(body, user.accountId);
+  }
+
+  @Query(() => WithdrawListResponse, {
+    name: GRAPHQL_NAME_TRANSACTION.GET_ALL_WITHDRAW,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN, Role.USER)
+  async getAllWithdraws(
+    @Args('params', {
+      nullable: true,
+      type: () => GetTransactionInput,
+      defaultValue: {},
+    })
+    data: GetTransactionInput,
+    @CurrentUser() user: UserProfile,
+  ): Promise<WithdrawListResponse> {
+    const page = data?.page ?? 1;
+    const limit = data?.limit ?? 10;
+    const search = data?.search ?? '';
+    if (user.role === Role.USER) {
+      data.accountId = user.accountId;
+    }
+
+    return this.transactionService.getAllWithdraw({
+      page,
+      limit,
+      search,
+      accountId: data.accountId,
+    });
+  }
+
+  @Query(() => WithdrawResponse, {
+    name: GRAPHQL_NAME_TRANSACTION.GET_ONE_WITHDRAW,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN, Role.USER)
+  async getWithdraw(
+    @Args('id') id: string,
+    @CurrentUser() user: UserProfile,
+  ): Promise<WithdrawResponse> {
+    return this.transactionService.getWithdrawDetail(id, user);
   }
 
   @Query(() => String)

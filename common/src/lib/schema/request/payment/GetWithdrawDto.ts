@@ -1,11 +1,7 @@
-import { Min, IsNumber, IsString, IsOptional } from 'class-validator';
+import { Min, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class GetTransactionDto {
-  @IsString()
-  @IsOptional()
-  accountId?: string;
-
+export class GetAllWithdrawDto {
   @IsNumber()
   @Min(1, { message: 'Page must be at least 1' })
   @Type(() => Number)
@@ -16,7 +12,11 @@ export class GetTransactionDto {
   @Type(() => Number)
   limit!: number;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  accountId?: string;
 }

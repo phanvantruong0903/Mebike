@@ -1,6 +1,7 @@
 import {
   BaseService,
   CreateWithDrawDto,
+  GetAllWithdrawDto,
   PAYMENT_MESSAGES,
   PaymentMethod,
   prismaPayment,
@@ -182,5 +183,31 @@ export class TransactionService extends BaseService<
     });
 
     return updatedWithdraw;
+  }
+
+  async getWithdrawDetail(id: string) {
+    return await prismaPayment.withdraw.findUnique({ where: { id } });
+  }
+
+  async getAllWithdraws(data: GetAllWithdrawDto) {
+    const response = await prismaPayment.withdraw.findMany({
+      where: {
+        accountId: data.accountId,
+      },
+      skip: (data.page - 1) * data.limit,
+      take: data.limit,
+    });
+    return {
+      data: response,
+      pagination: {
+        page: data.page,
+        limit: data.limit,
+        total: await prismaPayment.withdraw.count({
+          where: {
+            accountId: data.accountId,
+          },
+        }),
+      },
+    };
   }
 }

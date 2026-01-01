@@ -118,6 +118,9 @@ export const PAYMENT_MESSAGES = {
   UPDATE_WITHDRAW_SUCCESS: 'Withdraw updated successfully',
   CREATE_WALLET_SUCCESS: 'Wallet created successfully',
   REASON_REQUIRED: 'Reason is required',
+  FORBIDDEN: 'Forbidden: You can only view your own transactions',
+  GET_ALL_WITHDRAW_SUCCESS: 'Withdraws retrieved successfully',
+  GET_ONE_WITHDRAW_SUCCESS: 'Withdraw retrieved successfully',
 };
 
 export const SERVER_MESSAGE = {
