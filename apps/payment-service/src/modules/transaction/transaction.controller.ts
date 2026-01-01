@@ -14,7 +14,6 @@ import {
   TRANSACTION_METHODS,
   TransactionModel,
   UpdateWithDrawStatusDto,
-  Withdraw,
 } from '@mebike/common';
 
 @Controller()
