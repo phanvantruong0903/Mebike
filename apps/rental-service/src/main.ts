@@ -16,7 +16,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const consulService = new ConsulService();
-  const port = Number(process.env.RENTAL_SERVICE_PORT) || 50055;
+  const port = Number(process.env.RENTAL_SERVICE_PORT) || 50057;
   const host = consulService.getLocalIp();
 
   await consulService.registerService(
@@ -39,9 +39,10 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['rental', 'grpc.health.v1'],
+        package: ['reservation', 'grpc.health.v1'],
         protoPath: [
           join(process.cwd(), 'common/src/lib/proto/rental.proto'),
+          join(process.cwd(), 'common/src/lib/proto/reservation.proto'),
           join(process.cwd(), 'common/src/lib/proto/health.proto'),
         ],
         url: `0.0.0.0:${port}`,
