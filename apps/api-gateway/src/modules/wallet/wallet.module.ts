@@ -9,6 +9,7 @@ import {
 } from '@mebike/common';
 import { join } from 'node:path';
 import { ConfigModule } from '@nestjs/config';
+import { WalletResolver } from './wallet.resolver';
 
 @Module({
   imports: [
@@ -38,8 +39,7 @@ import { ConfigModule } from '@nestjs/config';
       },
     ]),
   ],
-  providers: [WalletService],
-  controllers: [],
+  providers: [WalletService, WalletResolver],
   exports: [WalletService],
 })
 export class WalletModule {}

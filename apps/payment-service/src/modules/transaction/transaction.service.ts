@@ -1,6 +1,8 @@
 import {
   BaseService,
+  buildSearchFilter,
   CreateWithDrawDto,
+  GetAllWithdrawDto,
   PAYMENT_MESSAGES,
   PaymentMethod,
   prismaPayment,
@@ -10,6 +12,7 @@ import {
   TransactionStatus,
   TransactionType,
   UpdateWithDrawStatusDto,
+  WalletStatus,
   WithdrawModel,
   WithdrawStatus,
 } from '@mebike/common';
@@ -18,10 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const VALID_WITHDRAW_TRANSITIONS: Record<WithdrawStatus, WithdrawStatus[]> = {
   [WithdrawStatus.PENDING]: [WithdrawStatus.APPROVED, WithdrawStatus.REJECTED],
-  [WithdrawStatus.APPROVED]: [
-    WithdrawStatus.COMPLETED,
-    WithdrawStatus.REJECTED,
-  ],
+  [WithdrawStatus.APPROVED]: [WithdrawStatus.COMPLETED],
   [WithdrawStatus.COMPLETED]: [],
   [WithdrawStatus.REJECTED]: [],
 };
@@ -39,6 +39,30 @@ export class TransactionService extends BaseService<
   async createWithdrawTransaction(
     data: CreateWithDrawDto,
   ): Promise<WithdrawModel> {
+    const wallet = await prismaPayment.wallet.findUnique({
+      where: {
+        accountId: data.accountId,
+      },
+    });
+
+    if (!wallet) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+      ]);
+    }
+
+    if (wallet.status !== WalletStatus.ACTIVE) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.WALLET_BLOCKED,
+      ]);
+    }
+
+    if (wallet.balance.lessThan(data.amount)) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
+      ]);
+    }
+
     const transaction = await prismaPayment.withdraw.create({
       data: {
         accountId: data.accountId,
@@ -46,7 +70,6 @@ export class TransactionService extends BaseService<
         bank: data.bank,
         accountOwner: data.accountOwner,
         accountNumber: data.accountNumber,
-        reason: data.reason || '',
         note: data.note || '',
       },
     });
@@ -67,6 +90,12 @@ export class TransactionService extends BaseService<
       ]);
     }
 
+    if (data.status === WithdrawStatus.REJECTED && !data.reason) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.REASON_REQUIRED,
+      ]);
+    }
+
     const currentStatus = findWithdraw.status;
     const allowedNextStatus = VALID_WITHDRAW_TRANSITIONS[currentStatus];
     if (!allowedNextStatus.includes(data.status)) {
@@ -75,38 +104,34 @@ export class TransactionService extends BaseService<
       ]);
     }
 
-    const transactionId = uuidv4();
-    const [updatedWithdraw] = await Promise.all([
-      prismaPayment.withdraw.update({
-        where: {
-          id: data.id,
-        },
-        data: {
-          status: data.status,
-          reason: data.reason,
-        },
-      }),
-      prismaPayment.walletHistory.create({
-        data: {
-          walletId: findWithdraw.accountId,
-          transactionId,
-          type: TransactionType.WITHDRAWAL,
-          amount: findWithdraw.amount,
-          balanceBefore: findWithdraw.amount,
-          balanceAfter: findWithdraw.amount,
-        },
-      }),
-      prismaPayment.wallet.update({
-        where: {
-          accountId: findWithdraw.accountId,
-        },
-        data: {
-          balance: {
-            decrement: findWithdraw.amount,
-          },
-        },
-      }),
-      prismaPayment.transaction.create({
+    if (data.status === WithdrawStatus.COMPLETED) {
+      const wallet = await prismaPayment.wallet.findUnique({
+        where: { accountId: findWithdraw.accountId },
+      });
+
+      if (!wallet) {
+        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+          PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+        ]);
+      }
+
+      if (wallet.status !== WalletStatus.ACTIVE) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          PAYMENT_MESSAGES.WALLET_BLOCKED,
+        ]);
+      }
+
+      if (wallet.balance.lessThan(findWithdraw.amount)) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
+        ]);
+      }
+
+      const balanceBefore = wallet.balance;
+      const balanceAfter = wallet.balance.sub(findWithdraw.amount);
+      const transactionId = uuidv4();
+
+      await prismaPayment.transaction.create({
         data: {
           id: transactionId,
           accountId: findWithdraw.accountId,
@@ -117,9 +142,80 @@ export class TransactionService extends BaseService<
           description:
             findWithdraw.reason || `Withdrawal ${findWithdraw.amount}`,
         },
+      });
+
+      const [updatedWithdraw] = await Promise.all([
+        prismaPayment.withdraw.update({
+          where: { id: data.id },
+          data: {
+            status: data.status,
+            reason: data.reason,
+          },
+        }),
+        prismaPayment.walletHistory.create({
+          data: {
+            walletId: wallet.id,
+            transactionId,
+            type: TransactionType.WITHDRAWAL,
+            amount: findWithdraw.amount,
+            balanceBefore,
+            balanceAfter,
+          },
+        }),
+        prismaPayment.wallet.update({
+          where: { accountId: findWithdraw.accountId },
+          data: {
+            balance: {
+              decrement: findWithdraw.amount,
+            },
+          },
+        }),
+      ]);
+
+      return updatedWithdraw;
+    }
+
+    const updatedWithdraw = await prismaPayment.withdraw.update({
+      where: { id: data.id },
+      data: {
+        status: data.status,
+        reason: data.reason,
+      },
+    });
+
+    return updatedWithdraw;
+  }
+
+  async getWithdrawDetail(id: string) {
+    return await prismaPayment.withdraw.findUnique({ where: { id } });
+  }
+
+  async getAllWithdraws(data: GetAllWithdrawDto) {
+    const searchFields = ['id'];
+    let searchFilter = buildSearchFilter(data.search, searchFields);
+
+    searchFilter = {
+      ...searchFilter,
+      ...(data.accountId && { accountId: data.accountId }),
+    };
+
+    const [response, total] = await Promise.all([
+      prismaPayment.withdraw.findMany({
+        where: searchFilter,
+        skip: (data.page - 1) * data.limit,
+        take: data.limit,
+      }),
+      prismaPayment.withdraw.count({
+        where: searchFilter,
       }),
     ]);
 
-    return updatedWithdraw;
+    return {
+      data: response,
+      total,
+      page: data.page,
+      limit: data.limit,
+      totalPages: Math.ceil(total / data.limit),
+    };
   }
 }

@@ -35,18 +35,22 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new GrpcExceptionFilter());
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.GRPC,
-    options: {
-      package: ['payment', 'wallet', 'grpc.health.v1'],
-      protoPath: [
-        join(process.cwd(), 'common/src/lib/proto/payment.proto'),
-        join(process.cwd(), 'common/src/lib/proto/wallet.proto'),
-        join(process.cwd(), 'common/src/lib/proto/health.proto'),
-      ],
-      url: `0.0.0.0:${process.env.PAYMENT_SERVICE_PORT}`,
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.GRPC,
+      options: {
+        package: ['payment', 'wallet', 'transaction', 'grpc.health.v1'],
+        protoPath: [
+          join(process.cwd(), 'common/src/lib/proto/payment.proto'),
+          join(process.cwd(), 'common/src/lib/proto/wallet.proto'),
+          join(process.cwd(), 'common/src/lib/proto/health.proto'),
+          join(process.cwd(), 'common/src/lib/proto/transaction.proto'),
+        ],
+        url: `0.0.0.0:${process.env.PAYMENT_SERVICE_PORT}`,
+      },
     },
-  });
+    { inheritAppConfig: true },
+  );
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,

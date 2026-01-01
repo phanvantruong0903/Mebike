@@ -115,6 +115,20 @@ services:
     networks:
       - mebike-network
 
+  rental-db:
+    image: mysql:8.0
+    container_name: rental-db
+    restart: 'unless-stopped'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${RENTAL_DB_NAME}
+    ports:
+      - '3307:3306'
+    volumes:
+      - rental_data:/var/lib/mysql
+    networks:
+      - mebike-network
+
   traefik:
     image: traefik:latest
     container_name: traefik
@@ -305,7 +319,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - TEMPORAL_ADDRESS=temporal:7233
-      - NODE_ENV=development
+      - NODE_ENV=production
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
       interval: 10s
@@ -446,6 +460,37 @@ services:
     networks:
       - mebike-network
 
+  rental-service:
+    build:
+      context: .
+      dockerfile: apps/rental-service/Dockerfile
+    container_name: rental-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      rental-db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=mysql://root:${DB_PASSWORD}@rental-db:3306/${RENTAL_DB_NAME}
+      - RENTAL_SERVICE_PORT=50058
+      - KAFKA_BROKERS=kafka:29092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50058']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mebike-network
+
 networks:
   mebike-network:
     driver: bridge
@@ -457,3 +502,4 @@ volumes:
   fleet_data:
   payment_data:
   temporal_data:
+  rental_data:
