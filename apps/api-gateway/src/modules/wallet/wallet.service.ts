@@ -1,10 +1,19 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
-import { GRPC_PACKAGE, GRPC_SERVICES } from '@mebike/common';
+import {
+  GetWalletInput,
+  GRPC_PACKAGE,
+  GRPC_SERVICES,
+  UpdateWalletStatusInput,
+  WalletListResponse,
+  WalletResponse,
+} from '@mebike/common';
 
 interface WalletServiceClient {
-  CreateWallet(data: { accountId: string }): Observable<any>;
+  ChangeWalletStatus(data: UpdateWalletStatusInput): Observable<WalletResponse>;
+  GetAllWallets(data: GetWalletInput): Observable<WalletListResponse>;
+  GetWallet(data: { accountId: string }): Observable<WalletResponse>;
 }
 
 @Injectable()
@@ -21,7 +30,15 @@ export class WalletService implements OnModuleInit {
     );
   }
 
-  async createWallet(data: { accountId: string }) {
-    return await firstValueFrom(this.paymentService.CreateWallet(data));
+  async changeWalletStatus(data: UpdateWalletStatusInput) {
+    return await firstValueFrom(this.paymentService.ChangeWalletStatus(data));
+  }
+
+  async getAllWallet(data: GetWalletInput) {
+    return await firstValueFrom(this.paymentService.GetAllWallets(data));
+  }
+
+  async getWallet(data: { accountId: string }) {
+    return await firstValueFrom(this.paymentService.GetWallet(data));
   }
 }

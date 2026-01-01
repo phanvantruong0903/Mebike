@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../../../common/src/lib/prisma/rental/generated"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Rental {
+  id             String       @id @default(uuid())
+  userId         String
+  bikeId         String?
+  startStation   String
+  endStation     String?
+  startTime      DateTime     @default(now())
+  endTime        DateTime?
+  duration       Int          @default(0)
+  totalPrice     Decimal      @default(0)
+  subscriptionId String?
+  status         RentalStatus @default(Rented)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("rentals")
+}
+
+enum RentalStatus {
+  Rented
+  Completed
+  Cancelled
+  Reserved
+}

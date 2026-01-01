@@ -45,3 +45,25 @@ export const GRAPHQL_NAME_BIKE = {
 export const GRAPHQL_NAME_PAYMENT = {
   CREATE: 'CreatePayment',
 };
+
+export const GRAPHQL_NAME_TRANSACTION = {
+  UPDATE_WITHDRAW_STATUS: 'UpdateWithdrawStatus',
+  GET_ONE: 'GetTransaction',
+  GET_ALL: 'GetAllTransactions',
+  CREATE_WITHDRAW: 'CreateWithdraw',
+  GET_ALL_WITHDRAW: 'GetAllWithdraws',
+  GET_ONE_WITHDRAW: 'GetWithdraw',
+};
+
+export const GRAPHQL_NAME_WALLET = {
+  GET_ALL: 'GetAllWallets',
+  GET_ONE: 'GetWallet',
+  UPDATE_STATUS: 'UpdateWalletStatus',
+};
+
+export const GRAPHQL_NAME_RENTAL = {
+  GET_ALL: 'Rentals',
+  GET_ONE: 'Rental',
+  CREATE: 'CreateRental',
+  END: 'EndRental',
+};

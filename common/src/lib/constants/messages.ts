@@ -117,6 +117,10 @@ export const PAYMENT_MESSAGES = {
   CREATE_WITHDRAW_SUCCESS: 'Withdraw created successfully',
   UPDATE_WITHDRAW_SUCCESS: 'Withdraw updated successfully',
   CREATE_WALLET_SUCCESS: 'Wallet created successfully',
+  REASON_REQUIRED: 'Reason is required',
+  FORBIDDEN: 'Forbidden: You can only view your own transactions',
+  GET_ALL_WITHDRAW_SUCCESS: 'Withdraws retrieved successfully',
+  GET_ONE_WITHDRAW_SUCCESS: 'Withdraw retrieved successfully',
 };
 
 export const SERVER_MESSAGE = {
@@ -134,4 +138,27 @@ export const SERVER_MESSAGE = {
   DELETED_NOT_IMPLEMENTED: 'Delete method is not implemented',
   BAD_REQUEST: 'Bad Request',
   UNAUTHORIZED: 'Unauthorized',
+};
+
+export const RENTAL_MESSAGES = {
+  CREATE_SUCCESS: 'Rental created successfully',
+  UPDATE_SUCCESS: 'Rental updated successfully',
+  GET_ALL_SUCCESS: 'Rentals retrieved successfully',
+  GET_ALL_FAIL: 'Rentals retrieved failed',
+  GET_DETAIL_SUCCESS: 'Rental details retrieved successfully',
+  DELETE_SUCCESS: 'Rental deleted successfully',
+  SUMMARIZE_SUCCESS: 'Rental summarized successfully',
+  SUMMARIZE_FAIL: 'Rental summarized failed',
+  NOT_FOUND: 'Rental not found',
+  NOT_FOUND_WITH_STATUS: (status: string) =>
+    `Rental not found with status ${status}`,
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Rental failed',
+  VALIDATION_FAILED: 'Rental name or phone incorrect',
+  UPDATE_FAIL: 'Update Rental failed',
+  GET_ALL_STATS_SUCCESS: 'Rental stats retrieved successfully',
+  FIELD_NOT_FOUND: (field: string) => `${field} not found in rental`,
+  INVALID_ID: 'Invalid id format',
+  GET_ONE_SUCCESS: 'Rental retrieved successfully',
+  GET_ONE_FAILED: 'Rental retrieved failed',
 };

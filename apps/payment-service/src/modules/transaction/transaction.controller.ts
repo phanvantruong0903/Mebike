@@ -5,6 +5,7 @@ import {
   BaseGrpcHandler,
   buildSearchFilter,
   CreateWithDrawDto,
+  GetAllWithdrawDto,
   GetTransactionDto,
   GRPC_SERVICES,
   grpcPaginateResponse,
@@ -32,8 +33,13 @@ export class TransactionController {
   async getAllTransaction(
     data: GetTransactionDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
-    const searchFields = ['id', 'accountId'];
-    const searchFilter = buildSearchFilter(data.accountId, searchFields);
+    const searchFields = ['id'];
+    let searchFilter = buildSearchFilter(data.search, searchFields);
+
+    searchFilter = {
+      ...searchFilter,
+      ...(data.accountId && { accountId: data.accountId }),
+    };
 
     const result = await this.baseGrpcHandler.getAllLogic(
       data.page,
@@ -79,5 +85,22 @@ export class TransactionController {
       result as unknown as TransactionModel,
       PAYMENT_MESSAGES.UPDATE_WITHDRAW_SUCCESS,
     );
+  }
+
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, TRANSACTION_METHODS.GET_ALL_WITHDRAW)
+  async getAllWithdraw(
+    data: GetAllWithdrawDto,
+  ): Promise<ReturnType<typeof grpcPaginateResponse>> {
+    const result = await this.transactionService.getAllWithdraws(data);
+    return grpcPaginateResponse(
+      result,
+      PAYMENT_MESSAGES.GET_ALL_WITHDRAW_SUCCESS,
+    );
+  }
+
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, TRANSACTION_METHODS.GET_ONE_WITHDRAW)
+  async getWithdrawDetail({ id }: { id: string }) {
+    const withdraw = await this.transactionService.getWithdrawDetail(id);
+    return grpcResponse(withdraw, PAYMENT_MESSAGES.GET_ONE_WITHDRAW_SUCCESS);
   }
 }

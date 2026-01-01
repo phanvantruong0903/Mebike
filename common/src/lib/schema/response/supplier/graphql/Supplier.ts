@@ -35,4 +35,22 @@ export class Supplier {
 
   @Field()
   updatedAt!: string;
+
+  @Field(() => Number, { nullable: true })
+  totalBikes?: number;
+
+  @Field(() => Number, { nullable: true })
+  availableBikes?: number;
+
+  @Field(() => Number, { nullable: true })
+  bookedBikes?: number;
+
+  @Field(() => Number, { nullable: true })
+  reservedBikes?: number;
+
+  @Field(() => Number, { nullable: true })
+  maintainedBikes?: number;
+
+  @Field(() => Number, { nullable: true })
+  unavailableBikes?: number;
 }

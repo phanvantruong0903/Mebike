@@ -3,6 +3,7 @@ export const KAFKA_SERVICE = {
   AUTH_SERVICE: 'auth-service',
   NOTIFICATION_SERVICE: 'notification-service',
   FLEET_SERVICE: 'fleet-service',
+  RENTAL_SERVICE: 'rental-service',
 } as const;
 
 export const KAFKA_GROUP_ID = {
@@ -11,6 +12,7 @@ export const KAFKA_GROUP_ID = {
   NOTIFICATION_SERVICE: 'notification-service',
   FLEET_SERVICE: 'fleet-service',
   PAYMENT_SERVICE: 'payment-service',
+  RENTAL_SERVICE: 'rental-service',
 } as const;
 
 export const KAFKA_CLIENT_ID = {
@@ -18,6 +20,7 @@ export const KAFKA_CLIENT_ID = {
   AUTH_SERVICE: 'auth-service',
   NOTIFICATION_SERVICE: 'notification-service',
   FLEET_SERVICE: 'fleet-service',
+  RENTAL_SERVICE: 'rental-service',
 } as const;
 
 export const KAFKA_TOPIC = {

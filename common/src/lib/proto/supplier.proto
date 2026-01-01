@@ -11,6 +11,12 @@ message Supplier {
   string createdAt = 6; 
   string updatedAt = 7;
   repeated BikeInSupplier bikes = 8;
+  optional int32 totalBikes = 9;
+  optional int32 availableBikes = 10;
+  optional int32 bookedBikes = 11;
+  optional int32 reservedBikes = 12;
+  optional int32 maintainedBikes = 13;
+  optional int32 unavailableBikes = 14;
 }
 
 message ContactInfo {

@@ -6,3 +6,4 @@ export * from './UpdateWalletStatusDto';
 export * from './GetAllWalletDto';
 export * from './DebitRentalDto';
 export * from './CreateWalletDto';
+export * from './GetWithdrawDto';

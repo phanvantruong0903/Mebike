@@ -37,6 +37,7 @@ The project consists of the following main services:
 - **Auth Service**: Handles user authentication and authorization (JWT, Passport).
 - **User Service**: Manages user profiles and data.
 - **Fleet Service**: Manages inventory (Bike, Station, Supplier).
+- **Rental Service**: Manages rental transactions and bookings.
 - **Consul**: Used for service discovery and configuration.
 - **Traefik**: Acts as the edge router and load balancer.
 
@@ -97,6 +98,9 @@ npx nx serve user-service
 
 # Start the Fleet Service
 npx nx serve fleet-service
+
+# Start the Rental Service
+npx nx serve rental-service
 ```
 
 ## 📦 Build
@@ -107,6 +111,7 @@ To build the project for production:
 npx nx build auth-service
 npx nx build user-service
 npx nx build fleet-service
+npx nx build rental-service
 ```
 
 ## 🧪 Testing
@@ -117,6 +122,7 @@ Run unit tests:
 npx nx test auth-service
 npx nx test user-service
 npx nx test fleet-service
+npx nx test rental-service
 ```
 
 ## 📂 Project Structure
@@ -127,7 +133,9 @@ Mebike/
 │   ├── api-gateway/    # API Gateway service
 │   ├── auth-service/   # Authentication service
 │   ├── user-service/   # User management service
-│   └── fleet-service/  # Inventory (Bike, Station, Supplier) management service
+│   ├── fleet-service/  # Inventory (Bike, Station, Supplier)
+│   └── rental-service/ # Rental management service
+management service
 ├── common/             # Shared libraries and modules
 ├── docker-compose.yaml # Docker infrastructure config
 ├── nx.json             # Nx configuration

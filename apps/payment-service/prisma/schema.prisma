@@ -65,7 +65,7 @@ model Withdraw {
   bank          String
   accountOwner  String
   accountNumber String
-  reason        String
+  reason        String            @default("")
   note          String
   status        WithdrawStatus    @default(PENDING)
   createdAt     DateTime          @default(now())
