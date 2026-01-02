@@ -6,9 +6,9 @@ import {
   RENTAL_MESSAGES,
   RESERVATION_MESSAGES,
   ReservationModel,
+  ReservationStatus,
 } from '@mebike/common';
 import { Injectable } from '@nestjs/common';
-import { ReservationStatus } from 'common/src/lib/prisma/rental/generated';
 
 @Injectable()
 export class ReservationService extends BaseService<

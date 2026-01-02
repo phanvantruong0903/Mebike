@@ -34,7 +34,7 @@ import { StationDataloader } from '../bike/station.dataloader';
           return {
             transport: Transport.GRPC,
             options: {
-              package: 'rental',
+              package: 'reservation',
               protoPath: join(
                 process.cwd(),
                 'common/src/lib/proto/reservation.proto',

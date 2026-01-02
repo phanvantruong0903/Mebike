@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package rental;
+package reservation;
 
 service RentalService {
   rpc CreateReservation (CreateReservationRequest) returns (ReservationResponse);
@@ -74,6 +74,11 @@ message ReservationListResponse {
   int32 totalPages = 7;
   int32 statusCode = 8;
   repeated string errors = 9;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
 }
 
 message Bike {
