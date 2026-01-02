@@ -17,7 +17,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${AUTH_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5433:5432'
     volumes:
@@ -33,7 +33,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${USER_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5434:5432'
     volumes:
@@ -49,7 +49,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${FLEET_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5435:5432'
     volumes:
@@ -65,7 +65,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${PAYMENT_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5437:5432'
     volumes:
@@ -81,7 +81,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${TEMPORAL_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     networks:
       - mebike-network
 
@@ -97,7 +97,7 @@ services:
       - POSTGRES_SEEDS=temporal-db
       - TEMPORAL_ADDRESS=temporal:7233
     ports:
-      - "7233:7233"
+      - '7233:7233'
     depends_on:
       - temporal-db
     networks:
@@ -107,7 +107,7 @@ services:
     image: temporalio/ui:latest
     container_name: temporal-ui
     ports:
-      - "8081:8080"
+      - '8081:8080'
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
     depends_on:
@@ -146,14 +146,14 @@ services:
       - './traefik/acme.json:/acme.json'
       - './traefik/logs:/var/log/traefik'
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-mebike.local}`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=web"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
-      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
-      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
-      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-mebike.local}`)'
+      - 'traefik.http.routers.traefik-dashboard.entrypoints=websecure'
+      - 'traefik.http.routers.traefik-dashboard.entrypoints=web'
+      - 'traefik.http.routers.traefik-dashboard.service=api@internal'
+      - 'traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth'
+      - 'traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_USERS}'
     networks:
       - mebike-network
 
@@ -264,21 +264,21 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     labels:
       - 'traefik.enable=true'
-      
+
       # GraphQL routes (higher priority)
       - 'traefik.http.routers.api-gateway-graphql.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
       - 'traefik.http.routers.api-gateway-graphql.entrypoints=websecure'
       - 'traefik.http.routers.api-gateway-graphql.tls.certresolver=cloudflare'
-      - "traefik.http.routers.api-gateway-graphql.priority=100"
+      - 'traefik.http.routers.api-gateway-graphql.priority=100'
       - 'traefik.http.routers.api-gateway-graphql.middlewares=api-ratelimit,api-compress,api-retry'
-      
+
       # REST API routes (lower priority for /api paths like VNPay callback)
-      - "traefik.http.routers.api-gateway-vnpay.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/api/payment/vnpay_return`)"
-      - "traefik.http.routers.api-gateway-vnpay.entrypoints=websecure"
-      - "traefik.http.routers.api-gateway-vnpay.tls.certresolver=cloudflare"
-      - "traefik.http.routers.api-gateway-vnpay.priority=90"
-      - "traefik.http.routers.api-gateway-vnpay.middlewares=api-compress"
-      
+      - 'traefik.http.routers.api-gateway-vnpay.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/api/payment/vnpay_return`)'
+      - 'traefik.http.routers.api-gateway-vnpay.entrypoints=websecure'
+      - 'traefik.http.routers.api-gateway-vnpay.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.api-gateway-vnpay.priority=90'
+      - 'traefik.http.routers.api-gateway-vnpay.middlewares=api-compress'
+
       # Other Middlewares
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.average=100'
       - 'traefik.http.middlewares.api-ratelimit.ratelimit.burst=50'
@@ -476,7 +476,7 @@ services:
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - DATABASE_URL=mysql://root:${DB_PASSWORD}@rental-db:3306/${RENTAL_DB_NAME}
+      - DATABASE_URL=mysql://root:${DB_PASSWORD}@rental-db:3306/${RENTAL_DB_NAME}?allowPublicKeyRetrieval=true
       - RENTAL_SERVICE_PORT=50058
       - KAFKA_BROKERS=kafka:29092
       - REDIS_HOST=redis

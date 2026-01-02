@@ -476,7 +476,7 @@ services:
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - DATABASE_URL=mysql://root:${DB_PASSWORD}@rental-db:3306/${RENTAL_DB_NAME}
+      - DATABASE_URL=mysql://root:${DB_PASSWORD}@rental-db:3306/${RENTAL_DB_NAME}?allowPublicKeyRetrieval=true
       - RENTAL_SERVICE_PORT=50058
       - KAFKA_BROKERS=kafka:29092
       - REDIS_HOST=redis
