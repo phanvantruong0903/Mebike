@@ -19,12 +19,14 @@ import {
   RentalListResponse,
   GetRentalListInput,
   EndRentalInput,
+  UserProfile,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { RentalService } from './rental.service';
 import { BikeDataloader } from './bike.dataloader';
 import { StationDataloader } from '../bike/station.dataloader';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver(() => Rental)
 export class RentalResolver {
@@ -38,16 +40,26 @@ export class RentalResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.USER)
   async createRental(
+    @CurrentUser() user: UserProfile,
     @Args('body') body: CreateRentalInput,
   ): Promise<RentalResponse> {
-    return this.rentalService.createRental(body);
+    return this.rentalService.createRental({
+      ...body,
+      accountId: user.accountId,
+    });
   }
 
   @Mutation(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.END })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.STAFF)
-  async endRental(@Args('body') body: EndRentalInput): Promise<RentalResponse> {
-    return this.rentalService.endRental(body);
+  async endRental(
+    @CurrentUser() user: UserProfile,
+    @Args('body') body: EndRentalInput,
+  ): Promise<RentalResponse> {
+    return this.rentalService.endRental({
+      ...body,
+      accountId: user.accountId,
+    });
   }
 
   @Query(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.GET_ONE })
