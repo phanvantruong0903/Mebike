@@ -31,7 +31,7 @@ model Reservation {
   id                    String       @id @default(uuid())
   userId                String
   bikeId                String?
-  stationId            String
+  stationId             String
   startTime             DateTime     @default(now())
   endTime               DateTime?
   prepaid               Decimal

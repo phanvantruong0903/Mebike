@@ -16,7 +16,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const consulService = new ConsulService();
-  const port = Number(process.env.RENTAL_SERVICE_PORT) || 50057;
+  const port = Number(process.env.RENTAL_SERVICE_PORT) || 50055;
   const host = consulService.getLocalIp();
 
   await consulService.registerService(

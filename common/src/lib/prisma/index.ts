@@ -77,4 +77,9 @@ export {
   WalletStatus,
   WithdrawStatus,
 } from './payment/generated';
-export { RentalStatus } from './rental/generated';
+export {
+  RentalStatus,
+  ReservationStatus,
+  SubscriptionStatus,
+  PackageStatus,
+} from './rental/generated';
