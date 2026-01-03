@@ -162,3 +162,28 @@ export const RENTAL_MESSAGES = {
   GET_ONE_SUCCESS: 'Rental retrieved successfully',
   GET_ONE_FAILED: 'Rental retrieved failed',
 };
+
+export const RESERVATION_MESSAGES = {
+  CREATE_SUCCESS: 'Reservation created successfully',
+  UPDATE_SUCCESS: 'Reservation updated successfully',
+  GET_ALL_SUCCESS: 'Reservations retrieved successfully',
+  GET_ALL_FAIL: 'Reservations retrieved failed',
+  GET_DETAIL_SUCCESS: 'Reservation details retrieved successfully',
+  DELETE_SUCCESS: 'Reservation deleted successfully',
+  SUMMARIZE_SUCCESS: 'Reservation summarized successfully',
+  SUMMARIZE_FAIL: 'Reservation summarized failed',
+  NOT_FOUND: 'Reservation not found',
+  NOT_FOUND_WITH_STATUS: (status: string) =>
+    `Reservation not found with status ${status}`,
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Reservation failed',
+  VALIDATION_FAILED: 'Reservation name or phone incorrect',
+  UPDATE_FAIL: 'Update Reservation failed',
+  GET_ALL_STATS_SUCCESS: 'Reservation stats retrieved successfully',
+  FIELD_NOT_FOUND: (field: string) => `${field} not found in reservation`,
+  INVALID_ID: 'Invalid id format',
+  GET_ONE_SUCCESS: 'Reservation retrieved successfully',
+  GET_ONE_FAILED: 'Reservation retrieved failed',
+  CONFIRM_SUCCESS: 'Reservation confirmed successfully',
+  CONFIRM_FAIL: 'Reservation confirmed failed',
+};

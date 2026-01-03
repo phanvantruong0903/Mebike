@@ -94,3 +94,10 @@ export const RENTAL_METHODS = {
   GET_ALL: 'GetAllRentals',
   SUMMARIZE: 'SummarizeRentals',
 };
+
+export const RESERVATION_METHODS = {
+  CREATE: 'CreateReservation',
+  CONFIRM: 'ConfirmReservation',
+  GET_ONE: 'GetReservation',
+  GET_ALL: 'GetAllReservations',
+};
