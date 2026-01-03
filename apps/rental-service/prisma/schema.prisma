@@ -48,7 +48,7 @@ model Subscription {
   userId                String
   packageId             String?
   activatedAt           DateTime?
-  expiresAt             DateTime?
+  expiredAt             DateTime?
   usageCounts           Int          @default(0)
   status                SubscriptionStatus   @default(Pending)
   createdAt             DateTime     @default(now())

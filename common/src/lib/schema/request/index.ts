@@ -7,3 +7,4 @@ export * from './payment';
 export * from './wallet';
 export * from './rental';
 export * from './reservation';
+export * from './subscription';

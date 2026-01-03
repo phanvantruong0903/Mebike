@@ -101,3 +101,11 @@ export const RESERVATION_METHODS = {
   GET_ONE: 'GetReservation',
   GET_ALL: 'GetAllReservations',
 };
+
+export const SUBSCRIPTION_METHODS = {
+  CREATE: 'CreateSubscription',
+  GET_ONE: 'GetSubscription',
+  GET_ALL: 'GetAllSubscriptions',
+  ACTIVATE: 'ActivateSubscription',
+  EXPIRE: 'ExpireSubscription',
+};

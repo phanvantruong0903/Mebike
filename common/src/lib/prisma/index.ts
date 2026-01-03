@@ -68,6 +68,7 @@ export type WalletHistoryModel = PaymentPrismaInternal.WalletHistory;
 export type WithdrawModel = PaymentPrismaInternal.Withdraw;
 export type RentalModel = RentalPrismaInternal.Rental;
 export type ReservationModel = RentalPrismaInternal.Reservation;
+export type SubscriptionModel = RentalPrismaInternal.Subscription;
 export { Role, UserVerifyStatus, UserStatus } from './user/generated';
 export { SupplierStatus, BikeStatus, StationStatus } from './fleet/generated';
 export {
