@@ -9,3 +9,4 @@ export * from './wallet';
 export * from './withdraw';
 export * from './rental';
 export * from './reservation';
+export * from './subscription';

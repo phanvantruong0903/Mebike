@@ -2,7 +2,6 @@ import {
   BaseService,
   CreateSubscriptionDto,
   prismaRental,
-  ReservationModel,
   SUBSCRIPTION_MESSAGES,
   SubscriptionModel,
   SubscriptionStatus,

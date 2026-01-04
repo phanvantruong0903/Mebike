@@ -19,7 +19,7 @@ enum SubscriptionStatus {
 
 message Subscription {
   string id = 1;
-  string userId = 2;
+  User user = 2;
   Package package = 3;
   optional string activatedAt = 4;
   optional string expiredAt = 5;
