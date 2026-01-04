@@ -6,3 +6,4 @@ export * from './bike';
 export * from './payment';
 export * from './wallet';
 export * from './rental';
+export * from './reservation';

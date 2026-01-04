@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package reservation;
+
+service RentalService {
+  rpc CreateReservation (CreateReservationRequest) returns (ReservationResponse);
+  rpc ConfirmReservation (ConfirmReservationRequest) returns (ReservationResponse);
+  rpc GetReservation (GetReservationRequest) returns (ReservationResponse);
+  rpc GetReservationList (GetReservationListRequest) returns (ReservationListResponse);
+}
+
+enum ReservationStatus {
+  Pending = 0;
+  Active = 1;
+  Cancelled = 2;
+  Expired = 3;
+}
+
+message Reservation {
+  string id = 1;
+  optional User user = 2;
+  optional Bike bike = 3;
+  optional Station station = 4;
+  string startTime = 5;
+  string endTime = 6;
+  string prepaid = 7;
+  optional string subscriptionId = 8;
+  ReservationStatus status = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+}
+
+message ReservationList {
+  repeated Reservation data = 1;
+}
+
+message CreateReservationRequest {
+  string accountId = 1;
+  string bikeId = 2;
+  string startTime = 3;
+  optional string subscriptionId = 4;
+}
+
+message ConfirmReservationRequest {
+  string accountId = 1;
+  string id = 2;
+}
+
+message GetReservationListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message GetReservationRequest {
+  string id = 1;
+}
+
+message ReservationResponse {
+  bool success = 1;
+  string message = 2;
+  Reservation data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}
+
+message ReservationListResponse {
+  bool success = 1;
+  string message = 2;
+  ReservationList data = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 limit = 6;
+  int32 totalPages = 7;
+  int32 statusCode = 8;
+  repeated string errors = 9;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+}
+
+message Bike {
+  string id = 1;
+  string chipId = 2;
+  optional Station station = 3;
+}
+
+message Station {
+  string id = 1;
+  optional string name = 2;
+  optional string address = 3;
+}

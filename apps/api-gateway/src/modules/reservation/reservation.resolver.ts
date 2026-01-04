@@ -13,73 +13,80 @@ import {
   Station,
   Bike,
   Rental,
-  RentalResponse,
-  GRAPHQL_NAME_RENTAL,
-  CreateRentalInput,
-  RentalListResponse,
-  GetRentalListInput,
-  EndRentalInput,
   UserProfile,
+  GRAPHQL_NAME_RESERVATION,
+  ReservationResponse,
+  CreateReservationInput,
+  ConfirmReservationInput,
+  ReservationListResponse,
+  GetReservationListInput,
+  Reservation,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
-import { RentalService } from './rental.service';
 import { BikeDataloader } from './bike.dataloader';
 import { StationDataloader } from '../bike/station.dataloader';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { ReservationService } from './reservation.service';
 
-@Resolver(() => Rental)
-export class RentalResolver {
+@Resolver(() => Reservation)
+export class ReservationResolver {
   constructor(
-    private readonly rentalService: RentalService,
+    private readonly reservationService: ReservationService,
     private readonly bikeDataLoader: BikeDataloader,
     private readonly stationDataLoader: StationDataloader,
   ) {}
 
-  @Mutation(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.CREATE })
+  @Mutation(() => ReservationResponse, {
+    name: GRAPHQL_NAME_RESERVATION.CREATE,
+  })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.USER)
-  async createRental(
+  async createReservation(
     @CurrentUser() user: UserProfile,
-    @Args('body') body: CreateRentalInput,
-  ): Promise<RentalResponse> {
-    return this.rentalService.createRental({
+    @Args('body') body: CreateReservationInput,
+  ): Promise<ReservationResponse> {
+    return this.reservationService.createReservation({
       ...body,
       accountId: user.accountId,
     });
   }
 
-  @Mutation(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.END })
+  @Mutation(() => ReservationResponse, {
+    name: GRAPHQL_NAME_RESERVATION.CONFIRM,
+  })
   @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(Role.STAFF)
-  async endRental(
+  @Roles(Role.USER)
+  async confirmReservation(
     @CurrentUser() user: UserProfile,
-    @Args('body') body: EndRentalInput,
-  ): Promise<RentalResponse> {
-    return this.rentalService.endRental({
+    @Args('body') body: ConfirmReservationInput,
+  ): Promise<ReservationResponse> {
+    return this.reservationService.confirmReservation({
       ...body,
       accountId: user.accountId,
     });
   }
 
-  @Query(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.GET_ONE })
-  async getRental(@Args('id') id: string): Promise<RentalResponse> {
-    return this.rentalService.getRental({ id });
+  @Query(() => ReservationResponse, { name: GRAPHQL_NAME_RESERVATION.GET_ONE })
+  async getReservation(@Args('id') id: string): Promise<ReservationResponse> {
+    return this.reservationService.getReservation({ id });
   }
 
-  @Query(() => RentalListResponse, { name: GRAPHQL_NAME_RENTAL.GET_ALL })
-  async getRentalList(
+  @Query(() => ReservationListResponse, {
+    name: GRAPHQL_NAME_RESERVATION.GET_ALL,
+  })
+  async getReservationList(
     @Args('params', {
       nullable: true,
-      type: () => GetRentalListInput,
+      type: () => GetReservationListInput,
       defaultValue: {},
     })
-    data: GetRentalListInput,
-  ): Promise<RentalListResponse> {
+    data: GetReservationListInput,
+  ): Promise<ReservationListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
-    return this.rentalService.getRentalList({
+    return this.reservationService.getReservationList({
       page,
       limit,
       search: data.search,
