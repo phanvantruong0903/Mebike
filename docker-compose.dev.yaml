@@ -240,6 +240,8 @@ services:
         condition: service_healthy
       fleet-service:
         condition: service_healthy
+      payment-service:
+        condition: service_healthy
       kafka:
         condition: service_healthy
       redis:
@@ -306,6 +308,10 @@ services:
         condition: service_healthy
       temporal:
         condition: service_started
+      payment-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
@@ -341,8 +347,6 @@ services:
       user-db:
         condition: service_started
       kafka:
-        condition: service_healthy
-      payment-service:
         condition: service_healthy
       temporal:
         condition: service_started

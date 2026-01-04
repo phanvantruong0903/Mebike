@@ -22,16 +22,43 @@ CREATE TABLE `reservations` (
     `id` VARCHAR(191) NOT NULL,
     `userId` VARCHAR(191) NOT NULL,
     `bikeId` VARCHAR(191) NULL,
-    `station_id` VARCHAR(191) NOT NULL,
+    `stationId` VARCHAR(191) NOT NULL,
     `startTime` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `endTime` DATETIME(3) NULL,
-    `prepaid` DECIMAL(65, 30) NOT NULL DEFAULT 0,
-    `status` ENUM('Pending', 'Active', 'Cancelled', 'Expired') NOT NULL DEFAULT 'Pending',
-    `reservation_option` ENUM('ONE_TIME', 'FIXED_SLOT', 'SUBSCRIPTION') NOT NULL DEFAULT 'ONE_TIME',
+    `prepaid` DECIMAL(65, 30) NOT NULL,
     `subscriptionId` VARCHAR(191) NULL,
-    `fixed_slot_template_id` VARCHAR(191) NULL,
+    `status` ENUM('Pending', 'Active', 'Cancelled', 'Expired') NOT NULL DEFAULT 'Pending',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `subscriptions` (
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `packageId` VARCHAR(191) NULL,
+    `activatedAt` DATETIME(3) NULL,
+    `expiresAt` DATETIME(3) NULL,
+    `usageCounts` INTEGER NOT NULL DEFAULT 0,
+    `status` ENUM('Pending', 'Active', 'Cancelled', 'Expired') NOT NULL DEFAULT 'Pending',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `packages` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `price` DECIMAL(65, 30) NOT NULL,
+    `maxUsages` INTEGER NULL,
+    `status` ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `packages_name_key`(`name`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
