@@ -1,32 +1,13 @@
 reviews:
   review_status: true
-
   auto_review:
     enabled: true
     base_branches:
       - dev
       - main
-
   request_changes_workflow: true
-
   auto_approve: false
 
-language: en-US
+language: vi-VN
 
 tone_instructions: 'Be concise and constructive. Focus on bugs, security issues, and performance improvements.'
-
-path_filters:
-  - 'apps/**/*'
-  - 'common/**/*'
-  - '*.ts'
-  - '*.js'
-  - '*.yaml'
-  - '*.yml'
-
-  - '!node_modules/**'
-  - '!dist/**'
-  - '!build/**'
-  - '!*.lock'
-  - '!package-lock.json'
-
-review_profile: 'chill'
