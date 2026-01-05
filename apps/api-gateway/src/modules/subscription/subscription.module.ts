@@ -18,12 +18,12 @@ import { SubscriptionResolver } from './subscription.resolver';
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
-        name: GRPC_PACKAGE.RENTAL,
+        name: GRPC_PACKAGE.MEMBERSHIP,
         imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
-          const subscriptionService = await consulService.discoverService(
-            CONSULT_SERVICE_ID.RENTAL,
+          const membershipService = await consulService.discoverService(
+            CONSULT_SERVICE_ID.MEMBERSHIP,
           );
           return {
             transport: Transport.GRPC,
@@ -33,7 +33,7 @@ import { SubscriptionResolver } from './subscription.resolver';
                 process.cwd(),
                 'common/src/lib/proto/subscription.proto',
               ),
-              url: `${subscriptionService.address}:${subscriptionService.port}`,
+              url: `${membershipService.address}:${membershipService.port}`,
             },
           };
         },

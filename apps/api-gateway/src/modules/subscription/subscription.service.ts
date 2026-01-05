@@ -27,12 +27,14 @@ export class SubscriptionService implements OnModuleInit {
   private subscriptionService!: SubscriptionServiceClient;
 
   constructor(
-    @Inject(GRPC_PACKAGE.RENTAL) private readonly client: ClientGrpc,
+    @Inject(GRPC_PACKAGE.MEMBERSHIP) private readonly client: ClientGrpc,
   ) {}
 
   onModuleInit() {
     this.subscriptionService =
-      this.client.getService<SubscriptionServiceClient>(GRPC_SERVICES.RENTAL);
+      this.client.getService<SubscriptionServiceClient>(
+        GRPC_SERVICES.MEMBERSHIP,
+      );
   }
 
   async createSubscription(data: CreateSubscriptionInput) {
