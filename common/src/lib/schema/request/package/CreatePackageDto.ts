@@ -7,7 +7,7 @@ import {
   IsPositive,
   IsEnum,
 } from 'class-validator';
-import { PackageStatus, UsageType } from 'src/lib/prisma/rental/generated';
+import { PackageStatus, UsageType } from 'src/lib/prisma/membership/generated';
 
 export class CreatePackageDto {
   @IsString()
