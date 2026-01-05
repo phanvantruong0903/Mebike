@@ -3,12 +3,14 @@ import * as UserPrismaInternal from './user/generated';
 import * as FleetPrismaInternal from './fleet/generated';
 import * as PaymentPrismaInternal from './payment/generated';
 import * as RentalPrismaInternal from './rental/generated';
+import * as MembershipPrismaInternal from './membership/generated';
 
 export * as AuthPrisma from './auth/generated';
 export * as UserPrisma from './user/generated';
 export * as FleetPrisma from './fleet/generated';
 export * as PaymentPrisma from './payment/generated';
 export * as RentalPrisma from './rental/generated';
+export * as MembershipPrisma from './membership/generated';
 
 // Singleton pattern to prevent multiple instances during hot reload
 const globalForPrisma = global as unknown as {
@@ -17,6 +19,7 @@ const globalForPrisma = global as unknown as {
   prismaFleet: FleetPrismaInternal.PrismaClient | undefined;
   prismaPayment: PaymentPrismaInternal.PrismaClient | undefined;
   prismaRental: RentalPrismaInternal.PrismaClient | undefined;
+  prismaMembership: MembershipPrismaInternal.PrismaClient | undefined;
 };
 
 export const prismaAuth =
@@ -49,12 +52,19 @@ export const prismaRental =
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   });
 
+export const prismaMembership =
+  globalForPrisma.prismaMembership ??
+  new MembershipPrismaInternal.PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  });
+
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prismaAuth = prismaAuth;
   globalForPrisma.prismaUser = prismaUser;
   globalForPrisma.prismaFleet = prismaFleet;
   globalForPrisma.prismaPayment = prismaPayment;
   globalForPrisma.prismaRental = prismaRental;
+  globalForPrisma.prismaMembership = prismaMembership;
 }
 
 export type User = AuthPrismaInternal.User;
@@ -68,7 +78,8 @@ export type WalletHistoryModel = PaymentPrismaInternal.WalletHistory;
 export type WithdrawModel = PaymentPrismaInternal.Withdraw;
 export type RentalModel = RentalPrismaInternal.Rental;
 export type ReservationModel = RentalPrismaInternal.Reservation;
-export type SubscriptionModel = RentalPrismaInternal.Subscription;
+export type SubscriptionModel = MembershipPrismaInternal.Subscription;
+export type PackageModel = MembershipPrismaInternal.Package;
 export { Role, UserVerifyStatus, UserStatus } from './user/generated';
 export { SupplierStatus, BikeStatus, StationStatus } from './fleet/generated';
 export {
@@ -78,9 +89,9 @@ export {
   WalletStatus,
   WithdrawStatus,
 } from './payment/generated';
+export { RentalStatus, ReservationStatus } from './rental/generated';
 export {
-  RentalStatus,
-  ReservationStatus,
   SubscriptionStatus,
   PackageStatus,
-} from './rental/generated';
+  UsageType,
+} from './membership/generated';

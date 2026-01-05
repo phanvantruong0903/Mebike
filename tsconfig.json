@@ -44,6 +44,12 @@
     },
     {
       "path": "./apps/rental-service"
+    },
+    {
+      "path": "./membership-service-e2e"
+    },
+    {
+      "path": "./membership-service"
     }
   ]
 }

@@ -214,3 +214,19 @@ export const SUBSCRIPTION_MESSAGES = {
   EXPIRE_SUCCESS: 'Subscription expired successfully',
   EXPIRE_FAILED: 'Subscription expired failed',
 };
+
+export const PACKAGE_MESSAGES = {
+  CREATE_SUCCESS: 'Package created successfully',
+  UPDATE_SUCCESS: 'Package updated successfully',
+  GET_ALL_SUCCESS: 'Packages retrieved successfully',
+  GET_ALL_FAIL: 'Packages retrieved failed',
+  GET_DETAIL_SUCCESS: 'Package details retrieved successfully',
+  DELETE_SUCCESS: 'Package deleted successfully',
+  NOT_FOUND: 'Package not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Package failed',
+  VALIDATION_FAILED: 'Package name incorrect',
+  UPDATE_FAIL: 'Update Package failed',
+  GET_ONE_SUCCESS: 'Package retrieved successfully',
+  GET_ONE_FAILED: 'Package retrieved failed',
+};

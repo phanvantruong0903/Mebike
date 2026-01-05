@@ -1,7 +1,7 @@
 import {
   BaseService,
   CreateSubscriptionDto,
-  prismaRental,
+  prismaMembership,
   SUBSCRIPTION_MESSAGES,
   SubscriptionModel,
   SubscriptionStatus,
@@ -19,13 +19,13 @@ export class SubscriptionService extends BaseService<
   CreateSubscriptionDto
 > {
   constructor() {
-    super(prismaRental.subscription);
+    super(prismaMembership.subscription);
   }
 
   override async create(
     data: CreateSubscriptionDto,
   ): Promise<SubscriptionModel> {
-    return await prismaRental.subscription.create({
+    return await prismaMembership.subscription.create({
       data: {
         ...data,
         userId: data.accountId,
@@ -38,7 +38,7 @@ export class SubscriptionService extends BaseService<
     const expiredAt = this.generateExpirationDate(activatedAt);
 
     try {
-      const result = await prismaRental.subscription.updateMany({
+      const result = await prismaMembership.subscription.updateMany({
         where: {
           id,
           status: SubscriptionStatus.Pending,
@@ -58,7 +58,7 @@ export class SubscriptionService extends BaseService<
         );
       }
 
-      return await prismaRental.subscription.findUniqueOrThrow({
+      return await prismaMembership.subscription.findUniqueOrThrow({
         where: { id },
       });
     } catch (error) {
@@ -68,7 +68,7 @@ export class SubscriptionService extends BaseService<
   }
 
   async expire(id: string): Promise<SubscriptionModel> {
-    const result = await prismaRental.subscription.updateMany({
+    const result = await prismaMembership.subscription.updateMany({
       where: { id, status: SubscriptionStatus.Active },
       data: { status: SubscriptionStatus.Expired },
     });
@@ -79,11 +79,13 @@ export class SubscriptionService extends BaseService<
       );
     }
 
-    return await prismaRental.subscription.findUniqueOrThrow({ where: { id } });
+    return await prismaMembership.subscription.findUniqueOrThrow({
+      where: { id },
+    });
   }
 
   async getOne(id: string): Promise<SubscriptionModel | null> {
-    const subscription = await prismaRental.subscription.findUnique({
+    const subscription = await prismaMembership.subscription.findUnique({
       where: { id },
     });
     return subscription;

@@ -29,7 +29,7 @@ export class SubscriptionController {
     );
   }
 
-  @GrpcMethod(GRPC_SERVICES.RENTAL, SUBSCRIPTION_METHODS.CREATE)
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.CREATE)
   async createSubscription(
     data: CreateSubscriptionDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
@@ -52,7 +52,7 @@ export class SubscriptionController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.RENTAL, SUBSCRIPTION_METHODS.GET_ONE)
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.GET_ONE)
   async getSubscription({
     id,
   }: {
@@ -80,7 +80,7 @@ export class SubscriptionController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.RENTAL, SUBSCRIPTION_METHODS.GET_ALL)
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.GET_ALL)
   async getAllSubscription(
     data: GetSubscriptionListDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
@@ -112,7 +112,7 @@ export class SubscriptionController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.RENTAL, SUBSCRIPTION_METHODS.ACTIVATE)
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.ACTIVATE)
   async activateSubscription({
     id,
   }: {
@@ -140,7 +140,7 @@ export class SubscriptionController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.RENTAL, SUBSCRIPTION_METHODS.EXPIRE)
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.EXPIRE)
   async expireSubscription({
     id,
   }: {

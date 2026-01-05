@@ -6,6 +6,7 @@ export const GRPC_SERVICES = {
   PAYMENT: 'PaymentService',
   TRANSACTION: 'TransactionService',
   RENTAL: 'RentalService',
+  MEMBERSHIP: 'MembershipService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -16,6 +17,7 @@ export const GRPC_PACKAGE = {
   PAYMENT: 'PAYMENT_PACKAGE',
   TRANSACTION: 'TRANSACTION_PACKAGE',
   RENTAL: 'RENTAL_PACKAGE',
+  MEMBERSHIP: 'MEMBERSHIP_PACKAGE',
 };
 
 export const USER_METHODS = {
@@ -108,4 +110,11 @@ export const SUBSCRIPTION_METHODS = {
   GET_ALL: 'GetAllSubscriptions',
   ACTIVATE: 'ActivateSubscription',
   EXPIRE: 'ExpireSubscription',
+};
+
+export const PACKAGE_METHODS = {
+  CREATE: 'CreatePackage',
+  UPDATE: 'UpdatePackage',
+  GET_ONE: 'GetPackage',
+  GET_ALL: 'GetAllPackages',
 };
