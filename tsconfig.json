@@ -46,10 +46,10 @@
       "path": "./apps/rental-service"
     },
     {
-      "path": "./membership-service-e2e"
+      "path": "./apps/membership-service-e2e"
     },
     {
-      "path": "./membership-service"
+      "path": "./apps/membership-service"
     }
   ]
 }
