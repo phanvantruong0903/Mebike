@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package package;
+
+service PackageService {
+  rpc CreatePackage (CreatePackageRequest) returns (PackageResponse);
+  rpc UpdatePackage (UpdatePackageRequest) returns (PackageResponse);
+  rpc GetPackage (GetPackageRequest) returns (PackageResponse);
+  rpc GetAllPackages (GetPackageListRequest) returns (PackageListResponse);
+}
+
+message Package {
+  string id = 1;
+  string name = 2;
+  string price = 3;
+  int32 maxUsages = 4;
+  string usageType = 5;
+  string status = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+message CreatePackageRequest {
+  string name = 1;
+  string price = 2;
+  optional int32 maxUsages = 3;
+  optional string usageType = 4;
+}
+
+message UpdatePackageRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string price = 3;
+  optional int32 maxUsages = 4;
+  optional string usageType = 5;
+  optional string status = 6;
+}
+
+message GetPackageRequest {
+  string id = 1;
+}
+
+message GetPackageListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message PackageResponse {
+  bool success = 1;
+  string message = 2;
+  int32 statusCode = 3;
+  Package data = 4;
+  repeated string errors = 5;
+}
+
+message Pagination {
+  int32 total = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalPages = 4;
+}
+
+message PackageList {
+  repeated Package data = 1;
+}
+
+message PackageListResponse {
+  bool success = 1;
+  string message = 2;
+  PackageList data = 3;
+  Pagination pagination = 4;
+  int32 statusCode = 5;
+  repeated string errors = 6;
+}

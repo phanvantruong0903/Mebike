@@ -15,6 +15,8 @@ import { HttpErrorStatusPlugin } from '../plugins/http-status.plugin';
 import { TransactionModule } from '../modules/transaction/transaction.module';
 import { RentalModule } from '../modules/rental/rental.module';
 import { ReservationModule } from '../modules/reservation/reservation.module';
+import { SubscriptionModule } from '../modules/subscription/subscription.module';
+import { PackageModule } from '../modules/package/package.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { ReservationModule } from '../modules/reservation/reservation.module';
     TransactionModule,
     RentalModule,
     ReservationModule,
+    SubscriptionModule,
+    PackageModule,
   ],
   providers: [HttpErrorStatusPlugin],
 })

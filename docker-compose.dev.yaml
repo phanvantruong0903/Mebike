@@ -8,7 +8,7 @@ services:
     command: 'agent -dev -client=0.0.0.0'
     networks:
       - mebike-network
-  
+
   auth-db:
     image: postgres:16-alpine
     container_name: auth-db
@@ -17,7 +17,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${AUTH_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5433:5432'
     volumes:
@@ -33,14 +33,14 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${USER_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5434:5432'
     volumes:
       - user_data:/var/lib/postgresql/data
     networks:
       - mebike-network
-  
+
   fleet-db:
     image: postgres:16-alpine
     container_name: fleet-db
@@ -49,14 +49,14 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${FLEET_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5435:5432'
     volumes:
       - fleet_data:/var/lib/postgresql/data
     networks:
       - mebike-network
-  
+
   payment-db:
     image: postgres:16-alpine
     container_name: payment-db
@@ -65,7 +65,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${PAYMENT_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     ports:
       - '5437:5432'
     volumes:
@@ -81,7 +81,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${TEMPORAL_DB_NAME}
-      POSTGRES_INITDB_ARGS: "-c idle_in_transaction_session_timeout=1800000"
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
     networks:
       - mebike-network
 
@@ -97,7 +97,7 @@ services:
       - POSTGRES_SEEDS=temporal-db
       - TEMPORAL_ADDRESS=temporal:7233
     ports:
-      - "7233:7233"
+      - '7233:7233'
     depends_on:
       - temporal-db
     networks:
@@ -107,7 +107,7 @@ services:
     image: temporalio/ui:latest
     container_name: temporal-ui
     ports:
-      - "8081:8080"
+      - '8081:8080'
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
     depends_on:
@@ -129,36 +129,50 @@ services:
     networks:
       - mebike-network
 
+  membership-db:
+    image: mysql:8.0
+    container_name: membership-db
+    restart: 'unless-stopped'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${MEMBERSHIP_DB_NAME}
+    ports:
+      - '3308:3306'
+    volumes:
+      - membership_data:/var/lib/mysql
+    networks:
+      - mebike-network
+
   traefik:
     image: traefik:latest
     container_name: traefik
     restart: 'unless-stopped'
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     command:
-      - "--api.dashboard=true"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--log.level=INFO"
+      - '--api.dashboard=true'
+      - '--api.insecure=true'
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.websecure.address=:443'
+      - '--log.level=INFO'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-mebike.local}`)"
-      - "traefik.http.routers.traefik-dashboard.entrypoints=web"
-      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-mebike.local}`)'
+      - 'traefik.http.routers.traefik-dashboard.entrypoints=web'
+      - 'traefik.http.routers.traefik-dashboard.service=api@internal'
     networks:
       - mebike-network
 
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
-      - "9092:9092"
-      - "29092:29092"
+      - '9092:9092'
+      - '29092:29092'
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: 'broker,controller'
@@ -175,15 +189,22 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_NUM_PARTITIONS: 3
-      KAFKAJS_NO_PARTITIONER_WARNING: "1"
+      KAFKAJS_NO_PARTITIONER_WARNING: '1'
 
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     volumes:
       - kafka_data:/var/lib/kafka
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      test:
+        [
+          'CMD',
+          'kafka-topics',
+          '--bootstrap-server',
+          'localhost:9092',
+          '--list',
+        ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -195,7 +216,7 @@ services:
     container_name: kafka-ui
     restart: 'unless-stopped'
     ports:
-      - "8080:8080"
+      - '8080:8080'
     environment:
       KAFKA_CLUSTERS_0_NAME: Mebike-Cluster
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
@@ -206,7 +227,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.kafka-ui.rule=Host(`kafka.localhost`)'
       - 'traefik.http.routers.kafka-ui.entrypoints=web'
-      - "traefik.http.services.kafka-ui.loadbalancer.server.port=8080"
+      - 'traefik.http.services.kafka-ui.loadbalancer.server.port=8080'
     networks:
       - mebike-network
 
@@ -215,10 +236,10 @@ services:
     container_name: redis
     restart: 'unless-stopped'
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 5
@@ -257,31 +278,31 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     labels:
       - 'traefik.enable=true'
-      
+
       # GraphQL routes
       - 'traefik.http.routers.api-gateway-graphql-http.rule=PathPrefix(`/graphql`)'
       - 'traefik.http.routers.api-gateway-graphql-http.entrypoints=web'
       - 'traefik.http.routers.api-gateway-graphql-http.middlewares=api-compress,api-retry'
       - 'traefik.http.routers.api-gateway-graphql-http.priority=100'
-      
+
       # GraphQL routes
       - 'traefik.http.routers.api-gateway-graphql-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/graphql`)'
       - 'traefik.http.routers.api-gateway-graphql-https.entrypoints=websecure'
       - 'traefik.http.routers.api-gateway-graphql-https.middlewares=api-compress,api-retry'
       - 'traefik.http.routers.api-gateway-graphql-https.priority=100'
-      
+
       # REST API routes
       - 'traefik.http.routers.api-gateway-rest-http.rule=PathPrefix(`/api`)'
       - 'traefik.http.routers.api-gateway-rest-http.entrypoints=web'
       - 'traefik.http.routers.api-gateway-rest-http.middlewares=api-compress,api-retry'
       - 'traefik.http.routers.api-gateway-rest-http.priority=90'
-      
+
       # REST API routes
       - 'traefik.http.routers.api-gateway-rest-https.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/api`)'
       - 'traefik.http.routers.api-gateway-rest-https.entrypoints=websecure'
       - 'traefik.http.routers.api-gateway-rest-https.middlewares=api-compress,api-retry'
       - 'traefik.http.routers.api-gateway-rest-https.priority=90'
-      
+
       # Middlewares
       - 'traefik.http.middlewares.api-compress.compress=true'
       - 'traefik.http.middlewares.api-retry.retry.attempts=3'
@@ -431,7 +452,7 @@ services:
       start_period: 60s
     networks:
       - mebike-network
-  
+
   payment-service:
     build:
       context: .
@@ -492,6 +513,28 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - mebike-network
+
+  membership-service:
+    build:
+      context: .
+      dockerfile: apps/membership-service/Dockerfile
+    container_name: membership-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      membership-db:
+        condition: service_started
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=mysql://root:${DB_PASSWORD}@membership-db:3306/${MEMBERSHIP_DB_NAME}?allowPublicKeyRetrieval=true
+      - MEMBERSHIP_SERVICE_PORT=50059
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - mebike-network
 

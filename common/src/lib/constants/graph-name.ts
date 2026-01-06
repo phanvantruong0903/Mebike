@@ -74,3 +74,18 @@ export const GRAPHQL_NAME_RESERVATION = {
   CREATE: 'CreateReservation',
   CONFIRM: 'ConfirmReservation',
 };
+
+export const GRAPHQL_NAME_SUBSCRIPTION = {
+  GET_ALL: 'Subscriptions',
+  GET_ONE: 'Subscription',
+  CREATE: 'CreateSubscription',
+  ACTIVATE: 'ActivateSubscription',
+  EXPIRE: 'ExpireSubscription',
+};
+
+export const GRAPHQL_NAME_PACKAGE = {
+  GET_ALL: 'Packages',
+  GET_ONE: 'Package',
+  CREATE: 'CreatePackage',
+  UPDATE: 'UpdatePackage',
+};
