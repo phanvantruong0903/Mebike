@@ -10,6 +10,7 @@ import {
   Matches,
 } from 'class-validator';
 import { PackageStatus, UsageType } from '../../../prisma';
+import { Transform } from 'class-transformer';
 
 export class CreatePackageDto {
   @IsString()
@@ -30,6 +31,9 @@ export class CreatePackageDto {
   @ValidateIf((o) => o.usageType !== UsageType.Infinite)
   @IsInt()
   @IsPositive()
+  @Transform(({ obj, value }) => {
+    return obj.usageType === UsageType.Infinite ? null : value;
+  })
   maxUsages?: number;
 
   @IsEnum(PackageStatus)
