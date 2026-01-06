@@ -187,3 +187,46 @@ export const RESERVATION_MESSAGES = {
   CONFIRM_SUCCESS: 'Reservation confirmed successfully',
   CONFIRM_FAIL: 'Reservation confirmed failed',
 };
+
+export const SUBSCRIPTION_MESSAGES = {
+  CREATE_SUCCESS: 'Subscription created successfully',
+  UPDATE_SUCCESS: 'Subscription updated successfully',
+  GET_ALL_SUCCESS: 'Subscriptions retrieved successfully',
+  GET_ALL_FAIL: 'Subscriptions retrieved failed',
+  GET_DETAIL_SUCCESS: 'Subscription details retrieved successfully',
+  DELETE_SUCCESS: 'Subscription deleted successfully',
+  SUMMARIZE_SUCCESS: 'Subscription summarized successfully',
+  SUMMARIZE_FAIL: 'Subscription summarized failed',
+  NOT_FOUND: 'Subscription not found',
+  NOT_FOUND_WITH_STATUS: (status: string) =>
+    `Subscription not found with status ${status}`,
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Subscription failed',
+  VALIDATION_FAILED: 'Subscription name or phone incorrect',
+  UPDATE_FAIL: 'Update Subscription failed',
+  GET_ALL_STATS_SUCCESS: 'Subscription stats retrieved successfully',
+  FIELD_NOT_FOUND: (field: string) => `${field} not found in subscription`,
+  INVALID_ID: 'Invalid id format',
+  GET_ONE_SUCCESS: 'Subscription retrieved successfully',
+  GET_ONE_FAILED: 'Subscription retrieved failed',
+  ACTIVATE_SUCCESS: 'Subscription activated successfully',
+  ACTIVATE_FAILED: 'Subscription activated failed',
+  EXPIRE_SUCCESS: 'Subscription expired successfully',
+  EXPIRE_FAILED: 'Subscription expired failed',
+};
+
+export const PACKAGE_MESSAGES = {
+  CREATE_SUCCESS: 'Package created successfully',
+  UPDATE_SUCCESS: 'Package updated successfully',
+  GET_ALL_SUCCESS: 'Packages retrieved successfully',
+  GET_ALL_FAIL: 'Packages retrieved failed',
+  GET_DETAIL_SUCCESS: 'Package details retrieved successfully',
+  DELETE_SUCCESS: 'Package deleted successfully',
+  NOT_FOUND: 'Package not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create Package failed',
+  VALIDATION_FAILED: 'Package name incorrect',
+  UPDATE_FAIL: 'Update Package failed',
+  GET_ONE_SUCCESS: 'Package retrieved successfully',
+  GET_ONE_FAILED: 'Package retrieved failed',
+};

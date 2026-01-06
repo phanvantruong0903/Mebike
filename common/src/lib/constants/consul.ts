@@ -5,4 +5,5 @@ export const CONSULT_SERVICE_ID = {
   FLEET: 'fleet-service',
   PAYMENT: 'payment-service',
   RENTAL: 'rental-service',
+  MEMBERSHIP: 'membership-service',
 };

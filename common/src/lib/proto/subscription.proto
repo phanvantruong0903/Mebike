@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package subscription;
+
+service MembershipService {
+  rpc CreateSubscription (CreateSubscriptionRequest) returns (SubscriptionResponse);
+  rpc GetSubscription (GetSubscriptionRequest) returns (SubscriptionResponse);
+  rpc GetAllSubscription (GetSubscriptionListRequest) returns (SubscriptionListResponse);
+  rpc ActivateSubscription (ActivateSubscriptionRequest) returns (SubscriptionResponse);
+  rpc ExpireSubscription (ExpireSubscriptionRequest) returns (SubscriptionResponse);
+}
+
+message Subscription {
+  string id = 1;
+  User user = 2;
+  Package package = 3;
+  optional string activatedAt = 4;
+  optional string expiredAt = 5;
+  int32 usageCounts = 6;
+  string status = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
+}
+
+message CreateSubscriptionRequest {
+  string accountId = 1;
+  string packageId = 2;
+}
+
+message GetSubscriptionRequest {
+  string id = 1;
+}
+
+message ActivateSubscriptionRequest {
+  string id = 1;
+}
+
+message ExpireSubscriptionRequest {
+  string id = 1;
+}
+
+message GetSubscriptionListRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message SubscriptionResponse {
+  bool success = 1;
+  string message = 2;
+  int32 statusCode = 3;
+  Subscription data = 4;
+  repeated string errors = 5;
+}
+
+message Pagination {
+  int32 total = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalPages = 4;
+}
+
+message SubscriptionList {
+  repeated Subscription data = 1;
+}
+
+message SubscriptionListResponse {
+  bool success = 1;
+  string message = 2;
+  SubscriptionList data = 3;
+  Pagination pagination = 4;
+  int32 statusCode = 5;
+  repeated string errors = 6;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+}
+
+message Package {
+  string id = 1;
+  string name = 2;
+  string price = 3;
+  int32 maxUsages = 4;
+  string status = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}

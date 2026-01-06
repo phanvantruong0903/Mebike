@@ -129,6 +129,20 @@ services:
     networks:
       - mebike-network
 
+  membership-db:
+    image: mysql:8.0
+    container_name: membership-db
+    restart: 'unless-stopped'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${MEMBERSHIP_DB_NAME}
+    ports:
+      - '3308:3306'
+    volumes:
+      - membership_data:/var/lib/mysql
+    networks:
+      - mebike-network
+
   traefik:
     image: traefik:latest
     container_name: traefik
@@ -147,7 +161,7 @@ services:
       - './traefik/logs:/var/log/traefik'
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`) || Host(`traefik.${DOMAIN:-mebike.local}`)'
+      - 'traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN:-mebike.local}`)'
       - 'traefik.http.routers.traefik-dashboard.entrypoints=websecure'
       - 'traefik.http.routers.traefik-dashboard.entrypoints=web'
       - 'traefik.http.routers.traefik-dashboard.service=api@internal'
@@ -214,7 +228,7 @@ services:
         condition: service_healthy
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.kafka-ui.rule=Host(`kafka.localhost`) || Host(`kafka.${DOMAIN:-mebike.local}`)'
+      - 'traefik.http.routers.kafka-ui.rule=Host(`kafka.${DOMAIN:-mebike.local}`)'
       - 'traefik.http.routers.kafka-ui.entrypoints=web'
       - 'traefik.http.services.kafka-ui.loadbalancer.server.port=8080'
     networks:
@@ -249,7 +263,11 @@ services:
         condition: service_healthy
       fleet-service:
         condition: service_healthy
+      rental-service:
+        condition: service_healthy
       payment-service:
+        condition: service_healthy
+      membership-service:
         condition: service_healthy
       kafka:
         condition: service_healthy
@@ -393,7 +411,7 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}
     healthcheck:
-      test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50053']
       interval: 10s
       timeout: 10s
       retries: 15
@@ -495,6 +513,34 @@ services:
     networks:
       - mebike-network
 
+  membership-service:
+    build:
+      context: .
+      dockerfile: apps/membership-service/Dockerfile
+    container_name: membership-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      membership-db:
+        condition: service_started
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=mysql://root:${DB_PASSWORD}@membership-db:3306/${MEMBERSHIP_DB_NAME}?allowPublicKeyRetrieval=true
+      - MEMBERSHIP_SERVICE_PORT=50059
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50059']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mebike-network
+
 networks:
   mebike-network:
     driver: bridge
@@ -507,3 +553,4 @@ volumes:
   payment_data:
   temporal_data:
   rental_data:
+  membership_data:
