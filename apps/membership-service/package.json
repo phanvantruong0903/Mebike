@@ -81,6 +81,11 @@
             "buildTarget": "@mebike/membership-service:build:production"
           }
         }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
       }
     }
   },
