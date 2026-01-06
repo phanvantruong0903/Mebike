@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package subscription;
 
-service SubscriptionService {
+service MembershipService {
   rpc CreateSubscription (CreateSubscriptionRequest) returns (SubscriptionResponse);
   rpc GetSubscription (GetSubscriptionRequest) returns (SubscriptionResponse);
   rpc GetAllSubscription (GetSubscriptionListRequest) returns (SubscriptionListResponse);
