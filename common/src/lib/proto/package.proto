@@ -54,18 +54,22 @@ message PackageResponse {
   repeated string errors = 5;
 }
 
+message Pagination {
+  int32 total = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  int32 totalPages = 4;
+}
+
 message PackageList {
   repeated Package data = 1;
-  int32 total = 2;
-  int32 page = 3;
-  int32 limit = 4;
-  int32 totalPages = 5;
 }
 
 message PackageListResponse {
   bool success = 1;
   string message = 2;
-  int32 statusCode = 3;
-  PackageList data = 4;
-  repeated string errors = 5;
+  PackageList data = 3;
+  Pagination pagination = 4;
+  int32 statusCode = 5;
+  repeated string errors = 6;
 }
