@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package package;
 
-service PackageService {
+service MembershipService {
   rpc CreatePackage (CreatePackageRequest) returns (PackageResponse);
   rpc UpdatePackage (UpdatePackageRequest) returns (PackageResponse);
   rpc GetPackage (GetPackageRequest) returns (PackageResponse);
