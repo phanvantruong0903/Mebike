@@ -14,8 +14,8 @@ message Package {
   string name = 2;
   string price = 3;
   int32 maxUsages = 4;
-  UsageType usageType = 5;
-  PackageStatus status = 6;
+  string usageType = 5;
+  string status = 6;
   string createdAt = 7;
   string updatedAt = 8;
 }
@@ -24,7 +24,7 @@ message CreatePackageRequest {
   string name = 1;
   string price = 2;
   optional int32 maxUsages = 3;
-  optional UsageType usageType = 4;
+  optional string usageType = 4;
 }
 
 message UpdatePackageRequest {
@@ -32,8 +32,8 @@ message UpdatePackageRequest {
   optional string name = 2;
   optional string price = 3;
   optional int32 maxUsages = 4;
-  optional UsageType usageType = 5;
-  optional PackageStatus status = 6;
+  optional string usageType = 5;
+  optional string status = 6;
 }
 
 message GetPackageRequest {
@@ -68,14 +68,4 @@ message PackageListResponse {
   int32 statusCode = 3;
   PackageList data = 4;
   repeated string errors = 5;
-}
-
-enum PackageStatus {
-  Active = 0;
-  Inactive = 1;
-}
-
-enum UsageType {
-  Infinite = 0;
-  Finite = 1;
 }

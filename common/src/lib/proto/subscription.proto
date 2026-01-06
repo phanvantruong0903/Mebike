@@ -10,13 +10,6 @@ service SubscriptionService {
   rpc ExpireSubscription (ExpireSubscriptionRequest) returns (SubscriptionResponse);
 }
 
-enum SubscriptionStatus {
-  Pending = 0;
-  Active = 1;
-  Cancelled = 2;
-  Expired = 3;
-}
-
 message Subscription {
   string id = 1;
   User user = 2;
@@ -24,7 +17,7 @@ message Subscription {
   optional string activatedAt = 4;
   optional string expiredAt = 5;
   int32 usageCounts = 6;
-  SubscriptionStatus status = 7;
+  string status = 7;
   string createdAt = 8;
   string updatedAt = 9;
 }
@@ -86,12 +79,7 @@ message Package {
   string name = 2;
   string price = 3;
   int32 maxUsages = 4;
-  PackageStatus status = 5;
+  string status = 5;
   string createdAt = 6;
   string updatedAt = 7;
-}
-
-enum PackageStatus {
-  Active = 0;
-  Inactive = 1;
 }

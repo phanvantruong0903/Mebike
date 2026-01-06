@@ -6,7 +6,8 @@ import {
   IsInt,
   IsPositive,
   IsEnum,
-  IsNumber,
+  IsNumberString,
+  Matches,
 } from 'class-validator';
 import { PackageStatus, UsageType } from '../../../prisma';
 
@@ -15,9 +16,12 @@ export class CreatePackageDto {
   @IsNotEmpty()
   name!: string;
 
-  @IsNumber()
+  @IsNumberString()
   @IsNotEmpty()
-  price!: number;
+  @Matches(/^\d*\.?\d+$/, {
+    message: 'price must be a positive number',
+  })
+  price!: string;
 
   @IsEnum(UsageType)
   @IsOptional()

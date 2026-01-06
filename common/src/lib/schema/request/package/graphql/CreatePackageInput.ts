@@ -4,10 +4,11 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsNumber,
+  IsNumberString,
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   ValidateIf,
 } from 'class-validator';
 
@@ -18,10 +19,11 @@ export class CreatePackageInput {
   @IsNotEmpty()
   name!: string;
 
-  @Field(() => Float)
-  @IsNumber()
+  @Field(() => String)
+  @IsNumberString()
   @IsNotEmpty()
-  price!: number;
+  @Matches(/^\d*\.?\d+$/)
+  price!: string;
 
   @Field(() => UsageType, { defaultValue: UsageType.Finite })
   @IsEnum(UsageType)
