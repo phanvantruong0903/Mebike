@@ -16,6 +16,7 @@ import { TransactionModule } from '../modules/transaction/transaction.module';
 import { RentalModule } from '../modules/rental/rental.module';
 import { ReservationModule } from '../modules/reservation/reservation.module';
 import { SubscriptionModule } from '../modules/subscription/subscription.module';
+import { PackageModule } from '../modules/package/package.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { SubscriptionModule } from '../modules/subscription/subscription.module'
     RentalModule,
     ReservationModule,
     SubscriptionModule,
+    PackageModule,
   ],
   providers: [HttpErrorStatusPlugin],
 })

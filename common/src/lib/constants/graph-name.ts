@@ -82,3 +82,10 @@ export const GRAPHQL_NAME_SUBSCRIPTION = {
   ACTIVATE: 'ActivateSubscription',
   EXPIRE: 'ExpireSubscription',
 };
+
+export const GRAPHQL_NAME_PACKAGE = {
+  GET_ALL: 'Packages',
+  GET_ONE: 'Package',
+  CREATE: 'CreatePackage',
+  UPDATE: 'UpdatePackage',
+};
