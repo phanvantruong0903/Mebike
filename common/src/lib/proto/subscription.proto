@@ -61,7 +61,7 @@ message SubscriptionResponse {
 }
 
 message SubscriptionList {
-  repeated Subscription items = 1;
+  repeated Subscription data = 1;
   int32 total = 2;
   int32 page = 3;
   int32 limit = 4;
@@ -84,7 +84,7 @@ message User {
 message Package {
   string id = 1;
   string name = 2;
-  int32 price = 3;
+  string price = 3;
   int32 maxUsages = 4;
   PackageStatus status = 5;
   string createdAt = 6;

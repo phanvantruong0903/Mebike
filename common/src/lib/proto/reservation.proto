@@ -23,7 +23,7 @@ message Reservation {
   optional Station station = 4;
   string startTime = 5;
   string endTime = 6;
-  int32 prepaid = 7;
+  string prepaid = 7;
   optional string subscriptionId = 8;
   ReservationStatus status = 9;
   string createdAt = 10;

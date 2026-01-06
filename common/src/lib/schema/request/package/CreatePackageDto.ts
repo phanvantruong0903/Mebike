@@ -6,6 +6,7 @@ import {
   IsInt,
   IsPositive,
   IsEnum,
+  IsNumber,
 } from 'class-validator';
 import { PackageStatus, UsageType } from '../../../prisma';
 
@@ -14,7 +15,7 @@ export class CreatePackageDto {
   @IsNotEmpty()
   name!: string;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   price!: number;
 
