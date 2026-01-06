@@ -265,6 +265,8 @@ services:
         condition: service_healthy
       payment-service:
         condition: service_healthy
+      membership-service:
+        condition: service_healthy
       kafka:
         condition: service_healthy
       redis:
