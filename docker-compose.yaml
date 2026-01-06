@@ -263,6 +263,8 @@ services:
         condition: service_healthy
       fleet-service:
         condition: service_healthy
+      rental-service:
+        condition: service_healthy
       payment-service:
         condition: service_healthy
       membership-service:
