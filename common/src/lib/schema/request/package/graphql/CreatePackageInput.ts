@@ -1,4 +1,4 @@
-import { Field, Float, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { PackageStatus, UsageType } from '../../../../prisma';
 import {
   IsEnum,

@@ -9,8 +9,8 @@ export class Package {
   @Field(() => String)
   name!: string;
 
-  @Field(() => Float)
-  price!: number;
+  @Field(() => String)
+  price!: string;
 
   @Field(() => Int)
   maxUsages!: number;
