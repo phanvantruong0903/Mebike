@@ -4,10 +4,9 @@ import { AppService } from './app.service';
 import { RentalModule } from '../modules/rental/rental.module';
 import { HealthController } from '../health/health.controller';
 import { ReservationModule } from '../modules/reservation/reservation.module';
-import { SubscriptionModule } from '../modules/subscription/subscription.module';
 
 @Module({
-  imports: [RentalModule, ReservationModule, SubscriptionModule],
+  imports: [RentalModule, ReservationModule],
   controllers: [AppController, HealthController],
   providers: [AppService],
 })

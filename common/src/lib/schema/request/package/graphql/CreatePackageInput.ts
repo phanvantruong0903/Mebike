@@ -1,15 +1,17 @@
-import { Field, Float, Int } from '@nestjs/graphql';
+import { Field, Float, InputType, Int } from '@nestjs/graphql';
 import { PackageStatus, UsageType } from '../../../../prisma';
 import {
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   ValidateIf,
 } from 'class-validator';
 
+@InputType()
 export class CreatePackageInput {
   @Field(() => String)
   @IsString()
@@ -17,7 +19,7 @@ export class CreatePackageInput {
   name!: string;
 
   @Field(() => Float)
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   price!: number;
 
