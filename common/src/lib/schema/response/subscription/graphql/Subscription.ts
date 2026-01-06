@@ -1,6 +1,7 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { SubscriptionStatus } from '../../../../prisma/index';
 import { UserProfile } from '../../user';
+import { Package } from '../../package';
 
 @ObjectType()
 export class Subscription {
@@ -10,8 +11,8 @@ export class Subscription {
   @Field(() => UserProfile, { nullable: true })
   user?: UserProfile;
 
-  @Field(() => String)
-  packageId!: string;
+  @Field(() => Package, { nullable: true })
+  package?: Package;
 
   @Field(() => String, { nullable: true })
   activatedAt?: string;
