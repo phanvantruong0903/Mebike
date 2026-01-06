@@ -3,7 +3,7 @@ import { SubscriptionStatus } from '../../../../prisma/index';
 import { UserProfile } from '../../user';
 import { Package } from '../../package';
 
-@ObjectType()
+@ObjectType('SubscriptionData')
 export class Subscription {
   @Field(() => ID)
   id!: string;
