@@ -10,6 +10,11 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import { config as dotenvConfig } from 'dotenv';
 
+/**
+ * Bootstraps the Nest application: loads environment variables, registers the service with Consul, applies global validation and gRPC error filters, attaches the gRPC microservice, and starts all microservices.
+ *
+ * The service port is read from the `MEMBERSHIP_SERVICE_PORT` environment variable and defaults to `50059` if unset.
+ */
 async function bootstrap() {
   dotenvConfig();
 
