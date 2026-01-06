@@ -407,7 +407,7 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}
     healthcheck:
-      test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50053']
       interval: 10s
       timeout: 10s
       retries: 15
@@ -528,6 +528,12 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50059']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - mebike-network
 
