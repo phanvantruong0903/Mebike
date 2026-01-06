@@ -77,7 +77,7 @@ export const GRAPHQL_NAME_RESERVATION = {
 
 export const GRAPHQL_NAME_SUBSCRIPTION = {
   GET_ALL: 'Subscriptions',
-  GET_ONE: 'Subscription',
+  GET_ONE: 'GetSubscription',
   CREATE: 'CreateSubscription',
   ACTIVATE: 'ActivateSubscription',
   EXPIRE: 'ExpireSubscription',
