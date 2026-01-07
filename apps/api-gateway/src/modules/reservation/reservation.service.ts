@@ -14,10 +14,10 @@ import {
 
 interface ReservationServiceClient {
   CreateReservation(
-    data: CreateReservationInput,
+    data: CreateReservationInput & { accountId: string },
   ): Observable<ReservationResponse>;
   ConfirmReservation(
-    data: ConfirmReservationInput,
+    data: ConfirmReservationInput & { accountId: string },
   ): Observable<ReservationResponse>;
   GetReservation(data: GetReservationInput): Observable<ReservationResponse>;
   GetReservationList(
@@ -39,13 +39,17 @@ export class ReservationService implements OnModuleInit {
     );
   }
 
-  async createReservation(data: CreateReservationInput) {
+  async createReservation(
+    data: CreateReservationInput & { accountId: string },
+  ) {
     return await firstValueFrom(
       this.reservationService.CreateReservation(data),
     );
   }
 
-  async confirmReservation(data: ConfirmReservationInput) {
+  async confirmReservation(
+    data: ConfirmReservationInput & { accountId: string },
+  ) {
     return await firstValueFrom(
       this.reservationService.ConfirmReservation(data),
     );
