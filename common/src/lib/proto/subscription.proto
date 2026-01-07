@@ -5,7 +5,7 @@ package subscription;
 service MembershipService {
   rpc CreateSubscription (CreateSubscriptionRequest) returns (SubscriptionResponse);
   rpc GetSubscription (GetSubscriptionRequest) returns (SubscriptionResponse);
-  rpc GetAllSubscription (GetSubscriptionListRequest) returns (SubscriptionListResponse);
+  rpc GetSubscriptionList (GetSubscriptionListRequest) returns (SubscriptionListResponse);
   rpc ActivateSubscription (ActivateSubscriptionRequest) returns (SubscriptionResponse);
   rpc ExpireSubscription (ExpireSubscriptionRequest) returns (SubscriptionResponse);
 }

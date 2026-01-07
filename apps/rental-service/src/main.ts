@@ -39,7 +39,7 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['reservation', 'grpc.health.v1'],
+        package: ['rental', 'reservation', 'grpc.health.v1'],
         protoPath: [
           join(process.cwd(), 'common/src/lib/proto/rental.proto'),
           join(process.cwd(), 'common/src/lib/proto/reservation.proto'),
