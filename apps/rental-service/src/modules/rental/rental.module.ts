@@ -30,6 +30,12 @@ import {
               package: 'bike',
               protoPath: join(process.cwd(), 'common/src/lib/proto/bike.proto'),
               url: `${fleetService.address}:${fleetService.port}`,
+              channelOptions: {
+                'grpc.max_reconnect_backoff_ms': 5000,
+                'grpc.initial_reconnect_backoff_ms': 1000,
+              },
+              maxRetryAttempts: 5,
+              retryDelay: 3000,
             },
           };
         },

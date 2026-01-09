@@ -13,8 +13,8 @@ model Rental {
   id             String       @id @default(uuid())
   accountId      String
   bikeId         String?
-  startStation   String
-  endStation     String?
+  startStationId   String
+  endStationId     String?
   startTime      DateTime     @default(now())
   endTime        DateTime?
   duration       Int          @default(0)

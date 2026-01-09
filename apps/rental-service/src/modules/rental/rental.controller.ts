@@ -3,7 +3,6 @@ import { RentalService } from './rental.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
-  BikeResponse,
   buildFilter,
   buildSearchFilter,
   CreateRentalDto,
@@ -51,10 +50,7 @@ export class RentalController {
     try {
       const result = await this.rentalService.end(data);
 
-      return grpcResponse<{
-        updatedRental: RentalModel;
-        updatedBike: BikeResponse;
-      }>(result, RENTAL_MESSAGES.CREATE_SUCCESS);
+      return grpcResponse<RentalModel>(result, RENTAL_MESSAGES.CREATE_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;

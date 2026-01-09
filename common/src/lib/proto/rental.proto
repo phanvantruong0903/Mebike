@@ -9,17 +9,10 @@ service RentalService {
   rpc GetRentalList (GetRentalListRequest) returns (RentalListResponse);
 }
 
-enum RentalStatus {
-  Rented = 0;
-  Completed = 1;
-  Cancelled = 2;
-  Reserved = 3;
-}
-
 message Rental {
   string id = 1;
-  optional Account account = 2;
-  optional RentalBike bike = 3;
+  optional UserProfile user = 2;
+  optional Bike bike = 3;
   optional Station startStation = 4;
   optional Station endStation = 5;
   string startTime = 6; // ISO 8601 string
@@ -27,7 +20,7 @@ message Rental {
   int32 duration = 8;
   string totalPrice = 9;
   optional string subscriptionId = 10;
-  RentalStatus status = 11;
+  string status = 11;
   string createdAt = 12; // ISO 8601 string
   string updatedAt = 13; // ISO 8601 string
 }
@@ -81,7 +74,7 @@ message RentalListResponse {
   repeated string errors = 6;
 }
 
-message RentalBike {
+message Bike {
   string id = 1;
   string chipId = 2;
   optional Station station = 3;
@@ -96,7 +89,6 @@ message Station {
 message Account {
   string id = 1;
   string email = 2;
-  UserProfile userProfile = 3;
 }
 
 message UserProfile {
@@ -108,4 +100,5 @@ message UserProfile {
   string phone = 6;
   string address = 7;
   string avatarUrl = 8;
+  optional Account account = 9;
 }

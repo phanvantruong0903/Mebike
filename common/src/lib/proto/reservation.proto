@@ -9,23 +9,16 @@ service RentalService {
   rpc GetReservationList (GetReservationListRequest) returns (ReservationListResponse);
 }
 
-enum ReservationStatus {
-  Pending = 0;
-  Active = 1;
-  Cancelled = 2;
-  Expired = 3;
-}
-
 message Reservation {
   string id = 1;
-  optional Account account = 2;
+  optional UserProfile user = 2;
   optional Bike bike = 3;
   optional Station station = 4;
   string startTime = 5;
   string endTime = 6;
   string prepaid = 7;
   optional string subscriptionId = 8;
-  ReservationStatus status = 9;
+  string status = 9;
   string createdAt = 10;
   string updatedAt = 11;
 }
@@ -80,11 +73,9 @@ message Pagination {
   int32 totalPages = 4;
 }
 
-
 message Account {
   string id = 1;
   string email = 2;
-  UserProfile userProfile = 3;
 }
 
 message UserProfile {
@@ -96,6 +87,7 @@ message UserProfile {
   string phone = 6;
   string address = 7;
   string avatarUrl = 8;
+  optional Account account = 9;
 }
 
 message Bike {
