@@ -13,6 +13,7 @@ import {
   TransactionStatus,
   TransactionType,
   UpdateWithDrawStatusDto,
+  WalletModel,
   WalletStatus,
   WithdrawModel,
   WithdrawStatus,
@@ -40,41 +41,48 @@ export class TransactionService extends BaseService<
   async createWithdrawTransaction(
     data: CreateWithDrawDto,
   ): Promise<WithdrawModel> {
-    const wallet = await prismaPayment.wallet.findUnique({
-      where: {
-        accountId: data.accountId,
+    return await prismaPayment.$transaction(
+      async (tx) => {
+        const wallet = await tx.wallet.findUnique({
+          where: {
+            accountId: data.accountId,
+          },
+        });
+
+        if (!wallet) {
+          throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+            PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+          ]);
+        }
+
+        if (wallet.status !== WalletStatus.ACTIVE) {
+          throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+            PAYMENT_MESSAGES.WALLET_BLOCKED,
+          ]);
+        }
+
+        if (wallet.balance.lessThan(data.amount)) {
+          throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+            PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
+          ]);
+        }
+
+        const transaction = await tx.withdraw.create({
+          data: {
+            accountId: data.accountId,
+            amount: data.amount,
+            bank: data.bank,
+            accountOwner: data.accountOwner,
+            accountNumber: data.accountNumber,
+            note: data.note || '',
+          },
+        });
+        return transaction;
       },
-    });
-
-    if (!wallet) {
-      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
-      ]);
-    }
-
-    if (wallet.status !== WalletStatus.ACTIVE) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        PAYMENT_MESSAGES.WALLET_BLOCKED,
-      ]);
-    }
-
-    if (wallet.balance.lessThan(data.amount)) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
-      ]);
-    }
-
-    const transaction = await prismaPayment.withdraw.create({
-      data: {
-        accountId: data.accountId,
-        amount: data.amount,
-        bank: data.bank,
-        accountOwner: data.accountOwner,
-        accountNumber: data.accountNumber,
-        note: data.note || '',
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
       },
-    });
-    return transaction;
+    );
   }
 
   async updateWithdrawTransactionStatus(
@@ -106,96 +114,11 @@ export class TransactionService extends BaseService<
     }
 
     if (data.status === WithdrawStatus.COMPLETED) {
-      const wallet = await prismaPayment.wallet.findUnique({
-        where: { accountId: findWithdraw.accountId },
-      });
-
-      if (!wallet) {
-        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-          PAYMENT_MESSAGES.WALLET_NOT_FOUND,
-        ]);
-      }
-
-      if (wallet.status !== WalletStatus.ACTIVE) {
-        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-          PAYMENT_MESSAGES.WALLET_BLOCKED,
-        ]);
-      }
-
-      if (wallet.balance.lessThan(findWithdraw.amount)) {
-        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-          PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
-        ]);
-      }
-
-      const balanceBefore = wallet.balance;
-      const balanceAfter = wallet.balance.sub(findWithdraw.amount);
-      const transactionId = uuidv4();
-
-      try {
-        const [, , , updatedWithdraw] = await prismaPayment.$transaction(
-          [
-            prismaPayment.transaction.create({
-              data: {
-                id: transactionId,
-                accountId: findWithdraw.accountId,
-                type: TransactionType.WITHDRAWAL,
-                status: TransactionStatus.SUCCESS,
-                amount: findWithdraw.amount,
-                paymentMethod: PaymentMethod.BALANCE,
-                description:
-                  findWithdraw.reason || `Withdrawal ${findWithdraw.amount}`,
-              },
-            }),
-            prismaPayment.walletHistory.create({
-              data: {
-                walletId: wallet.id,
-                transactionId,
-                type: TransactionType.WITHDRAWAL,
-                amount: findWithdraw.amount,
-                balanceBefore,
-                balanceAfter,
-              },
-            }),
-            prismaPayment.wallet.update({
-              where: { accountId: findWithdraw.accountId },
-              data: {
-                balance: {
-                  decrement: findWithdraw.amount,
-                },
-              },
-            }),
-            prismaPayment.withdraw.update({
-              where: { id: data.id },
-              data: {
-                status: data.status,
-                reason: data.reason,
-              },
-            }),
-          ],
-          {
-            isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-          },
-        );
-
-        return updatedWithdraw;
-      } catch (error: any) {
-        await prismaPayment.transaction.create({
-          data: {
-            id: transactionId,
-            accountId: findWithdraw.accountId,
-            type: TransactionType.WITHDRAWAL,
-            amount: findWithdraw.amount,
-            paymentMethod: PaymentMethod.BALANCE,
-            description: `FAILED: Withdrawal ${findWithdraw.amount} with error ${error.message}`,
-            status: TransactionStatus.FAILED,
-          },
-        });
-
-        throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-          SERVER_MESSAGE.INTERNAL_SERVER,
-        ]);
-      }
+      return await this.completedWithdrawRequest(
+        findWithdraw.accountId,
+        findWithdraw,
+        data.reason,
+      );
     }
 
     const updatedWithdraw = await prismaPayment.withdraw.update({
@@ -240,5 +163,129 @@ export class TransactionService extends BaseService<
       limit: data.limit,
       totalPages: Math.ceil(total / data.limit),
     };
+  }
+
+  async completedWithdrawRequest(
+    accountId: string,
+    findWithDraw: WithdrawModel,
+    reason?: string,
+  ) {
+    const transactionId = uuidv4();
+
+    try {
+      return await prismaPayment.$transaction(
+        async (tx) => {
+          const findWallet = await tx.wallet.findUnique({
+            where: { accountId: accountId },
+          });
+
+          if (!findWallet) {
+            throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+              PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+            ]);
+          }
+
+          await this.checkWalletActive(findWallet);
+
+          // Atomic update wallet
+          const updatedWallet = await tx.wallet
+            .update({
+              where: {
+                accountId: accountId,
+                balance: { gte: findWithDraw.amount },
+              },
+              data: {
+                balance: {
+                  decrement: findWithDraw.amount,
+                },
+              },
+            })
+            .catch(() => {
+              throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+                PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
+              ]);
+            });
+
+          const balanceAfter = updatedWallet.balance;
+          const balanceBefore = updatedWallet.balance.add(findWithDraw.amount);
+
+          await tx.transaction.create({
+            data: {
+              id: transactionId,
+              accountId: accountId,
+              type: TransactionType.WITHDRAWAL,
+              status: TransactionStatus.SUCCESS,
+              amount: findWithDraw.amount,
+              paymentMethod: PaymentMethod.BALANCE,
+              description: `Withdrawal ${findWithDraw.amount}`,
+            },
+          });
+
+          await tx.walletHistory.create({
+            data: {
+              walletId: updatedWallet.id,
+              transactionId,
+              type: TransactionType.WITHDRAWAL,
+              amount: findWithDraw.amount,
+              balanceBefore,
+              balanceAfter,
+            },
+          });
+
+          return tx.withdraw.update({
+            where: { id: findWithDraw.id },
+            data: {
+              status: WithdrawStatus.COMPLETED,
+              reason: reason,
+            },
+          });
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+        },
+      );
+    } catch (error: any) {
+      try {
+        await prismaPayment.transaction.create({
+          data: {
+            id: transactionId,
+            accountId: findWithDraw.accountId,
+            type: TransactionType.WITHDRAWAL,
+            amount: findWithDraw.amount,
+            paymentMethod: PaymentMethod.BALANCE,
+            description: `Failed withdrawal ${findWithDraw.amount} with error ${error.message}`,
+            status: TransactionStatus.FAILED,
+          },
+        });
+      } catch (logError) {
+        console.error('Failed to log failed transaction:', logError);
+      }
+
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+        SERVER_MESSAGE.INTERNAL_SERVER,
+      ]);
+    }
+  }
+
+  async findUserWallet(accountId: string) {
+    return await prismaPayment.wallet.findUnique({
+      where: { accountId: accountId },
+    });
+  }
+
+  async checkWalletActive(wallet: WalletModel) {
+    if (!wallet) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+      ]);
+    }
+
+    if (wallet.status !== WalletStatus.ACTIVE) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.WALLET_BLOCKED,
+      ]);
+    }
+
+    return true;
   }
 }
