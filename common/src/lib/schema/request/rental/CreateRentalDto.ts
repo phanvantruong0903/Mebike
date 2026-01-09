@@ -10,10 +10,6 @@ export class CreateRentalDto {
   bikeId!: string;
 
   @IsString()
-  @IsNotEmpty()
-  stationId!: string;
-
-  @IsString()
   @IsOptional()
   subscriptionId?: string;
 }
