@@ -131,48 +131,70 @@ export class TransactionService extends BaseService<
       const balanceAfter = wallet.balance.sub(findWithdraw.amount);
       const transactionId = uuidv4();
 
-      await prismaPayment.transaction.create({
-        data: {
-          id: transactionId,
-          accountId: findWithdraw.accountId,
-          type: TransactionType.WITHDRAWAL,
-          status: TransactionStatus.SUCCESS,
-          amount: findWithdraw.amount,
-          paymentMethod: PaymentMethod.BALANCE,
-          description:
-            findWithdraw.reason || `Withdrawal ${findWithdraw.amount}`,
-        },
-      });
-
-      const [updatedWithdraw] = await Promise.all([
-        prismaPayment.withdraw.update({
-          where: { id: data.id },
-          data: {
-            status: data.status,
-            reason: data.reason,
+      try {
+        const [, , , updatedWithdraw] = await prismaPayment.$transaction(
+          [
+            prismaPayment.transaction.create({
+              data: {
+                id: transactionId,
+                accountId: findWithdraw.accountId,
+                type: TransactionType.WITHDRAWAL,
+                status: TransactionStatus.SUCCESS,
+                amount: findWithdraw.amount,
+                paymentMethod: PaymentMethod.BALANCE,
+                description:
+                  findWithdraw.reason || `Withdrawal ${findWithdraw.amount}`,
+              },
+            }),
+            prismaPayment.walletHistory.create({
+              data: {
+                walletId: wallet.id,
+                transactionId,
+                type: TransactionType.WITHDRAWAL,
+                amount: findWithdraw.amount,
+                balanceBefore,
+                balanceAfter,
+              },
+            }),
+            prismaPayment.wallet.update({
+              where: { accountId: findWithdraw.accountId },
+              data: {
+                balance: {
+                  decrement: findWithdraw.amount,
+                },
+              },
+            }),
+            prismaPayment.withdraw.update({
+              where: { id: data.id },
+              data: {
+                status: data.status,
+                reason: data.reason,
+              },
+            }),
+          ],
+          {
+            isolationLevel: 'Serializable',
           },
-        }),
-        prismaPayment.walletHistory.create({
+        );
+
+        return updatedWithdraw;
+      } catch (error: any) {
+        await prismaPayment.transaction.create({
           data: {
-            walletId: wallet.id,
-            transactionId,
+            id: transactionId,
+            accountId: findWithdraw.accountId,
             type: TransactionType.WITHDRAWAL,
             amount: findWithdraw.amount,
-            balanceBefore,
-            balanceAfter,
+            paymentMethod: PaymentMethod.BALANCE,
+            description: `FAILED: Withdrawal ${findWithdraw.amount} with error ${error.message}`,
+            status: TransactionStatus.FAILED,
           },
-        }),
-        prismaPayment.wallet.update({
-          where: { accountId: findWithdraw.accountId },
-          data: {
-            balance: {
-              decrement: findWithdraw.amount,
-            },
-          },
-        }),
-      ]);
+        });
 
-      return updatedWithdraw;
+        throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+          SERVER_MESSAGE.INTERNAL_SERVER,
+        ]);
+      }
     }
 
     const updatedWithdraw = await prismaPayment.withdraw.update({

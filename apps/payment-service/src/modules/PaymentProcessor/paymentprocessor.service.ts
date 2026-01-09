@@ -113,42 +113,58 @@ export class PaymentprocessorService {
     amount: number,
     description: string,
   ) {
-    const findWallet = await this.checkWalletExist(accountId);
-
-    const newAmount = findWallet.balance.add(amount);
     const transactionId = uuidv4();
 
-    await Promise.all([
-      prismaPayment.wallet.update({
-        where: {
-          accountId,
-        },
-        data: {
-          balance: newAmount,
-        },
-      }),
-      prismaPayment.walletHistory.create({
-        data: {
-          walletId: findWallet.id,
-          transactionId,
-          type: TransactionType.TOPUP,
-          amount,
-          balanceBefore: findWallet.balance,
-          balanceAfter: newAmount,
-        },
-      }),
-      prismaPayment.transaction.create({
+    try {
+      const findWallet = await this.checkWalletExist(accountId);
+      const newAmount = findWallet.balance.add(amount);
+
+      await prismaPayment.$transaction([
+        prismaPayment.wallet.update({
+          where: { accountId },
+          data: { balance: newAmount },
+        }),
+        prismaPayment.walletHistory.create({
+          data: {
+            walletId: findWallet.id,
+            transactionId,
+            type: TransactionType.TOPUP,
+            amount,
+            balanceBefore: findWallet.balance,
+            balanceAfter: newAmount,
+          },
+        }),
+        prismaPayment.transaction.create({
+          data: {
+            id: transactionId,
+            accountId,
+            type: TransactionType.TOPUP,
+            amount,
+            paymentMethod: PaymentMethod.VNPAY,
+            description,
+            status: TransactionStatus.SUCCESS,
+          },
+        }),
+      ]);
+    } catch (error) {
+      await prismaPayment.transaction.create({
         data: {
           id: transactionId,
           accountId,
           type: TransactionType.TOPUP,
           amount,
           paymentMethod: PaymentMethod.VNPAY,
-          description,
-          status: TransactionStatus.SUCCESS,
+          description: `FAILED: ${description} - Error: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+          status: TransactionStatus.FAILED,
         },
-      }),
-    ]);
+      });
+
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+        SERVER_MESSAGE.INTERNAL_SERVER,
+      ]);
+    }
   }
 
   async createWallet(accountId: string): Promise<WalletModel> {
@@ -185,37 +201,65 @@ export class PaymentprocessorService {
     }
 
     const transactionId = uuidv4();
-    await Promise.all([
-      prismaPayment.wallet.update({
-        where: {
-          accountId: data.accountId,
+
+    try {
+      await prismaPayment.$transaction(
+        [
+          prismaPayment.wallet.update({
+            where: {
+              accountId: data.accountId,
+            },
+            data: {
+              balance: newAmount,
+            },
+          }),
+          prismaPayment.walletHistory.create({
+            data: {
+              walletId: wallet.id,
+              transactionId,
+              type: data.transactionType,
+              amount: data.amount,
+              balanceBefore: wallet.balance,
+              balanceAfter: newAmount,
+            },
+          }),
+          prismaPayment.transaction.create({
+            data: {
+              id: transactionId,
+              accountId: data.accountId,
+              type: data.transactionType,
+              amount: data.amount,
+              paymentMethod: PaymentMethod.BALANCE,
+              status: TransactionStatus.SUCCESS,
+              description: data.description || 'Debit for rental service',
+            },
+          }),
+        ],
+        {
+          isolationLevel: 'Serializable',
         },
-        data: {
-          balance: newAmount,
-        },
-      }),
-      prismaPayment.walletHistory.create({
-        data: {
-          walletId: wallet.id,
-          transactionId,
-          type: data.transactionType,
-          amount: data.amount,
-          balanceBefore: wallet.balance,
-          balanceAfter: newAmount,
-        },
-      }),
-      prismaPayment.transaction.create({
+      );
+    } catch (error) {
+      await prismaPayment.transaction.create({
         data: {
           id: transactionId,
           accountId: data.accountId,
           type: data.transactionType,
           amount: data.amount,
           paymentMethod: PaymentMethod.BALANCE,
-          status: TransactionStatus.SUCCESS,
-          description: data.description || 'Debit for rental service',
+          description: `FAILED: ${
+            data.description || 'Debit for rental service'
+          } - Error: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
+          status: TransactionStatus.FAILED,
         },
-      }),
-    ]);
+      });
+
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+        SERVER_MESSAGE.INTERNAL_SERVER,
+      ]);
+    }
   }
 
   async checkWalletExist(accountId: string): Promise<WalletModel> {
