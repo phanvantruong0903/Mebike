@@ -249,17 +249,6 @@ export class PaymentprocessorService {
           const balanceAfter = updatedWallet.balance;
           const balanceBefore = updatedWallet.balance.sub(amount);
 
-          await tx.walletHistory.create({
-            data: {
-              walletId: wallet.id,
-              transactionId,
-              type: TransactionType.TOPUP,
-              amount,
-              balanceBefore,
-              balanceAfter,
-            },
-          });
-
           await tx.transaction.create({
             data: {
               id: transactionId,
@@ -269,6 +258,17 @@ export class PaymentprocessorService {
               paymentMethod: PaymentMethod.VNPAY,
               status: TransactionStatus.SUCCESS,
               description,
+            },
+          });
+
+          await tx.walletHistory.create({
+            data: {
+              walletId: wallet.id,
+              transactionId,
+              type: TransactionType.TOPUP,
+              amount,
+              balanceBefore,
+              balanceAfter,
             },
           });
 
@@ -348,17 +348,6 @@ export class PaymentprocessorService {
           const balanceAfter = updatedWallet.balance;
           const balanceBefore = updatedWallet.balance.add(amount);
 
-          await tx.walletHistory.create({
-            data: {
-              walletId: wallet.id,
-              transactionId,
-              type: transactionType,
-              amount,
-              balanceBefore,
-              balanceAfter,
-            },
-          });
-
           await tx.transaction.create({
             data: {
               id: transactionId,
@@ -368,6 +357,17 @@ export class PaymentprocessorService {
               paymentMethod: PaymentMethod.BALANCE,
               status: TransactionStatus.SUCCESS,
               description: description || 'Debit for Rental Service',
+            },
+          });
+
+          await tx.walletHistory.create({
+            data: {
+              walletId: wallet.id,
+              transactionId,
+              type: transactionType,
+              amount,
+              balanceBefore,
+              balanceAfter,
             },
           });
 
