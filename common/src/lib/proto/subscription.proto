@@ -12,7 +12,7 @@ service MembershipService {
 
 message Subscription {
   string id = 1;
-  User user = 2;
+  Account account = 2;
   Package package = 3;
   optional string activatedAt = 4;
   optional string expiredAt = 5;
@@ -73,9 +73,22 @@ message SubscriptionListResponse {
   repeated string errors = 6;
 }
 
-message User {
+
+message Account {
+  string id = 1;
+  string email = 2;
+  UserProfile userProfile = 3;
+}
+
+message UserProfile {
   string id = 1;
   string name = 2;
+  int32 YOB = 3;
+  string role = 4;
+  string status = 5;
+  string phone = 6;
+  string address = 7;
+  string avatarUrl = 8;
 }
 
 message Package {
