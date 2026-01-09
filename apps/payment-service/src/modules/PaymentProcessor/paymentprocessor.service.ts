@@ -9,6 +9,7 @@ import {
   PAYMENT_MESSAGES,
   PaymentMethod,
   prismaPayment,
+  Prisma,
   SERVER_MESSAGE,
   throwGrpcError,
   TransactionStatus,
@@ -236,7 +237,7 @@ export class PaymentprocessorService {
           }),
         ],
         {
-          isolationLevel: 'Serializable',
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
         },
       );
     } catch (error) {

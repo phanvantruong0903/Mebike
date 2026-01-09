@@ -5,6 +5,7 @@ import {
   GetAllWithdrawDto,
   PAYMENT_MESSAGES,
   PaymentMethod,
+  Prisma,
   prismaPayment,
   SERVER_MESSAGE,
   throwGrpcError,
@@ -173,7 +174,7 @@ export class TransactionService extends BaseService<
             }),
           ],
           {
-            isolationLevel: 'Serializable',
+            isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
           },
         );
 
