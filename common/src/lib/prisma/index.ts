@@ -95,3 +95,4 @@ export {
   PackageStatus,
   UsageType,
 } from './membership/generated';
+export { Prisma } from './payment/generated';
