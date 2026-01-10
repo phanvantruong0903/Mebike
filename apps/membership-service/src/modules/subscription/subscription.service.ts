@@ -28,7 +28,6 @@ export class SubscriptionService extends BaseService<
     return await prismaMembership.subscription.create({
       data: {
         ...data,
-        userId: data.accountId,
       },
     });
   }

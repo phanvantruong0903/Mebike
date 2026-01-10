@@ -41,6 +41,7 @@ export const USER_METHODS = {
   VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
   USER_VERIFY: 'UserVerify',
   DELETE: 'DeleteUser',
+  GET_USERS_BY_ACCOUNT_IDS: 'GetUsersByAccountIds',
 } as const;
 
 export const SUPPLIER_METHODS = {
@@ -68,6 +69,7 @@ export const BIKE_METHODS = {
   UPDATE: 'UpdateBike',
   GET_ALL: 'GetAllBikes',
   CHANGE_STATUS: 'ChangeBikeStatus',
+  GET_BIKES_BY_IDS: 'GetBikesByIds',
 };
 
 export const PAYMENT_METHODS = {

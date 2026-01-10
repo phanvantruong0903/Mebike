@@ -24,7 +24,6 @@ export class ReservationService extends BaseService<
     return await prismaRental.reservation.create({
       data: {
         ...data,
-        userId: data.accountId,
         prepaid,
       },
     });
