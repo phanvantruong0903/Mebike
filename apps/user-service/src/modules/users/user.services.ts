@@ -139,4 +139,11 @@ export class UserService extends BaseService<
     });
     return profile;
   }
+
+  async getUsersByAccountIds(ids: string[]) {
+    const users = await prismaUser.profile.findMany({
+      where: { id: { in: ids } },
+    });
+    return users;
+  }
 }

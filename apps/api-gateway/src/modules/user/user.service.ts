@@ -10,6 +10,7 @@ import {
   UserStatus,
   Account,
   UserStatsResponse,
+  UserProfile,
 } from '@mebike/common';
 
 interface UserServiceClient {
@@ -30,6 +31,7 @@ interface UserServiceClient {
   }): Observable<UserResponse>;
   GetAccountsByAccountIds(data: { ids: string[] }): Observable<Account[]>;
   GetUserStats(data: object): Observable<UserStatsResponse>;
+  GetUsersByAccountIds(data: { ids: string[] }): Observable<UserProfile[]>;
 }
 
 @Injectable()
@@ -72,5 +74,9 @@ export class UserService implements OnModuleInit {
 
   async getUserStats() {
     return await firstValueFrom(this.userService.GetUserStats({}));
+  }
+
+  async getUsersByAccountIds(ids: string[]) {
+    return await firstValueFrom(this.userService.GetUsersByAccountIds({ ids }));
   }
 }
