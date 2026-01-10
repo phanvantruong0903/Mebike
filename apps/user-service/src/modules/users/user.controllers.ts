@@ -201,8 +201,8 @@ export class UserController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_USERS_BY_ACCOUNT_IDS)
-  async getUsersByAccountIds(data: { ids: string[] }) {
-    const result = await this.userService.getUsersByAccountIds(data.ids);
+  async getUsersByAccountIds(data: { accountIds: string[] }) {
+    const result = await this.userService.getUsersByAccountIds(data.accountIds);
     return grpcResponse(result, USER_MESSAGES.GET_USERS_BY_ACCOUNT_IDS_SUCCESS);
   }
 }

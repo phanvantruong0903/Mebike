@@ -140,9 +140,9 @@ export class UserService extends BaseService<
     return profile;
   }
 
-  async getUsersByAccountIds(ids: string[]) {
+  async getUsersByAccountIds(accountIds: string[]) {
     const users = await prismaUser.profile.findMany({
-      where: { id: { in: ids } },
+      where: { accountId: { in: accountIds } },
     });
     return users;
   }

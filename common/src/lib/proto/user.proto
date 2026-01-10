@@ -106,7 +106,7 @@ service UserService {
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
   rpc GetUserStats(Empty) returns (UserStatsResponse);
   rpc UserVerify(UserVerifyRequest) returns (UserDetailResponse);
-  rpc GetUsersByAccountIds(GetUsersByAccountIdsRequest) returns (UsersResponse)
+  rpc GetUsersByAccountIds(GetUsersByAccountIdsRequest) returns (UsersResponse);
 }
 
 message CreateUserRequest {
@@ -140,5 +140,5 @@ message DeleteUserResponse {
 message Empty {}
 
 message GetUsersByAccountIdsRequest {
-  repeated string ids = 1;
+  repeated string accountIds = 1;
 }
