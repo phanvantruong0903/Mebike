@@ -58,32 +58,20 @@ export class RentalService
       return;
     }
 
-    // Try primary name
     try {
       this.fleetService = this.client.getService<FleetServiceClient>(
         GRPC_SERVICES.FLEET,
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(
         `Failed to load ${GRPC_SERVICES.FLEET}: ${error.message}`,
       );
     }
 
-    // Try fallback name
-    if (!this.fleetService) {
-      this.logger.warn(`Attempting fallback to 'bike.FleetService'...`);
-      try {
-        this.fleetService =
-          this.client.getService<FleetServiceClient>('bike.FleetService');
-      } catch (error) {
-        this.logger.error(`Failed to load bike.FleetService: ${error.message}`);
-      }
-    }
-
     if (this.fleetService) {
       this.logger.log('FleetService initialized successfully');
     } else {
-      this.logger.error('Critical: Failed to initialize FleetService');
+      this.logger.error('Failed to initialize FleetService');
     }
   }
 
@@ -160,6 +148,11 @@ export class RentalService
     const rental = await prismaRental.rental.findUnique({
       where: { id },
     });
+    if (!rental) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        RENTAL_MESSAGES.NOT_FOUND,
+      ]);
+    }
     return rental;
   }
 
