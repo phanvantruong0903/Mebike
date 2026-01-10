@@ -70,4 +70,11 @@ export class BikeService extends BaseService<
     });
     return profile;
   }
+
+  async getBikesByIds(ids: string[]) {
+    const bikes = await prismaFleet.bike.findMany({
+      where: { id: { in: ids } },
+    });
+    return bikes;
+  }
 }

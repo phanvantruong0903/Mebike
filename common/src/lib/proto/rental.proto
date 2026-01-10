@@ -11,10 +11,10 @@ service RentalService {
 
 message Rental {
   string id = 1;
-  optional UserProfile user = 2;
-  optional Bike bike = 3;
-  optional Station startStation = 4;
-  optional Station endStation = 5;
+  string accountId = 2;
+  string bikeId = 3;
+  string startStationId = 4;
+  string endStationId = 5;
   string startTime = 6; // ISO 8601 string
   optional string endTime = 7; // ISO 8601 string
   int32 duration = 8;
