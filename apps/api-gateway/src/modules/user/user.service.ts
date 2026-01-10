@@ -33,7 +33,7 @@ interface UserServiceClient {
   GetUserStats(data: object): Observable<UserStatsResponse>;
   GetUsersByAccountIds(data: {
     accountIds: string[];
-  }): Observable<UserProfile[]>;
+  }): Observable<UserListResponse>;
 }
 
 @Injectable()
@@ -79,8 +79,9 @@ export class UserService implements OnModuleInit {
   }
 
   async getUsersByAccountIds(accountIds: string[]) {
-    return await firstValueFrom(
+    const users = await firstValueFrom(
       this.userService.GetUsersByAccountIds({ accountIds }),
     );
+    return users.data || [];
   }
 }

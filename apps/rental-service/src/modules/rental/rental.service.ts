@@ -100,12 +100,17 @@ export class RentalService
         BIKE_MESSAGES.NOT_AVAILABLE,
       ]);
     }
-    return await prismaRental.rental.create({
-      data: {
-        ...data,
-        startStationId: bike.station?.id as string,
-      },
-    });
+    const [createdRental] = await Promise.all([
+      prismaRental.rental.create({
+        data: {
+          ...data,
+          startStationId: bike.station?.id as string,
+        },
+      }),
+      this.changeBikeStatus(data.bikeId, BikeStatus.Booked),
+    ]);
+
+    return createdRental;
   }
 
   async end(data: EndRentalDto): Promise<RentalModel> {
@@ -130,7 +135,6 @@ export class RentalService
       prismaRental.rental.update({
         where: { id: data.id },
         data: {
-          ...data,
           endStationId: rental.startStationId,
           endTime: now,
           duration: duration,
