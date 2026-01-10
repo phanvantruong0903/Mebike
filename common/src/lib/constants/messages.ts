@@ -40,6 +40,7 @@ export const USER_MESSAGES = {
   ACCESS_TOKEN_REQUIRED: 'Access Token is required',
   USER_VERIFY_SUCCESS: 'User verified successfully',
   DELETE_FAILED: 'Delete User failed',
+  FIND_FREE_SOS_SUCCESS: 'Find free SOS successfully',
 };
 
 export const SUPPLIER_MESSAGES = {
@@ -71,6 +72,8 @@ export const STATION_MESSAGES = {
   UPDATE_FAIL: 'Update Station failed',
   GET_ALL_STATS_SUCCESS: 'Station stats retrieved successfully',
   STATION_FULL: 'Station is full',
+  NO_STATION_NEARBY: 'No station nearby',
+  NO_STATION_NEARBY_AND_BIKE: 'No station nearby and available bike',
 };
 
 export const BIKE_MESSAGES = {
@@ -229,4 +232,20 @@ export const PACKAGE_MESSAGES = {
   UPDATE_FAIL: 'Update Package failed',
   GET_ONE_SUCCESS: 'Package retrieved successfully',
   GET_ONE_FAILED: 'Package retrieved failed',
+};
+
+export const SOS_MESSAGES = {
+  CREATE_SUCCESS: 'SOS created successfully',
+  UPDATE_SUCCESS: 'SOS updated successfully',
+  GET_ALL_SUCCESS: 'SOS retrieved successfully',
+  GET_ALL_FAIL: 'SOS retrieved failed',
+  GET_DETAIL_SUCCESS: 'SOS details retrieved successfully',
+  DELETE_SUCCESS: 'SOS deleted successfully',
+  NOT_FOUND: 'SOS not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create SOS failed',
+  VALIDATION_FAILED: 'SOS name incorrect',
+  UPDATE_FAIL: 'Update SOS failed',
+  GET_ONE_SUCCESS: 'SOS retrieved successfully',
+  GET_ONE_FAILED: 'SOS retrieved failed',
 };

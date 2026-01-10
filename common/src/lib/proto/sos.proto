@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package sos;
+
+service IncidentService {
+  rpc CreateSos (CreateSosRequest) returns (CreateSosResponse);
+}
+
+message Sos {
+  string id = 1;
+  string rentalId = 2;
+  string requesterId = 3;
+  string bikeId = 4;
+  string issue = 5;
+  repeated string photos = 6;
+  bool isContinuingRental = 7;
+  string latitude = 8;
+  string longitude = 9;
+  string agentId = 10;
+  optional string agentNotes = 11;
+  string stationId = 12;
+  string status = 13;
+  string createdAt = 14;
+  optional string startedAt = 15;
+  optional string resolvedAt = 16;
+  string updatedAt = 17;
+}
+
+message CreateSosRequest {
+  string rentalId = 1;
+  string requesterId = 2;
+  string bikeId = 3;
+  string issue = 4;
+  repeated string photos = 5;
+  bool isContinuingRental = 6;
+  string latitude = 7;
+  string longitude = 8;
+}
+
+message CreateSosResponse {
+  bool success = 1;
+  string message = 2;
+  Sos data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}

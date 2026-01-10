@@ -50,6 +50,27 @@ import { join } from 'node:path';
         },
       },
       {
+        name: GRPC_PACKAGE.FLEET,
+        imports: [ConsulModule],
+        inject: [ConsulService],
+        useFactory: async (consulService: ConsulService) => {
+          const fleetService = await consulService.discoverService(
+            CONSULT_SERVICE_ID.FLEET,
+          );
+          return {
+            transport: Transport.GRPC,
+            options: {
+              package: 'station',
+              protoPath: join(
+                process.cwd(),
+                'common/src/lib/proto/station.proto',
+              ),
+              url: `${fleetService.address}:${fleetService.port}`,
+            },
+          };
+        },
+      },
+      {
         name: KAFKA_SERVICE.AUTH_SERVICE,
         imports: [ConfigModule],
         inject: [ConfigService],

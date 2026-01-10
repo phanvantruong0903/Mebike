@@ -205,4 +205,15 @@ export class StationController {
 
     return { activeStation, inactiveStation };
   }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.STATION_EXIST)
+  async stationExist(data: {
+    id: string;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const exists = await this.stationService.checkStationExist(data.id);
+    return grpcResponse(
+      { exists },
+      exists ? STATION_MESSAGES.GET_DETAIL_SUCCESS : STATION_MESSAGES.NOT_FOUND,
+    );
+  }
 }

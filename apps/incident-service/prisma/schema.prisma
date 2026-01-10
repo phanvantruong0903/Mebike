@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../../../common/src/lib/prisma/incident/generated"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EmergencyRequest {
+  id          String @id @default(uuid())
+  rentalId    String @db.Uuid
+  requesterId String @db.Uuid
+  bikeId      String @db.Uuid
+
+  issue              String
+  photos             String[]
+  isContinuingRental Boolean  @default(false)
+
+  latitude  Decimal @db.Decimal(10, 8)
+  longitude Decimal @db.Decimal(11, 8)
+
+  agentId    String  @db.Uuid
+  agentNotes String?
+
+  stationId String @db.Uuid
+
+  status     EmergencyStatus @default(Assigned)
+  createdAt  DateTime        @default(now())
+  startedAt  DateTime?
+  resolvedAt DateTime?
+  updatedAt  DateTime        @updatedAt
+
+  @@map("emergency_requests")
+}
+
+enum EmergencyStatus {
+  Assigned
+  Processing
+  Resolved
+  Cancelled
+}

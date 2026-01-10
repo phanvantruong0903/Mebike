@@ -17,4 +17,6 @@ export class CreateProfileDto extends PickedUserFields {
   @IsNotEmpty()
   @IsNotIn([Role.ADMIN], { message: 'Role must not be ADMIN' })
   role!: Role;
+
+  workStationId?: string;
 }

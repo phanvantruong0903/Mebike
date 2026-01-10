@@ -16,6 +16,7 @@ message User {
   string address = 11;
   string avatarUrl = 12;
   string nfcCardUid = 13;
+  string workStationId = 14;
 }
 
 
@@ -106,6 +107,7 @@ service UserService {
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
   rpc GetUserStats(Empty) returns (UserStatsResponse);
   rpc UserVerify(UserVerifyRequest) returns (UserDetailResponse);
+  rpc FindFreeSos(FindFreeSosRequest) returns (UsersResponse);
 }
 
 message CreateUserRequest {
@@ -114,6 +116,10 @@ message CreateUserRequest {
   int32 YOB = 3;
   string phone = 4;
   optional string role = 5;
+}
+
+message FindFreeSosRequest {
+  string stationId = 1;
 }
 
 message CreateUserResponse {

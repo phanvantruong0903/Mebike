@@ -199,4 +199,10 @@ export class UserController {
       throw new RpcException(err?.message || USER_MESSAGES.CREATE_FAILED);
     }
   }
+
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.FIND_FREE_SOS)
+  async findFreeSos(data: { stationId: string }) {
+    const result = await this.userService.findFreeSos(data.stationId);
+    return grpcResponse(result, USER_MESSAGES.FIND_FREE_SOS_SUCCESS);
+  }
 }

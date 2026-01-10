@@ -60,7 +60,8 @@
         "apps/fleet-service-e2e/**/*",
         "apps/payment-service-e2e/**/*",
         "apps/rental-service-e2e/**/*",
-        "apps/membership-service-e2e/**/*"
+        "apps/membership-service-e2e/**/*",
+        "apps/incident-service-e2e/**/*"
       ]
     },
     {

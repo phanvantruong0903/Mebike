@@ -139,4 +139,11 @@ export class UserService extends BaseService<
     });
     return profile;
   }
+
+  async findFreeSos(stationId: string) {
+    const result = await prismaUser.profile.findMany({
+      where: { workStationId: stationId, role: Role.SOS },
+    });
+    return result;
+  }
 }

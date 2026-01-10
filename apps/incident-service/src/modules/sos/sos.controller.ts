@@ -1,0 +1,83 @@
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  BaseGrpcHandler,
+  SosModel,
+  CreateSosDto,
+  UpdateSosDto,
+  GRPC_SERVICES,
+  SOS_METHODS,
+  GetSosDto,
+  grpcPaginateResponse,
+  SOS_MESSAGES,
+  GetSosByIdDto,
+  grpcResponse,
+} from '@mebike/common';
+import { SosService } from './sos.service';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
+
+@Controller()
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+export class SosController {
+  private readonly baseHandler: BaseGrpcHandler<
+    SosModel,
+    CreateSosDto,
+    UpdateSosDto
+  >;
+
+  constructor(private readonly sosService: SosService) {
+    this.baseHandler = new BaseGrpcHandler(
+      this.sosService,
+      CreateSosDto,
+      UpdateSosDto,
+    );
+  }
+
+  @GrpcMethod(GRPC_SERVICES.INCIDENT, SOS_METHODS.GET_ALL)
+  async getAllSos(
+    data: GetSosDto,
+  ): Promise<ReturnType<typeof grpcPaginateResponse>> {
+    try {
+      const { page, limit } = data;
+      const result = await this.baseHandler.getAllLogic(page, limit);
+      return grpcPaginateResponse(result, SOS_MESSAGES.GET_ALL_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || SOS_MESSAGES.GET_ALL_FAIL);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.INCIDENT, SOS_METHODS.GET_ONE)
+  async getSosDetails(
+    data: GetSosByIdDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.baseHandler.getOneById(data.id);
+      return grpcResponse(result, SOS_MESSAGES.GET_ONE_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || SOS_MESSAGES.GET_ONE_FAILED);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.INCIDENT, SOS_METHODS.CREATE)
+  async createSos(
+    data: CreateSosDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.sosService.createSos(data);
+      return grpcResponse(result, SOS_MESSAGES.CREATE_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || SOS_MESSAGES.CREATE_FAILED);
+    }
+  }
+}

@@ -540,6 +540,22 @@ services:
       start_period: 30s
     networks:
       - mebike-network
+  
+  # osrm-service:
+  #   image: osrm/osrm-backend
+  #   container_name: osrm-service
+  #   restart: 'unless-stopped'
+  #   command: osrm-routed --algorithm mld /data/hcm.osrm
+  #   volumes:
+  #     - ./osrm-data:/data
+  #   networks:
+  #     - mebike-network
+  #   labels:
+  #     - 'traefik.enable=true'
+  #     - 'traefik.http.routers.osrm.rule=Host(`${DOMAIN:-mebike.local}`) && PathPrefix(`/route`)'
+  #     - 'traefik.http.routers.osrm.entrypoints=websecure'
+  #     - 'traefik.http.routers.osrm.tls.certresolver=cloudflare'
+  #     - 'traefik.http.services.osrm.loadbalancer.server.port=5000'
 
 networks:
   mebike-network:

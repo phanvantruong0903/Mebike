@@ -9,6 +9,7 @@ service FleetService {
   rpc GetAllStations (GetAllStationsRequest) returns (StationList);
   rpc GetStationsByIds (GetAllStationsByIdsRequest) returns (StationList);
   rpc UpdateStationStatus (UpdateStationStatusRequest) returns (StationDetailResponse);
+  rpc StationExist (GetStationRequest) returns (StationExistResponse);
 }
 
 message CreateStationRequest {
@@ -127,4 +128,16 @@ message StationDetailResponse {
   Station data = 3;
   int32 statusCode = 4;
   repeated string errors = 5;
+}
+
+message StationExistResponse {
+  bool success = 1;
+  string message = 2;
+  StationExistData data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
+}
+
+message StationExistData {
+  bool exists = 1;
 }

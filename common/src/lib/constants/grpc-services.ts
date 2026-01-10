@@ -7,6 +7,7 @@ export const GRPC_SERVICES = {
   TRANSACTION: 'TransactionService',
   RENTAL: 'RentalService',
   MEMBERSHIP: 'MembershipService',
+  INCIDENT: 'IncidentService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -41,6 +42,7 @@ export const USER_METHODS = {
   VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
   USER_VERIFY: 'UserVerify',
   DELETE: 'DeleteUser',
+  FIND_FREE_SOS: 'FindFreeSos',
 } as const;
 
 export const SUPPLIER_METHODS = {
@@ -60,6 +62,7 @@ export const STATION_METHODS = {
   GET_ALL: 'GetAllStations',
   GET_STATIONS_BY_IDS: 'GetStationsByIds',
   UPDATE_STATUS: 'UpdateStationStatus',
+  STATION_EXIST: 'StationExist',
 } as const;
 
 export const BIKE_METHODS = {
@@ -117,4 +120,11 @@ export const PACKAGE_METHODS = {
   UPDATE: 'UpdatePackage',
   GET_ONE: 'GetPackage',
   GET_ALL: 'GetAllPackages',
+};
+
+export const SOS_METHODS = {
+  CREATE: 'CreateSos',
+  GET_ONE: 'GetSos',
+  UPDATE: 'UpdateSos',
+  GET_ALL: 'GetAllSos',
 };

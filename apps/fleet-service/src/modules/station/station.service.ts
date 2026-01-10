@@ -395,4 +395,12 @@ export class StationService extends BaseService<
     });
     return stations;
   }
+
+  async checkStationExist(id: string) {
+    const station = await prismaFleet.station.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    return !!station;
+  }
 }

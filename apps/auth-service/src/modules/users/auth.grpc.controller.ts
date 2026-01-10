@@ -1,5 +1,6 @@
 import { Controller, Inject, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ClientKafka, GrpcMethod, RpcException } from '@nestjs/microservices';
+import type { ClientGrpc } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import {
   BaseGrpcHandler,
@@ -27,15 +28,25 @@ import {
   LogoutDto,
   UserVerifyStatus,
   VerifyEmailDto,
+  GRPC_PACKAGE,
+  STATION_MESSAGES,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
 import { TemporalService } from '../../saga/temporal-service';
+import { firstValueFrom, Observable } from 'rxjs';
+
+interface FleetServiceClient {
+  StationExist(data: {
+    id: string;
+  }): Observable<ReturnType<typeof grpcResponse<{ exists: boolean }>>>;
+}
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class AuthGrpcController {
   private readonly baseHandler: BaseGrpcHandler<User, UserDto, never>;
+  private readonly fleetService!: FleetServiceClient;
 
   constructor(
     @Inject(KAFKA_SERVICE.AUTH_SERVICE)
@@ -44,14 +55,34 @@ export class AuthGrpcController {
     private readonly redis: Redis,
     private readonly authService: AuthService,
     private readonly temporalService: TemporalService,
+    @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
   ) {
     this.baseHandler = new BaseGrpcHandler(this.authService, CreateUserDto);
+    this.fleetService = this.fleetClient.getService<FleetServiceClient>(
+      GRPC_SERVICES.FLEET,
+    );
+  }
+
+  async checkStationExist(data: { id: string }): Promise<boolean> {
+    const response = await firstValueFrom(
+      this.fleetService.StationExist({ id: data.id }),
+    );
+    return (response.data as { exists: boolean }).exists;
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.CREATE)
   async createUser(
     data: CreateUserDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
+    const stationExist = await this.checkStationExist({
+      id: data.workStationId,
+    });
+    if (!stationExist) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        STATION_MESSAGES.NOT_FOUND,
+      ]);
+    }
+
     return this._handleCreateUserLogic(data, data.role, false);
   }
 
@@ -231,6 +262,7 @@ export class AuthGrpcController {
         name: data.name,
         phone: data.phone,
         YOB: data.YOB,
+        workStationId: 'workStationId' in data ? data.workStationId : undefined,
       });
 
       if (shouldGenerateToken) {
