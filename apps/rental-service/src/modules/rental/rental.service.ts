@@ -100,11 +100,18 @@ export class RentalService
         BIKE_MESSAGES.NOT_AVAILABLE,
       ]);
     }
+
+    if (!bike.station?.id) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        BIKE_MESSAGES.NOT_ASSIGNED_STATION,
+      ]);
+    }
+
     const [createdRental] = await Promise.all([
       prismaRental.rental.create({
         data: {
           ...data,
-          startStationId: bike.station?.id as string,
+          startStationId: bike.station.id,
         },
       }),
       this.changeBikeStatus(data.bikeId, BikeStatus.Booked),

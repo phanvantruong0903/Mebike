@@ -87,6 +87,7 @@ export const BIKE_MESSAGES = {
   VALIDATION_FAILED: 'Bike name or phone incorrect',
   UPDATE_FAIL: 'Update Bike failed',
   GET_ALL_STATS_SUCCESS: 'Bike stats retrieved successfully',
+  NOT_ASSIGNED_STATION: 'Bike is not assigned to any station',
   // status messages
   NOT_AVAILABLE: 'Bike is not available',
 };
