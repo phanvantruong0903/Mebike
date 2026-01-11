@@ -85,20 +85,3 @@ message Station {
   optional string name = 2;
   optional string address = 3;
 }
-
-message Account {
-  string id = 1;
-  string email = 2;
-}
-
-message UserProfile {
-  string id = 1;
-  string name = 2;
-  int32 YOB = 3;
-  string role = 4;
-  string status = 5;
-  string phone = 6;
-  string address = 7;
-  string avatarUrl = 8;
-  optional Account account = 9;
-}

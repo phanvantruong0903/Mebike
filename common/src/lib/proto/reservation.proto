@@ -11,9 +11,9 @@ service RentalService {
 
 message Reservation {
   string id = 1;
-  optional UserProfile user = 2;
-  optional Bike bike = 3;
-  optional Station station = 4;
+  string accountId = 2;
+  string bikeId = 3;
+  string stationId = 4;
   string startTime = 5;
   string endTime = 6;
   string prepaid = 7;
@@ -71,23 +71,6 @@ message Pagination {
   int32 page = 2;
   int32 limit = 3;
   int32 totalPages = 4;
-}
-
-message Account {
-  string id = 1;
-  string email = 2;
-}
-
-message UserProfile {
-  string id = 1;
-  string name = 2;
-  int32 YOB = 3;
-  string role = 4;
-  string status = 5;
-  string phone = 6;
-  string address = 7;
-  string avatarUrl = 8;
-  optional Account account = 9;
 }
 
 message Bike {

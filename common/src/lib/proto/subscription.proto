@@ -12,8 +12,8 @@ service MembershipService {
 
 message Subscription {
   string id = 1;
-  UserProfile user = 2;
-  Package package = 3;
+  string accountId = 2;
+  string packageId = 3;
   optional string activatedAt = 4;
   optional string expiredAt = 5;
   int32 usageCounts = 6;
@@ -71,31 +71,4 @@ message SubscriptionListResponse {
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;
-}
-
-message Account {
-  string id = 1;
-  string email = 2;
-}
-
-message UserProfile {
-  string id = 1;
-  string name = 2;
-  int32 YOB = 3;
-  string role = 4;
-  string status = 5;
-  string phone = 6;
-  string address = 7;
-  string avatarUrl = 8;
-  optional Account account = 9;
-}
-
-message Package {
-  string id = 1;
-  string name = 2;
-  string price = 3;
-  int32 maxUsages = 4;
-  string status = 5;
-  string createdAt = 6;
-  string updatedAt = 7;
 }
