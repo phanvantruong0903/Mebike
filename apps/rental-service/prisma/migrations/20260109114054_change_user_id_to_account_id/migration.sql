@@ -1,16 +1,15 @@
-/*
-  Warnings:
+-- Add accountId as nullable
+ALTER TABLE `rentals` ADD COLUMN `accountId` VARCHAR(191);
+ALTER TABLE `reservations` ADD COLUMN `accountId` VARCHAR(191);
 
-  - You are about to drop the column `userId` on the `rentals` table. All the data in the column will be lost.
-  - You are about to drop the column `userId` on the `reservations` table. All the data in the column will be lost.
-  - Added the required column `accountId` to the `rentals` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `accountId` to the `reservations` table without a default value. This is not possible if the table is not empty.
+-- Copy data
+UPDATE `rentals` SET `accountId` = `userId`;
+UPDATE `reservations` SET `accountId` = `userId`;
 
-*/
--- AlterTable
-ALTER TABLE `rentals` DROP COLUMN `userId`,
-    ADD COLUMN `accountId` VARCHAR(191) NOT NULL;
+-- Make NOT NULL
+ALTER TABLE `rentals` MODIFY COLUMN `accountId` VARCHAR(191) NOT NULL;
+ALTER TABLE `reservations` MODIFY COLUMN `accountId` VARCHAR(191) NOT NULL;
 
--- AlterTable
-ALTER TABLE `reservations` DROP COLUMN `userId`,
-    ADD COLUMN `accountId` VARCHAR(191) NOT NULL;
+-- Drop old column
+ALTER TABLE `rentals` DROP COLUMN `userId`;
+ALTER TABLE `reservations` DROP COLUMN `userId`;
