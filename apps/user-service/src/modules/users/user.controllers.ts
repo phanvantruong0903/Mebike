@@ -199,4 +199,10 @@ export class UserController {
       throw new RpcException(err?.message || USER_MESSAGES.CREATE_FAILED);
     }
   }
+
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_USERS_BY_ACCOUNT_IDS)
+  async getUsersByAccountIds(data: { accountIds: string[] }) {
+    const result = await this.userService.getUsersByAccountIds(data.accountIds);
+    return grpcResponse(result, USER_MESSAGES.GET_USERS_BY_ACCOUNT_IDS_SUCCESS);
+  }
 }

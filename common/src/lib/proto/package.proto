@@ -6,7 +6,7 @@ service MembershipService {
   rpc CreatePackage (CreatePackageRequest) returns (PackageResponse);
   rpc UpdatePackage (UpdatePackageRequest) returns (PackageResponse);
   rpc GetPackage (GetPackageRequest) returns (PackageResponse);
-  rpc GetAllPackages (GetPackageListRequest) returns (PackageListResponse);
+  rpc GetPackageList (GetPackageListRequest) returns (PackageListResponse);
 }
 
 message Package {

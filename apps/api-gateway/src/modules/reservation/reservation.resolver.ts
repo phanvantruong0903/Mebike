@@ -12,7 +12,6 @@ import {
   Role,
   Station,
   Bike,
-  Rental,
   UserProfile,
   GRAPHQL_NAME_RESERVATION,
   ReservationResponse,
@@ -94,21 +93,15 @@ export class ReservationResolver {
   }
 
   @ResolveField(() => Bike, { nullable: true })
-  async bike(@Parent() rental: Rental): Promise<Bike | null> {
-    if (!rental.bike?.id) return null;
-    return this.bikeDataLoader.batchBikes.load(rental.bike.id);
+  async bike(@Parent() reservation: Reservation): Promise<Bike | null> {
+    if (!reservation.bike?.id) return null;
+    return this.bikeDataLoader.batchBikes.load(reservation.bike.id);
   }
 
   @ResolveField(() => Station, { nullable: true })
-  async startStation(@Parent() rental: Rental): Promise<Station | null> {
-    if (!rental.startStation?.id) return null;
-    return this.stationDataLoader.batchStations.load(rental.startStation.id);
-  }
-
-  @ResolveField(() => Station, { nullable: true })
-  async endStation(@Parent() rental: Rental): Promise<Station | null> {
-    if (!rental.endStation?.id) return null;
-    return this.stationDataLoader.batchStations.load(rental.endStation.id);
+  async station(@Parent() reservation: Reservation): Promise<Station | null> {
+    if (!reservation.station?.id) return null;
+    return this.stationDataLoader.batchStations.load(reservation.station.id);
   }
 
   @Query(() => String)

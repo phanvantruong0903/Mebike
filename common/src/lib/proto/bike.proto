@@ -8,12 +8,17 @@ service FleetService {
   rpc UpdateBike (UpdateBikeRequest) returns (UpdateBikeResponse);
   rpc GetAllBikes (GetAllBikesRequest) returns (BikeList);
   rpc ChangeBikeStatus (ChangeBikeStatusRequest) returns (BikeDetailResponse);
+  rpc GetBikesByIds (GetAllBikesByIdsRequest) returns (BikeList);
 }
 
 message CreateBikeRequest {
   string chipId = 1;
   string stationId = 2;
   string supplierId = 3;
+}
+
+message GetAllBikesByIdsRequest {
+  repeated string ids = 1;
 }
 
 message ChangeBikeStatusRequest {
