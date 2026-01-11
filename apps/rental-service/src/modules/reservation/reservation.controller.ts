@@ -108,7 +108,7 @@ export class ReservationController {
       const { page, limit, search, ...filterFields } = data;
       const filter = buildFilter(filterFields);
 
-      const searchFields = ['userId', 'stationId', 'status'];
+      const searchFields = ['accountId', 'stationId', 'status'];
       const searchFilter = buildSearchFilter(search, searchFields);
 
       const where = {

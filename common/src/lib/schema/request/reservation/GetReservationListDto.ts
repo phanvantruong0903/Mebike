@@ -18,7 +18,7 @@ export class GetReservationListDto {
 
   @IsOptional()
   @IsString()
-  userId?: string;
+  accountId?: string;
 
   @IsOptional()
   @IsString()

@@ -89,7 +89,12 @@ export class RentalController {
       const { page, limit, search, ...filterFields } = data;
       const filter = buildFilter(filterFields);
 
-      const searchFields = ['startStation', 'endStation', 'status'];
+      const searchFields = [
+        'accountId',
+        'startStationId',
+        'endStationId',
+        'status',
+      ];
       const searchFilter = buildSearchFilter(search, searchFields);
 
       const where = {
