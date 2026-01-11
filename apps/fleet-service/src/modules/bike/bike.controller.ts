@@ -140,4 +140,13 @@ export class BikeController {
       throw new RpcException(err?.message);
     }
   }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_BIKES_BY_IDS)
+  async getBikesByIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const bikes = await this.bikeService.getBikesByIds(ids);
+    return grpcResponse(bikes, BIKE_MESSAGES.GET_ALL_SUCCESS);
+  }
 }

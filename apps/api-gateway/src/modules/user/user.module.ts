@@ -40,6 +40,6 @@ import { AuthModule } from '../auth/auth.module';
     forwardRef(() => AuthModule),
   ],
   providers: [UserService, UserResolver, UserAccountDataloader],
-  exports: [ClientsModule],
+  exports: [ClientsModule, UserService],
 })
 export class UserModule {}

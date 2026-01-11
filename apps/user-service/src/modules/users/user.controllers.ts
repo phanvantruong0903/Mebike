@@ -200,6 +200,12 @@ export class UserController {
     }
   }
 
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_USERS_BY_ACCOUNT_IDS)
+  async getUsersByAccountIds(data: { accountIds: string[] }) {
+    const result = await this.userService.getUsersByAccountIds(data.accountIds);
+    return grpcResponse(result, USER_MESSAGES.GET_USERS_BY_ACCOUNT_IDS_SUCCESS);
+  }
+
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.FIND_FREE_SOS)
   async findFreeSos(data: { stationId: string }) {
     const result = await this.userService.findFreeSos(data.stationId);

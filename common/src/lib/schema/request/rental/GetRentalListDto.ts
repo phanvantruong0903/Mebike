@@ -18,7 +18,7 @@ export class GetRentalListDto {
 
   @IsOptional()
   @IsString()
-  userId?: string;
+  accountId?: string;
 
   @IsOptional()
   @IsString()
@@ -26,11 +26,11 @@ export class GetRentalListDto {
 
   @IsOptional()
   @IsString()
-  startStation?: string;
+  startStationId?: string;
 
   @IsOptional()
   @IsString()
-  endStation?: string;
+  endStationId?: string;
 
   @IsOptional()
   @IsString()

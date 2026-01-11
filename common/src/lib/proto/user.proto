@@ -107,6 +107,7 @@ service UserService {
   rpc ChangeStatus(ChangeStatusRequest) returns (UpdateUserResponse);
   rpc GetUserStats(Empty) returns (UserStatsResponse);
   rpc UserVerify(UserVerifyRequest) returns (UserDetailResponse);
+  rpc GetUsersByAccountIds(GetUsersByAccountIdsRequest) returns (UsersResponse);
   rpc FindFreeSos(FindFreeSosRequest) returns (UsersResponse);
 }
 
@@ -143,3 +144,7 @@ message DeleteUserResponse {
 }
 
 message Empty {}
+
+message GetUsersByAccountIdsRequest {
+  repeated string accountIds = 1;
+}

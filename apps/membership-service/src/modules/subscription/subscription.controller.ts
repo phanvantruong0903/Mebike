@@ -88,7 +88,7 @@ export class SubscriptionController {
       const { page, limit, search, ...filterFields } = data;
       const filter = buildFilter(filterFields);
 
-      const searchFields = ['userId', 'status'];
+      const searchFields = ['accountId', 'status'];
       const searchFilter = buildSearchFilter(search, searchFields);
 
       const where = {

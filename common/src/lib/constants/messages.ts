@@ -40,6 +40,7 @@ export const USER_MESSAGES = {
   ACCESS_TOKEN_REQUIRED: 'Access Token is required',
   USER_VERIFY_SUCCESS: 'User verified successfully',
   DELETE_FAILED: 'Delete User failed',
+  GET_USERS_BY_ACCOUNT_IDS_SUCCESS: 'Get users by account ids successfully',
   FIND_FREE_SOS_SUCCESS: 'Find free SOS successfully',
 };
 
@@ -89,6 +90,9 @@ export const BIKE_MESSAGES = {
   VALIDATION_FAILED: 'Bike name or phone incorrect',
   UPDATE_FAIL: 'Update Bike failed',
   GET_ALL_STATS_SUCCESS: 'Bike stats retrieved successfully',
+  NOT_ASSIGNED_STATION: 'Bike is not assigned to any station',
+  // status messages
+  NOT_AVAILABLE: 'Bike is not available',
 };
 
 export const PAYMENT_MESSAGES = {

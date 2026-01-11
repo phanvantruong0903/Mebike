@@ -42,6 +42,7 @@ export const USER_METHODS = {
   VERIFY_EMAIL_PROCESS: 'VerifyEmailProcess',
   USER_VERIFY: 'UserVerify',
   DELETE: 'DeleteUser',
+  GET_USERS_BY_ACCOUNT_IDS: 'GetUsersByAccountIds',
   FIND_FREE_SOS: 'FindFreeSos',
 } as const;
 
@@ -71,6 +72,7 @@ export const BIKE_METHODS = {
   UPDATE: 'UpdateBike',
   GET_ALL: 'GetAllBikes',
   CHANGE_STATUS: 'ChangeBikeStatus',
+  GET_BIKES_BY_IDS: 'GetBikesByIds',
 };
 
 export const PAYMENT_METHODS = {
@@ -96,7 +98,7 @@ export const RENTAL_METHODS = {
   CREATE: 'CreateRental',
   END: 'EndRental',
   GET_ONE: 'GetRental',
-  GET_ALL: 'GetAllRentals',
+  GET_ALL: 'GetRentalList',
   SUMMARIZE: 'SummarizeRentals',
 };
 
@@ -104,13 +106,13 @@ export const RESERVATION_METHODS = {
   CREATE: 'CreateReservation',
   CONFIRM: 'ConfirmReservation',
   GET_ONE: 'GetReservation',
-  GET_ALL: 'GetAllReservations',
+  GET_ALL: 'GetReservationList',
 };
 
 export const SUBSCRIPTION_METHODS = {
   CREATE: 'CreateSubscription',
   GET_ONE: 'GetSubscription',
-  GET_ALL: 'GetAllSubscriptions',
+  GET_ALL: 'GetSubscriptionList',
   ACTIVATE: 'ActivateSubscription',
   EXPIRE: 'ExpireSubscription',
 };
@@ -119,7 +121,7 @@ export const PACKAGE_METHODS = {
   CREATE: 'CreatePackage',
   UPDATE: 'UpdatePackage',
   GET_ONE: 'GetPackage',
-  GET_ALL: 'GetAllPackages',
+  GET_ALL: 'GetPackageList',
 };
 
 export const SOS_METHODS = {

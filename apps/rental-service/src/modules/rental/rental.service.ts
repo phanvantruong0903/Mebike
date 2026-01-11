@@ -1,29 +1,123 @@
 import {
   BaseService,
+  Bike,
+  BIKE_MESSAGES,
+  BikeResponse,
+  BikeStatus,
   CreateRentalDto,
   EndRentalDto,
+  GRPC_PACKAGE,
+  GRPC_SERVICES,
   prismaRental,
   RENTAL_MESSAGES,
   RentalModel,
   RentalStatus,
+  SERVER_MESSAGE,
+  throwGrpcError,
   TrendValue,
 } from '@mebike/common';
-import { Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
+import type { ClientGrpc } from '@nestjs/microservices';
+import { firstValueFrom, Observable } from 'rxjs';
+
+interface FleetServiceClient {
+  GetBike(data: { id: string }): Observable<BikeResponse>;
+  ChangeBikeStatus(data: {
+    id: string;
+    status: BikeStatus;
+  }): Observable<BikeResponse>;
+}
 
 @Injectable()
-export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
-  constructor() {
+export class RentalService
+  extends BaseService<RentalModel, CreateRentalDto>
+  implements OnModuleInit
+{
+  private readonly logger = new Logger(RentalService.name);
+  private fleetService!: FleetServiceClient;
+
+  constructor(@Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc) {
     super(prismaRental.rental);
   }
 
+  onModuleInit() {
+    this.initializeFleetService();
+  }
+
+  private initializeFleetService() {
+    if (this.fleetService) return;
+
+    if (!this.client) {
+      this.logger.error('ClientGrpc is not injected!');
+      return;
+    }
+
+    try {
+      this.fleetService = this.client.getService<FleetServiceClient>(
+        GRPC_SERVICES.FLEET,
+      );
+    } catch (error: any) {
+      this.logger.warn(
+        `Failed to load ${GRPC_SERVICES.FLEET}: ${error.message}`,
+      );
+    }
+
+    if (this.fleetService) {
+      this.logger.log('FleetService initialized successfully');
+    } else {
+      this.logger.error('Failed to initialize FleetService');
+    }
+  }
+
+  private ensureFleetService() {
+    if (!this.fleetService) {
+      this.logger.warn('FleetService not initialized, attempting lazy load...');
+      this.initializeFleetService();
+    }
+    if (!this.fleetService) {
+      throw new InternalServerErrorException(
+        'RentalService: FleetService dependency is missing. Check gRPC client configuration.',
+      );
+    }
+    return this.fleetService;
+  }
+
   override async create(data: CreateRentalDto): Promise<RentalModel> {
-    return await prismaRental.rental.create({
-      data: {
-        ...data,
-        userId: data.accountId,
-        startStation: data.stationId,
-      },
-    });
+    const bikeResponse = await this.getBikeById(data.bikeId);
+    if (!bikeResponse || !bikeResponse.data) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
+    }
+
+    const bike = bikeResponse.data as Bike;
+    if (bike.status !== BikeStatus.Available) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        BIKE_MESSAGES.NOT_AVAILABLE,
+      ]);
+    }
+
+    if (!bike.station?.id) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        BIKE_MESSAGES.NOT_ASSIGNED_STATION,
+      ]);
+    }
+
+    const [createdRental] = await Promise.all([
+      prismaRental.rental.create({
+        data: {
+          ...data,
+          startStationId: bike.station.id,
+        },
+      }),
+      this.changeBikeStatus(data.bikeId, BikeStatus.Booked),
+    ]);
+
+    return createdRental;
   }
 
   async end(data: EndRentalDto): Promise<RentalModel> {
@@ -31,9 +125,9 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
       where: { id: data.id, status: RentalStatus.Rented },
     });
     if (!rental) {
-      throw new Error(
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
         RENTAL_MESSAGES.NOT_FOUND_WITH_STATUS(RentalStatus.Rented),
-      );
+      ]);
     }
 
     const now = new Date();
@@ -48,15 +142,16 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
       prismaRental.rental.update({
         where: { id: data.id },
         data: {
-          ...data,
-          endStation: rental.startStation,
+          endStationId: rental.startStationId,
           endTime: now,
           duration: duration,
           totalPrice: totalPrice,
           status: RentalStatus.Completed,
         },
       }),
+      this.changeBikeStatus(rental.bikeId, BikeStatus.Available),
     ]);
+
     return updatedRental;
   }
 
@@ -64,6 +159,11 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     const rental = await prismaRental.rental.findUnique({
       where: { id },
     });
+    if (!rental) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        RENTAL_MESSAGES.NOT_FOUND,
+      ]);
+    }
     return rental;
   }
 
@@ -202,5 +302,16 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     const halfHourUnit = Math.max(1, Math.ceil(minutes / 30));
     const pricePer30Min = Number(process.env.PRICE_PER_30_MINS || '2000');
     return pricePer30Min * halfHourUnit;
+  }
+
+  // bike functions
+  async getBikeById(id: string) {
+    return await firstValueFrom(this.ensureFleetService().GetBike({ id }));
+  }
+
+  async changeBikeStatus(id: string, status: BikeStatus) {
+    return await firstValueFrom(
+      this.ensureFleetService().ChangeBikeStatus({ id, status }),
+    );
   }
 }

@@ -15,10 +15,13 @@ import { StationModule } from '../station/station.module';
 import { BikeDataloader } from './bike.dataloader';
 import { BikeModule } from '../bike/bike.module';
 import { StationDataloader } from '../bike/station.dataloader';
+import { UserProfileDataLoader } from './user-profile.dataloader';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     RedisModule,
+    UserModule,
     StationModule,
     BikeModule,
     ConfigModule.forRoot({ isGlobal: true }),
@@ -46,6 +49,12 @@ import { StationDataloader } from '../bike/station.dataloader';
       },
     ]),
   ],
-  providers: [RentalService, RentalResolver, BikeDataloader, StationDataloader],
+  providers: [
+    RentalService,
+    RentalResolver,
+    BikeDataloader,
+    StationDataloader,
+    UserProfileDataLoader,
+  ],
 })
 export class RentalModule {}
