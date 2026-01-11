@@ -45,6 +45,7 @@ enum Role {
   ADMIN
   STAFF
   SOS
+  SUPPLIER
 }
 
 enum UserStatus {

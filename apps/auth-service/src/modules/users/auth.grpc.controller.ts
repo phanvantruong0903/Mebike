@@ -74,13 +74,22 @@ export class AuthGrpcController {
   async createUser(
     data: CreateUserDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    const stationExist = await this.checkStationExist({
-      id: data.workStationId,
-    });
-    if (!stationExist) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        STATION_MESSAGES.NOT_FOUND,
-      ]);
+    if (data.role !== Role.SUPPLIER) {
+      if (!data.workStationId) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          STATION_MESSAGES.NOT_FOUND,
+        ]);
+      }
+      const stationExist = await this.checkStationExist({
+        id: data.workStationId,
+      });
+      if (!stationExist) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          STATION_MESSAGES.NOT_FOUND,
+        ]);
+      }
+    } else {
+      data.workStationId = '';
     }
 
     return this._handleCreateUserLogic(data, data.role, false);

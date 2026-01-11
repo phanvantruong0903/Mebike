@@ -19,7 +19,7 @@ model EmergencyRequest {
   id          String @id @default(uuid())
   rentalId    String @db.Uuid
   requesterId String @db.Uuid
-  bikeId      String @db.Uuid
+  bikeId      String @default("")
 
   issue              String
   photos             String[]

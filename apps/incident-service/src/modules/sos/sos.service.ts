@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import {
   BaseService,
   REDIS_CONSTANTS,
@@ -19,6 +19,9 @@ import {
   Profile,
   EmergencyStatus,
   STATION_MESSAGES,
+  BikeModel,
+  BikeStatus,
+  SOS_MESSAGES,
 } from '@mebike/common';
 import Redis from 'ioredis';
 import { type ClientGrpc } from '@nestjs/microservices';
@@ -50,32 +53,39 @@ interface UserServiceClient {
 
 interface StationWithAvailability extends StationModel {
   availableBike: number;
+  bikes: [BikeModel];
+}
+
+interface StationWithBikes extends StationModel {
+  bikes: [BikeModel];
 }
 
 @Injectable()
-export class SosService
-  extends BaseService<SosModel, CreateSosDto, UpdateSosDto>
-  implements OnModuleInit
-{
+export class SosService extends BaseService<
+  SosModel,
+  CreateSosDto,
+  UpdateSosDto
+> {
   private rentalServiceClient!: RentalServiceClient;
-  private fleetServiceClient!: FleetServiceClient;
+  private stationServiceClient!: FleetServiceClient;
   private userServiceClient!: UserServiceClient;
 
   constructor(
     @Inject(REDIS_CONSTANTS.REDIS_CLIENT)
     private readonly redisClient: Redis,
     @Inject(GRPC_PACKAGE.RENTAL) private readonly rentalClient: ClientGrpc,
-    @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
+    @Inject(GRPC_PACKAGE.FLEET) private readonly stationClient: ClientGrpc,
     @Inject(GRPC_PACKAGE.USER) private readonly userClient: ClientGrpc,
   ) {
     super(prismaIncident.emergencyRequest);
+    this.initialize();
   }
-  onModuleInit() {
+
+  private initialize() {
     this.rentalServiceClient =
       this.rentalClient.getService<RentalServiceClient>(GRPC_SERVICES.RENTAL);
-    this.fleetServiceClient = this.fleetClient.getService<FleetServiceClient>(
-      GRPC_SERVICES.FLEET,
-    );
+    this.stationServiceClient =
+      this.stationClient.getService<FleetServiceClient>(GRPC_SERVICES.FLEET);
     this.userServiceClient = this.userClient.getService<UserServiceClient>(
       GRPC_SERVICES.USER,
     );
@@ -87,12 +97,12 @@ export class SosService
 
   async getStationsByIds(ids: string[]) {
     const response = await firstValueFrom(
-      this.fleetServiceClient.GetStationsByIds({ ids }),
+      this.stationServiceClient.GetStationsByIds({ ids }),
     );
     return (response.data as StationModel[]) ?? [];
   }
 
-  async findFreeSos(stationId: string) {
+  async findSosStation(stationId: string) {
     const response = await firstValueFrom(
       this.userServiceClient.FindFreeSos({ stationId }),
     );
@@ -100,14 +110,19 @@ export class SosService
   }
 
   async checkStationExist(id: string) {
-    return await firstValueFrom(this.fleetServiceClient.StationExist({ id }));
+    return await firstValueFrom(this.stationServiceClient.StationExist({ id }));
   }
 
   async getStationById(id: string) {
-    return await firstValueFrom(this.fleetServiceClient.GetStation({ id }));
+    return await firstValueFrom(this.stationServiceClient.GetStation({ id }));
   }
 
   async createSos(data: CreateSosDto) {
+    const existed = await this.existedSos(data.rentalId);
+    if (existed) {
+      throwGrpcError(409, SOS_MESSAGES.EXISTED, [SOS_MESSAGES.EXISTED]);
+    }
+
     const findRental = await this.getRentalById(data.rentalId);
     const rental = findRental.data as RentalModel;
 
@@ -129,8 +144,11 @@ export class SosService
 
     let selectedStation = null;
     let selectedSos = null;
+    let selectedBike = null;
+
     for (const station of stations) {
       const freeSos = await this.findFreeSosForStation(station.id);
+
       if (freeSos.length === 0) {
         continue;
       }
@@ -142,6 +160,16 @@ export class SosService
         if (stationData?.availableBike === 0) {
           continue;
         }
+
+        const availableBikes = stationData.bikes?.filter(
+          (bike) => bike.status === BikeStatus.Available,
+        );
+
+        if (!availableBikes || availableBikes.length === 0) {
+          continue;
+        }
+
+        selectedBike = availableBikes[0];
       }
 
       selectedStation = station;
@@ -162,8 +190,9 @@ export class SosService
     return await prismaIncident.emergencyRequest.create({
       data: {
         ...data,
+        bikeId: selectedBike?.id || '',
         stationId: selectedStation.id,
-        agentId: selectedSos.id,
+        agentId: selectedSos.accountId,
       },
     });
   }
@@ -201,7 +230,7 @@ export class SosService
   }
 
   private async findFreeSosForStation(stationId: string) {
-    const allSos = await this.findFreeSos(stationId);
+    const allSos = await this.findSosStation(stationId);
 
     const busySos = await prismaIncident.emergencyRequest.findMany({
       where: {
@@ -217,6 +246,19 @@ export class SosService
 
     const busyIds = new Set(busySos.map((a) => a.agentId));
 
-    return allSos.filter((sos) => !busyIds.has(sos.id));
+    return allSos.filter((sos) => !busyIds.has(sos.accountId));
+  }
+
+  private async existedSos(rentalId: string) {
+    const existed = await prismaIncident.emergencyRequest.findFirst({
+      where: {
+        rentalId,
+        status: {
+          notIn: [EmergencyStatus.Cancelled],
+        },
+      },
+    });
+
+    return !!existed;
   }
 }

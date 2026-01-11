@@ -6,6 +6,7 @@ import {
   IsNotIn,
   IsPhoneNumber,
   IsUUID,
+  IsOptional,
 } from 'class-validator';
 import { Role } from '../../../prisma/index';
 
@@ -32,5 +33,6 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsUUID()
-  workStationId!: string;
+  @IsOptional()
+  workStationId?: string;
 }

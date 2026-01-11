@@ -73,8 +73,10 @@ export const STATION_MESSAGES = {
   UPDATE_FAIL: 'Update Station failed',
   GET_ALL_STATS_SUCCESS: 'Station stats retrieved successfully',
   STATION_FULL: 'Station is full',
-  NO_STATION_NEARBY: 'No station nearby',
-  NO_STATION_NEARBY_AND_BIKE: 'No station nearby and available bike',
+  NO_STATION_NEARBY:
+    'We are experiencing high demand. Please try your request again shortly. ',
+  NO_STATION_NEARBY_AND_BIKE:
+    'Sorry, there are no cars available in your area right now. Please try again shortly.',
 };
 
 export const BIKE_MESSAGES = {
@@ -239,6 +241,7 @@ export const PACKAGE_MESSAGES = {
 };
 
 export const SOS_MESSAGES = {
+  EXISTED: 'SOS already exists',
   CREATE_SUCCESS: 'SOS created successfully',
   UPDATE_SUCCESS: 'SOS updated successfully',
   GET_ALL_SUCCESS: 'SOS retrieved successfully',

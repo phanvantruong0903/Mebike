@@ -117,6 +117,7 @@ message CreateUserRequest {
   int32 YOB = 3;
   string phone = 4;
   optional string role = 5;
+  optional string workStationId = 6;
 }
 
 message FindFreeSosRequest {

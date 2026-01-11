@@ -17,4 +17,7 @@ export class CreateUserInput {
 
   @Field(() => Role)
   role!: Role;
+
+  @Field(() => String, { nullable: true })
+  workStationId?: string;
 }

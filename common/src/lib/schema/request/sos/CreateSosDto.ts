@@ -19,9 +19,6 @@ export class CreateSosDto {
   @IsUUID()
   requesterId!: string;
 
-  @IsUUID()
-  bikeId!: string;
-
   @IsString()
   @IsNotEmpty()
   issue!: string;

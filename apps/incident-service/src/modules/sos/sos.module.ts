@@ -31,8 +31,11 @@ import { join } from 'node:path';
           return {
             transport: Transport.GRPC,
             options: {
-              package: 'bike',
-              protoPath: join(process.cwd(), 'common/src/lib/proto/bike.proto'),
+              package: 'station',
+              protoPath: join(
+                process.cwd(),
+                'common/src/lib/proto/station.proto',
+              ),
               url: `${fleetService.address}:${fleetService.port}`,
             },
           };

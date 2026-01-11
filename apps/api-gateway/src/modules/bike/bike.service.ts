@@ -3,7 +3,6 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
-  GRPC_SERVICES,
   UpdateBikeInput,
   GetBikeInput,
   CreateBikeInput,
@@ -11,6 +10,7 @@ import {
   BikeListResponse,
   BikeStatus,
   Bike,
+  GRPC_SERVICES,
 } from '@mebike/common';
 
 interface BikeServiceClient {
