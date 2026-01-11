@@ -33,7 +33,7 @@ model Reservation {
   bikeId         String?
   stationId      String
   startTime      DateTime          @default(now())
-  endTime        DateTime?
+  endTime        DateTime
   prepaid        Decimal
   subscriptionId String?
   status         ReservationStatus @default(Pending)
