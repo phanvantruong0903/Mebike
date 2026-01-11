@@ -8,11 +8,11 @@
         "executor": "nx:run-commands",
         "options": {
           "command": "prisma generate",
-          "cwd": "apps/rental-service"
+          "cwd": "apps/incident-service"
         },
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/common/src/lib/prisma/rental/generated"
+          "{workspaceRoot}/common/src/lib/prisma/incident/generated"
         ]
       },
       "build": {
