@@ -10,6 +10,14 @@ import {
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import { config as dotenvConfig } from 'dotenv';
+/**
+ * Bootstraps the Nest application: loads environment variables, registers the service with Consul,
+ * applies global validation and exception handling, connects gRPC and Kafka microservices, and starts them.
+ *
+ * This performs process-wide setup including determining host/port, registering the RENTAL service in Consul,
+ * configuring ValidationPipe and GrpcExceptionFilter, loading protobuf definitions for gRPC, configuring Kafka
+ * client/consumer settings, and starting all connected microservices.
+ */
 async function bootstrap() {
   dotenvConfig();
 
