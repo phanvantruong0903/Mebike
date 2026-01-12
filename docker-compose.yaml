@@ -73,6 +73,22 @@ services:
     networks:
       - mebike-network
 
+  incident-db:
+    image: postgres:16-alpine
+    container_name: incident-db
+    restart: 'unless-stopped'
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${INCIDENT_DB_NAME}
+      POSTGRES_INITDB_ARGS: '-c idle_in_transaction_session_timeout=1800000'
+    ports:
+      - '5438:5432'
+    volumes:
+      - incident_data:/var/lib/postgresql/data
+    networks:
+      - mebike-network
+
   temporal-db:
     image: postgres:16-alpine
     container_name: temporal-db
@@ -540,7 +556,41 @@ services:
       start_period: 30s
     networks:
       - mebike-network
-  
+
+  incident-service:
+    build:
+      context: .
+      dockerfile: apps/incident-service/Dockerfile
+    container_name: incident-service
+    restart: 'unless-stopped'
+    depends_on:
+      consul:
+        condition: service_started
+      incident-db:
+        condition: service_started
+      fleet-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      rental-service:
+        condition: service_healthy
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@incident-db:5432/${PAYMENT_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
+      - INCIDENT_SERVICE_PORT=50049
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ['CMD', 'nc', '-z', '127.0.0.1', '50049']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mebike-network
+
   # osrm-service:
   #   image: osrm/osrm-backend
   #   container_name: osrm-service
