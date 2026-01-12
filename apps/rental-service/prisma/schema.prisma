@@ -13,12 +13,14 @@ model Rental {
   id             String       @id @default(uuid())
   accountId      String
   bikeId         String?
-  startStationId   String
-  endStationId     String?
+  startStationId String
+  endStationId   String?
+  reservationId  String?      @unique
+  reservation    Reservation? @relation(fields: [reservationId], references: [id])
   startTime      DateTime     @default(now())
   endTime        DateTime?
   duration       Int          @default(0)
-  totalPrice     Decimal      @default(0)
+  totalPrice     Decimal      @default(0) @db.Decimal(10, 2)
   subscriptionId String?
   status         RentalStatus @default(Rented)
   createdAt      DateTime     @default(now())
@@ -34,11 +36,12 @@ model Reservation {
   stationId      String
   startTime      DateTime          @default(now())
   endTime        DateTime
-  prepaid        Decimal
+  prepaid        Decimal           @db.Decimal(10, 2)
   subscriptionId String?
   status         ReservationStatus @default(Pending)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+  Rental         Rental?
 
   @@map("reservations")
 }
