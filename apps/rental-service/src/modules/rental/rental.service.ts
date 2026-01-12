@@ -16,13 +16,7 @@ import {
   throwGrpcError,
   TrendValue,
 } from '@mebike/common';
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
 
@@ -35,57 +29,20 @@ interface FleetServiceClient {
 }
 
 @Injectable()
-export class RentalService
-  extends BaseService<RentalModel, CreateRentalDto>
-  implements OnModuleInit
-{
-  private readonly logger = new Logger(RentalService.name);
+export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
   private fleetService!: FleetServiceClient;
 
   constructor(@Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc) {
     super(prismaRental.rental);
-  }
-
-  onModuleInit() {
-    this.initializeFleetService();
-  }
-
-  private initializeFleetService() {
-    if (this.fleetService) return;
-
-    if (!this.client) {
-      this.logger.error('ClientGrpc is not injected!');
-      return;
-    }
-
     try {
       this.fleetService = this.client.getService<FleetServiceClient>(
         GRPC_SERVICES.FLEET,
       );
     } catch (error: any) {
-      this.logger.warn(
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
         `Failed to load ${GRPC_SERVICES.FLEET}: ${error.message}`,
-      );
+      ]);
     }
-
-    if (this.fleetService) {
-      this.logger.log('FleetService initialized successfully');
-    } else {
-      this.logger.error('Failed to initialize FleetService');
-    }
-  }
-
-  private ensureFleetService() {
-    if (!this.fleetService) {
-      this.logger.warn('FleetService not initialized, attempting lazy load...');
-      this.initializeFleetService();
-    }
-    if (!this.fleetService) {
-      throw new InternalServerErrorException(
-        'RentalService: FleetService dependency is missing. Check gRPC client configuration.',
-      );
-    }
-    return this.fleetService;
   }
 
   override async create(data: CreateRentalDto): Promise<RentalModel> {
@@ -306,12 +263,12 @@ export class RentalService
 
   // bike functions
   async getBikeById(id: string) {
-    return await firstValueFrom(this.ensureFleetService().GetBike({ id }));
+    return await firstValueFrom(this.fleetService.GetBike({ id }));
   }
 
   async changeBikeStatus(id: string, status: BikeStatus) {
     return await firstValueFrom(
-      this.ensureFleetService().ChangeBikeStatus({ id, status }),
+      this.fleetService.ChangeBikeStatus({ id, status }),
     );
   }
 }
