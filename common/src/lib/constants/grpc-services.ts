@@ -68,8 +68,8 @@ export const BIKE_METHODS = {
   GET_ONE: 'GetBike',
   UPDATE: 'UpdateBike',
   GET_ALL: 'GetAllBikes',
-  CHANGE_STATUS: 'ChangeBikeStatus',
   GET_BIKES_BY_IDS: 'GetBikesByIds',
+  CHANGE_STATUS: 'ChangeBikeStatus',
 };
 
 export const PAYMENT_METHODS = {
@@ -101,7 +101,7 @@ export const RENTAL_METHODS = {
 
 export const RESERVATION_METHODS = {
   CREATE: 'CreateReservation',
-  CONFIRM: 'ConfirmReservation',
+  ACTIVATE: 'ActivateReservation',
   GET_ONE: 'GetReservation',
   GET_ALL: 'GetReservationList',
 };

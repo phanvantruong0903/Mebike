@@ -16,7 +16,7 @@ import {
   GRAPHQL_NAME_RESERVATION,
   ReservationResponse,
   CreateReservationInput,
-  ConfirmReservationInput,
+  ActivateReservationInput,
   ReservationListResponse,
   GetReservationListInput,
   Reservation,
@@ -52,15 +52,15 @@ export class ReservationResolver {
   }
 
   @Mutation(() => ReservationResponse, {
-    name: GRAPHQL_NAME_RESERVATION.CONFIRM,
+    name: GRAPHQL_NAME_RESERVATION.ACTIVATE,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.USER)
-  async confirmReservation(
+  async activateReservation(
     @CurrentUser() user: UserProfile,
-    @Args('body') body: ConfirmReservationInput,
+    @Args('body') body: ActivateReservationInput,
   ): Promise<ReservationResponse> {
-    return this.reservationService.confirmReservation({
+    return this.reservationService.activateReservation({
       ...body,
       accountId: user.accountId,
     });

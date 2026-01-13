@@ -165,6 +165,7 @@ export const RENTAL_MESSAGES = {
   INVALID_ID: 'Invalid id format',
   GET_ONE_SUCCESS: 'Rental retrieved successfully',
   GET_ONE_FAILED: 'Rental retrieved failed',
+  BIKE_NOT_ASSIGNED: 'Bike not assigned to this reservation',
 };
 
 export const RESERVATION_MESSAGES = {
@@ -188,8 +189,10 @@ export const RESERVATION_MESSAGES = {
   INVALID_ID: 'Invalid id format',
   GET_ONE_SUCCESS: 'Reservation retrieved successfully',
   GET_ONE_FAILED: 'Reservation retrieved failed',
-  CONFIRM_SUCCESS: 'Reservation confirmed successfully',
-  CONFIRM_FAIL: 'Reservation confirmed failed',
+  ACTIVATE_SUCCESS: 'Reservation activated successfully',
+  ACTIVATE_FAIL: 'Reservation activated failed',
+  INVALID_ACTIVATE_TIME:
+    'Activation time must be between start time and end time',
 };
 
 export const SUBSCRIPTION_MESSAGES = {

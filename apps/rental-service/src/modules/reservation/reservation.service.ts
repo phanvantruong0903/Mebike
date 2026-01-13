@@ -1,14 +1,25 @@
 import {
+  ActivateReservationDto,
   BaseService,
   ConfirmReservationDto,
+  CreateRentalDto,
   CreateReservationDto,
   prismaRental,
   RENTAL_MESSAGES,
+  RentalStatus,
   RESERVATION_MESSAGES,
   ReservationModel,
   ReservationStatus,
+  SERVER_MESSAGE,
+  throwGrpcError,
 } from '@mebike/common';
 import { Injectable } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
+
+interface CreateRentalFromReservation extends CreateRentalDto {
+  reservationId: string;
+  startStationId: string;
+}
 
 @Injectable()
 export class ReservationService extends BaseService<
@@ -20,33 +31,70 @@ export class ReservationService extends BaseService<
   }
 
   override async create(data: CreateReservationDto): Promise<ReservationModel> {
-    const prepaid = Number(process.env.PREPAID || '2000');
-    return await prismaRental.reservation.create({
-      data: {
-        ...data,
-        prepaid,
-      },
-    });
+    const prepaid = Number(process.env.PREPAID_AMOUNT || '2000');
+    const endTime = this.generateEndTime(data.startTime);
+
+    const reservationId = uuidv4();
+
+    const createRentalData: CreateRentalFromReservation = {
+      accountId: data.accountId,
+      bikeId: data.bikeId,
+      subscriptionId: data.subscriptionId,
+      startStationId: data.stationId,
+      reservationId,
+    };
+    const [createdReservation] = await prismaRental.$transaction([
+      prismaRental.reservation.create({
+        data: {
+          ...data,
+          endTime,
+          prepaid,
+          id: reservationId,
+        },
+      }),
+      prismaRental.rental.create({
+        data: createRentalData,
+      }),
+    ]);
+
+    return createdReservation;
   }
 
-  async confirm(data: ConfirmReservationDto): Promise<ReservationModel> {
+  async activate(data: ActivateReservationDto): Promise<ReservationModel> {
     const reservation = await prismaRental.reservation.findUnique({
       where: { id: data.id, status: ReservationStatus.Pending },
     });
     if (!reservation) {
-      throw new Error(
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
         RESERVATION_MESSAGES.NOT_FOUND_WITH_STATUS(ReservationStatus.Pending),
-      );
+      ]);
     }
 
     if (!reservation.bikeId) {
-      throw new Error(RENTAL_MESSAGES.FIELD_NOT_FOUND('bikeId'));
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        RENTAL_MESSAGES.BIKE_NOT_ASSIGNED,
+      ]);
     }
 
-    return await prismaRental.reservation.update({
-      where: { id: data.id },
-      data: { status: ReservationStatus.Active },
-    });
+    const now = new Date();
+    if (now < reservation.startTime || now > reservation.endTime) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        RESERVATION_MESSAGES.INVALID_ACTIVATE_TIME,
+      ]);
+    }
+
+    const [activatedReservation] = await Promise.all([
+      prismaRental.reservation.update({
+        where: { id: data.id },
+        data: { status: ReservationStatus.Active },
+      }),
+      prismaRental.rental.update({
+        where: { reservationId: reservation.id },
+        data: { status: RentalStatus.Rented },
+      }),
+    ]);
+
+    return activatedReservation;
   }
 
   async getOne(id: string): Promise<ReservationModel | null> {
@@ -54,5 +102,12 @@ export class ReservationService extends BaseService<
       where: { id },
     });
     return reservation;
+  }
+
+  generateEndTime(startTime: string) {
+    const validConfirmHour = Number(process.env.VALID_CONFIRM_HOUR || '1');
+    const endTime = new Date(startTime);
+    endTime.setHours(endTime.getHours() + validConfirmHour);
+    return endTime;
   }
 }

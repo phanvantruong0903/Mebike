@@ -4,7 +4,7 @@ package reservation;
 
 service RentalService {
   rpc CreateReservation (CreateReservationRequest) returns (ReservationResponse);
-  rpc ConfirmReservation (ConfirmReservationRequest) returns (ReservationResponse);
+  rpc ActivateReservation (ActivateReservationRequest) returns (ReservationResponse);
   rpc GetReservation (GetReservationRequest) returns (ReservationResponse);
   rpc GetReservationList (GetReservationListRequest) returns (ReservationListResponse);
 }
@@ -34,7 +34,7 @@ message CreateReservationRequest {
   optional string subscriptionId = 4;
 }
 
-message ConfirmReservationRequest {
+message ActivateReservationRequest {
   string accountId = 1;
   string id = 2;
 }
