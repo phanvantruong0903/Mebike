@@ -48,7 +48,7 @@ model Reservation {
 
 enum ReservationStatus {
   Pending
-  Active
+  Completed
   Cancelled
   Expired
 }

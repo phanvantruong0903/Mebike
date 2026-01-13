@@ -1,7 +1,6 @@
 import {
   ActivateReservationDto,
   BaseService,
-  ConfirmReservationDto,
   CreateRentalDto,
   CreateReservationDto,
   prismaRental,
@@ -83,10 +82,10 @@ export class ReservationService extends BaseService<
       ]);
     }
 
-    const [activatedReservation] = await Promise.all([
+    const [activatedReservation] = await prismaRental.$transaction([
       prismaRental.reservation.update({
         where: { id: data.id },
-        data: { status: ReservationStatus.Active },
+        data: { status: ReservationStatus.Completed },
       }),
       prismaRental.rental.update({
         where: { reservationId: reservation.id },
