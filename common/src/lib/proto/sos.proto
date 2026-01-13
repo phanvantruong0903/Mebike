@@ -29,12 +29,11 @@ message Sos {
 message CreateSosRequest {
   string rentalId = 1;
   string requesterId = 2;
-  string bikeId = 3;
-  string issue = 4;
-  repeated string photos = 5;
-  bool isContinuingRental = 6;
-  string latitude = 7;
-  string longitude = 8;
+  string issue = 3;
+  repeated string photos = 4;
+  bool isContinuingRental = 5;
+  string latitude = 6;
+  string longitude = 7;
 }
 
 message CreateSosResponse {

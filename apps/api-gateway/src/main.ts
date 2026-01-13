@@ -15,6 +15,7 @@ import './modules/rental/graphql/enum';
 import './modules/reservation/graphql/enum';
 import './modules/subscription/graphql/enum';
 import './modules/package/graphql/enum';
+import './modules/sos/graphql/enum';
 
 async function bootstrap() {
   dotenv.config();
