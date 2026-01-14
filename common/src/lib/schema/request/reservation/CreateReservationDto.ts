@@ -6,7 +6,7 @@ import {
   IsDate,
   Validate,
 } from 'class-validator';
-import { IsFutureDateConstraint } from '../../../utils/validator-constraints/date-time';
+import { IsFutureDateConstraint } from '../../../utils';
 import { RESERVATION_MESSAGES } from '../../../constants';
 
 export class CreateReservationDto {
