@@ -8,6 +8,7 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import type { ReservationModel } from '@mebike/common';
 import {
   Role,
   Station,
@@ -27,6 +28,7 @@ import { BikeDataloader } from './bike.dataloader';
 import { StationDataloader } from '../bike/station.dataloader';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ReservationService } from './reservation.service';
+import { UserProfileDataLoader } from '../rental/user-profile.dataloader';
 
 @Resolver(() => Reservation)
 export class ReservationResolver {
@@ -34,6 +36,7 @@ export class ReservationResolver {
     private readonly reservationService: ReservationService,
     private readonly bikeDataLoader: BikeDataloader,
     private readonly stationDataLoader: StationDataloader,
+    private readonly userProfileDataLoader: UserProfileDataLoader,
   ) {}
 
   @Mutation(() => ReservationResponse, {
@@ -92,16 +95,28 @@ export class ReservationResolver {
     });
   }
 
+  @ResolveField(() => UserProfile, { nullable: true })
+  async user(
+    @Parent() reservation: ReservationModel,
+  ): Promise<UserProfile | null> {
+    if (!reservation.accountId) return null;
+    return this.userProfileDataLoader.batchUserProfiles.load(
+      reservation.accountId,
+    );
+  }
+
   @ResolveField(() => Bike, { nullable: true })
-  async bike(@Parent() reservation: Reservation): Promise<Bike | null> {
-    if (!reservation.bike?.id) return null;
-    return this.bikeDataLoader.batchBikes.load(reservation.bike.id);
+  async bike(@Parent() reservation: ReservationModel): Promise<Bike | null> {
+    if (!reservation.bikeId) return null;
+    return this.bikeDataLoader.batchBikes.load(reservation.bikeId);
   }
 
   @ResolveField(() => Station, { nullable: true })
-  async station(@Parent() reservation: Reservation): Promise<Station | null> {
-    if (!reservation.station?.id) return null;
-    return this.stationDataLoader.batchStations.load(reservation.station.id);
+  async station(
+    @Parent() reservation: ReservationModel,
+  ): Promise<Station | null> {
+    if (!reservation.stationId) return null;
+    return this.stationDataLoader.batchStations.load(reservation.stationId);
   }
 
   @Query(() => String)

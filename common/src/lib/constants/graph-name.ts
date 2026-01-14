@@ -72,7 +72,7 @@ export const GRAPHQL_NAME_RESERVATION = {
   GET_ALL: 'Reservations',
   GET_ONE: 'Reservation',
   CREATE: 'CreateReservation',
-  CONFIRM: 'ConfirmReservation',
+  ACTIVATE: 'ActivateReservation',
 };
 
 export const GRAPHQL_NAME_SUBSCRIPTION = {

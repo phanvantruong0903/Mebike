@@ -154,8 +154,7 @@ export const RENTAL_MESSAGES = {
   SUMMARIZE_SUCCESS: 'Rental summarized successfully',
   SUMMARIZE_FAIL: 'Rental summarized failed',
   NOT_FOUND: 'Rental not found',
-  NOT_FOUND_WITH_STATUS: (status: string) =>
-    `Rental not found with status ${status}`,
+  NOT_FOUND_WITH_STATUS: (status: string) => `${status} rental not found`,
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create Rental failed',
   VALIDATION_FAILED: 'Rental name or phone incorrect',
@@ -178,8 +177,7 @@ export const RESERVATION_MESSAGES = {
   SUMMARIZE_SUCCESS: 'Reservation summarized successfully',
   SUMMARIZE_FAIL: 'Reservation summarized failed',
   NOT_FOUND: 'Reservation not found',
-  NOT_FOUND_WITH_STATUS: (status: string) =>
-    `Reservation not found with status ${status}`,
+  NOT_FOUND_WITH_STATUS: (status: string) => `${status} reservation not found`,
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create Reservation failed',
   VALIDATION_FAILED: 'Reservation name or phone incorrect',
@@ -205,8 +203,7 @@ export const SUBSCRIPTION_MESSAGES = {
   SUMMARIZE_SUCCESS: 'Subscription summarized successfully',
   SUMMARIZE_FAIL: 'Subscription summarized failed',
   NOT_FOUND: 'Subscription not found',
-  NOT_FOUND_WITH_STATUS: (status: string) =>
-    `Subscription not found with status ${status}`,
+  NOT_FOUND_WITH_STATUS: (status: string) => `${status} subscription not found`,
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create Subscription failed',
   VALIDATION_FAILED: 'Subscription name or phone incorrect',
