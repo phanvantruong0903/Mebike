@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsString, IsNotEmpty, IsOptional, IsDate } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  MinDate,
+} from 'class-validator';
 
 export class CreateReservationDto {
   @IsString()
@@ -12,6 +18,7 @@ export class CreateReservationDto {
 
   @Type(() => Date)
   @IsDate()
+  @MinDate(new Date())
   @IsNotEmpty()
   startTime!: Date;
 

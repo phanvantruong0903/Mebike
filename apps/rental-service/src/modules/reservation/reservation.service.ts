@@ -67,7 +67,7 @@ export class ReservationService extends BaseService<
       ]);
     }
 
-    const prepaid = Number(process.env.PREPAID_AMOUNT || '2000');
+    const prepaid = Number(process.env.RS_PREPAID_AMOUNT || '2000');
     const endTime = this.generateEndTime(data.startTime);
 
     const reservationId = uuidv4();
@@ -95,10 +95,7 @@ export class ReservationService extends BaseService<
           data: createRentalData,
         }),
       ]),
-      this.fleetService.ChangeBikeStatus({
-        id: data.bikeId,
-        status: BikeStatus.Reserved,
-      }),
+      this.changeBikeStatus(data.bikeId, BikeStatus.Reserved),
     ]);
 
     return createdReservation;
@@ -138,10 +135,7 @@ export class ReservationService extends BaseService<
           data: { status: RentalStatus.Rented },
         }),
       ]),
-      this.fleetService.ChangeBikeStatus({
-        id: reservation.bikeId,
-        status: BikeStatus.Booked,
-      }),
+      this.changeBikeStatus(reservation.bikeId, BikeStatus.Booked),
     ]);
 
     return activatedReservation;
@@ -154,8 +148,8 @@ export class ReservationService extends BaseService<
     return reservation;
   }
 
-  generateEndTime(startTime: string) {
-    const validConfirmHour = Number(process.env.VALID_CONFIRM_HOUR || '1');
+  generateEndTime(startTime: Date) {
+    const validConfirmHour = Number(process.env.RS_VALID_ACTIVATED_HOUR || '1');
     const endTime = new Date(startTime);
     endTime.setHours(endTime.getHours() + validConfirmHour);
     return endTime;
