@@ -11,10 +11,6 @@ export class CreateReservationDto {
 
   @IsString()
   @IsNotEmpty()
-  stationId!: string;
-
-  @IsString()
-  @IsNotEmpty()
   startTime!: string;
 
   @IsString()

@@ -6,9 +6,6 @@ export class CreateReservationInput {
   bikeId!: string;
 
   @Field(() => String)
-  stationId!: string;
-
-  @Field(() => String)
   startTime!: string;
 
   @Field(() => String, { nullable: true })
