@@ -285,6 +285,8 @@ services:
         condition: service_healthy
       membership-service:
         condition: service_healthy
+      incident-service:
+        condition: service_healthy
       kafka:
         condition: service_healthy
       redis:
