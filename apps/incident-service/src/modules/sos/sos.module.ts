@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import {
   ConsulModule,
   ConsulService,
@@ -12,12 +12,14 @@ import { SosController } from './sos.controller';
 import { SosService } from './sos.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
+import { SagaModule } from '../../saga/saga.module';
 
 @Module({
   imports: [
     ConsulModule,
     RedisModule,
     JwtSharedModule,
+    forwardRef(() => SagaModule),
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
@@ -84,5 +86,6 @@ import { join } from 'node:path';
   ],
   controllers: [SosController],
   providers: [SosService],
+  exports: [SosService],
 })
 export class SosModule {}

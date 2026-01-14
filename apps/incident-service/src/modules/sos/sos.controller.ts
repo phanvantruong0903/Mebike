@@ -14,6 +14,7 @@ import {
 } from '@mebike/common';
 import { SosService } from './sos.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { TemporalService } from '../../saga/temporal-service';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -24,7 +25,10 @@ export class SosController {
     UpdateSosDto
   >;
 
-  constructor(private readonly sosService: SosService) {
+  constructor(
+    private readonly sosService: SosService,
+    private readonly temporalService: TemporalService,
+  ) {
     this.baseHandler = new BaseGrpcHandler(
       this.sosService,
       CreateSosDto,
@@ -70,12 +74,23 @@ export class SosController {
     data: CreateSosDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.sosService.createSos(data);
-      return grpcResponse(result, SOS_MESSAGES.CREATE_SUCCESS);
+      const workflowId = await this.temporalService.startSosCreationWorkflow(
+        data,
+      );
+      const result = await this.temporalService.getSosCreationWorkflowResult(
+        workflowId,
+      );
+
+      if (!result.success) {
+        throw new RpcException(result.error || SOS_MESSAGES.CREATE_FAILED);
+      }
+
+      return grpcResponse(result.data, SOS_MESSAGES.CREATE_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
       }
+
       const err = error as Error;
       throw new RpcException(err?.message || SOS_MESSAGES.CREATE_FAILED);
     }

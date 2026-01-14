@@ -9,7 +9,7 @@ const {
 } = proxyActivities({
   startToCloseTimeout: '1 minute',
   retry: {
-    maximumAttempts: 3,
+    maximumAttempts: 1,
   },
 });
 

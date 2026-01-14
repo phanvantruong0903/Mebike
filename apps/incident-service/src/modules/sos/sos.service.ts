@@ -56,10 +56,6 @@ interface StationWithAvailability extends StationModel {
   bikes: [BikeModel];
 }
 
-interface StationWithBikes extends StationModel {
-  bikes: [BikeModel];
-}
-
 @Injectable()
 export class SosService extends BaseService<
   SosModel,
@@ -260,5 +256,13 @@ export class SosService extends BaseService<
     });
 
     return !!existed;
+  }
+
+  async deleteSos(id: string) {
+    return await prismaIncident.emergencyRequest.delete({
+      where: {
+        id,
+      },
+    });
   }
 }

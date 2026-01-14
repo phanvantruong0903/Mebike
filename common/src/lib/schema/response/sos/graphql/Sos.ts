@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { EmergencyStatus, StationStatus } from '../../../../prisma/index';
+import { EmergencyStatus } from '../../../../prisma/index';
 
 @ObjectType()
 export class Sos {
