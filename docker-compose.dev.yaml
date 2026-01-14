@@ -424,11 +424,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_USER=${MAIL_USER}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}
+      - RESEND_API_KEY=${RESEND_API_KEY}
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
       interval: 10s
