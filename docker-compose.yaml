@@ -565,11 +565,13 @@ services:
         condition: service_started
       incident-db:
         condition: service_started
-      fleet-service:
-        condition: service_healthy
+      temporal:
+        condition: service_started
       user-service:
         condition: service_healthy
       rental-service:
+        condition: service_healthy
+      fleet-service:
         condition: service_healthy
     environment:
       - CONSUL_HOST=consul
@@ -579,6 +581,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - TEMPORAL_ADDRESS=temporal:7233
+      - NODE_ENV=production
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50049']
       interval: 5s
