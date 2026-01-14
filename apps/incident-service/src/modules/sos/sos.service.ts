@@ -133,8 +133,8 @@ export class SosService extends BaseService<
       longitude: data.longitude,
     });
     if (stations.length === 0) {
-      throwGrpcError(404, STATION_MESSAGES.NOT_FOUND, [
-        STATION_MESSAGES.NO_STATION_NEARBY,
+      throwGrpcError(404, STATION_MESSAGES.NO_STATION_NEARBY, [
+        STATION_MESSAGES.NOT_FOUND,
       ]);
     }
 
@@ -174,13 +174,11 @@ export class SosService extends BaseService<
     }
 
     if (!selectedStation || !selectedSos) {
-      throwGrpcError(
-        404,
-        STATION_MESSAGES.NOT_FOUND,
-        data.isContinuingRental
-          ? [STATION_MESSAGES.NO_STATION_NEARBY_AND_BIKE]
-          : [STATION_MESSAGES.NO_STATION_NEARBY],
-      );
+      const errorMessage = data.isContinuingRental
+        ? STATION_MESSAGES.NO_STATION_NEARBY_AND_BIKE
+        : STATION_MESSAGES.NO_STATION_NEARBY;
+
+      throwGrpcError(404, errorMessage, [STATION_MESSAGES.NOT_FOUND]);
     }
 
     return await prismaIncident.emergencyRequest.create({

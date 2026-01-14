@@ -553,7 +553,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - mebike-network
-  
+
   incident-service:
     build:
       context: .
@@ -565,14 +565,24 @@ services:
         condition: service_started
       incident-db:
         condition: service_started
+      temporal:
+        condition: service_started
+      user-service:
+        condition: service_healthy
+      rental-service:
+        condition: service_healthy
+      fleet-service:
+        condition: service_healthy
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@incident-db:5432/${PAYMENT_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@incident-db:5432/${INCIDENT_DB_NAME}?schema=public&connection_limit=10&pool_timeout=20&connect_timeout=10
       - INCIDENT_SERVICE_PORT=50049
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - TEMPORAL_ADDRESS=temporal:7233
+      - NODE_ENV=production
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50049']
       interval: 5s
