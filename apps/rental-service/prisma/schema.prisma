@@ -36,7 +36,7 @@ model Reservation {
   stationId      String
   startTime      DateTime          @default(now())
   endTime        DateTime
-  prepaid        Decimal           @db.Decimal(10, 2)
+  prepaid        Decimal           @default(0) @db.Decimal(10, 2)
   subscriptionId String?
   status         ReservationStatus @default(Pending)
   createdAt      DateTime          @default(now())

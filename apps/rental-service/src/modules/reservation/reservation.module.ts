@@ -28,10 +28,7 @@ import { join } from 'path';
             transport: Transport.GRPC,
             options: {
               package: 'bike',
-              protoPath: join(
-                process.cwd(),
-                '/common/src/lib/proto/bike.proto',
-              ),
+              protoPath: join(process.cwd(), 'common/src/lib/proto/bike.proto'),
               url: `${fleetService.address}:${fleetService.port}`,
               channelOptions: {
                 'grpc.max_reconnect_backoff_ms': 5000,
