@@ -7,7 +7,7 @@ import {
   Validate,
 } from 'class-validator';
 import { IsFutureDateConstraint } from '../../../utils/validator-constraints/date-time';
-import { RESERVATION_MESSAGES } from 'src/lib/constants';
+import { RESERVATION_MESSAGES } from '../../../constants';
 
 export class CreateReservationDto {
   @IsString()

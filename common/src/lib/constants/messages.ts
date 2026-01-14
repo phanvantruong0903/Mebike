@@ -191,6 +191,7 @@ export const RESERVATION_MESSAGES = {
   ACTIVATE_FAIL: 'Reservation activated failed',
   INVALID_ACTIVATE_TIME:
     'Activation time must be between start time and end time',
+  FUTURE_START_TIME: 'Start time must be in the future',
 };
 
 export const SUBSCRIPTION_MESSAGES = {
