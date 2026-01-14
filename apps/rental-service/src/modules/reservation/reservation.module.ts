@@ -37,7 +37,7 @@ import { join } from 'path';
                 'grpc.max_reconnect_backoff_ms': 5000,
                 'grpc.initial_reconnect_backoff_ms': 1000,
               },
-              maxRetryAttemps: 5,
+              maxRetryAttempts: 5,
               retryDelay: 3000,
             },
           };

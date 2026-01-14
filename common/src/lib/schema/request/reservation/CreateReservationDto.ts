@@ -4,8 +4,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsDate,
-  MinDate,
+  Validate,
 } from 'class-validator';
+import { IsFutureDateConstraint } from '../../../utils/validator-constraints/date-time';
+import { RESERVATION_MESSAGES } from 'src/lib/constants';
 
 export class CreateReservationDto {
   @IsString()
@@ -18,7 +20,9 @@ export class CreateReservationDto {
 
   @Type(() => Date)
   @IsDate()
-  @MinDate(new Date())
+  @Validate(IsFutureDateConstraint, {
+    message: RESERVATION_MESSAGES.FUTURE_START_TIME,
+  })
   @IsNotEmpty()
   startTime!: Date;
 

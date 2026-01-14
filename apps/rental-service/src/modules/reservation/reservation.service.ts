@@ -44,15 +44,18 @@ export class ReservationService extends BaseService<
   private fleetService!: FleetServiceClient;
   constructor(@Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc) {
     super(prismaRental.reservation);
-    try {
-      this.fleetService = this.client.getService<FleetServiceClient>(
-        GRPC_SERVICES.FLEET,
-      );
-    } catch (error: any) {
+    this.fleetService = this.client.getService<FleetServiceClient>(
+      GRPC_SERVICES.FLEET,
+    );
+  }
+
+  private getFleetService(): FleetServiceClient {
+    if (!this.fleetService) {
       throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        `Failed to load ${GRPC_SERVICES.FLEET}: ${error.message}`,
+        `Failed to load ${GRPC_SERVICES.FLEET}. Check proto definitions.`,
       ]);
     }
+    return this.fleetService;
   }
 
   override async create(data: CreateReservationDto): Promise<ReservationModel> {
@@ -157,12 +160,12 @@ export class ReservationService extends BaseService<
 
   // bike functions
   async getBikeById(id: string) {
-    return await firstValueFrom(this.fleetService.GetBike({ id }));
+    const service = this.getFleetService();
+    return await firstValueFrom(service.GetBike({ id }));
   }
 
   async changeBikeStatus(id: string, status: BikeStatus) {
-    return await firstValueFrom(
-      this.fleetService.ChangeBikeStatus({ id, status }),
-    );
+    const service = this.getFleetService();
+    return await firstValueFrom(service.ChangeBikeStatus({ id, status }));
   }
 }
