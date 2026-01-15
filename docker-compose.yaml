@@ -187,6 +187,22 @@ services:
     networks:
       - mebike-network
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - mebike-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN:-mebike.local}`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls.certresolver=cloudflare"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
   kafka:
     image: confluentinc/cp-kafka:latest
     ports:
@@ -624,3 +640,4 @@ volumes:
   rental_data:
   membership_data:
   incident_data:
+  portainer_data:

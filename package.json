@@ -101,8 +101,6 @@
   },
   "workspaces": [
     "apps/*",
-    "common",
-    "rental-service",
-    "rental-service-e2e"
+    "common"
   ]
 }
