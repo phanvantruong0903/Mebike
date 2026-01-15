@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class ConfirmReservationInput {
+export class ActivateReservationInput {
   @Field(() => String)
   id!: string;
 }

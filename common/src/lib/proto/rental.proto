@@ -25,10 +25,6 @@ message Rental {
   string updatedAt = 13; // ISO 8601 string
 }
 
-message RentalList {
-  repeated Rental data = 1;
-}
-
 message CreateRentalRequest {
   string accountId = 1;
   string bikeId = 2;
