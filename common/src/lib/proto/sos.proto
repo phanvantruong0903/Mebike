@@ -4,6 +4,9 @@ package sos;
 
 service IncidentService {
   rpc CreateSos (CreateSosRequest) returns (CreateSosResponse);
+  rpc GetAllSos (GetAllSosRequest) returns (GetAllSosResponse);
+  rpc GetSos (GetSosByIdRequest) returns (GetSosByIdResponse);
+  rpc UpdateSosStatus (UpdateSosStatusRequest) returns (GetSosByIdResponse);
 }
 
 message Sos {
@@ -42,4 +45,37 @@ message CreateSosResponse {
   Sos data = 3;
   repeated string errors = 4;
   int32 statusCode = 5;
+}
+
+message GetAllSosRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string search = 3;
+}
+
+message GetAllSosResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Sos data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message GetSosByIdRequest {
+  string id = 1;
+}
+
+message GetSosByIdResponse {
+  bool success = 1;
+  string message = 2;
+  Sos data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message UpdateSosStatusRequest {
+  string id = 1;
+  string status = 2;
+  string accountId = 3;
+  string role = 4;
 }

@@ -22,6 +22,8 @@ import {
   BikeModel,
   BikeStatus,
   SOS_MESSAGES,
+  Role,
+  SERVER_MESSAGE,
 } from '@mebike/common';
 import Redis from 'ioredis';
 import { type ClientGrpc } from '@nestjs/microservices';
@@ -55,6 +57,20 @@ interface StationWithAvailability extends StationModel {
   availableBike: number;
   bikes: [BikeModel];
 }
+
+const VALID_SOS_STATUS: Record<EmergencyStatus, EmergencyStatus[]> = {
+  [EmergencyStatus.Assigned]: [
+    EmergencyStatus.Processing,
+    EmergencyStatus.Cancelled,
+  ],
+  [EmergencyStatus.Processing]: [
+    EmergencyStatus.Resolved,
+    EmergencyStatus.Unsolvable,
+  ],
+  [EmergencyStatus.Resolved]: [],
+  [EmergencyStatus.Cancelled]: [],
+  [EmergencyStatus.Unsolvable]: [],
+};
 
 @Injectable()
 export class SosService extends BaseService<
@@ -262,5 +278,101 @@ export class SosService extends BaseService<
         id,
       },
     });
+  }
+
+  async updateSosStatus(data: UpdateSosDto) {
+    const findSos = await prismaIncident.emergencyRequest.findUnique({
+      where: {
+        id: data.id,
+      },
+    });
+    if (!findSos) {
+      throwGrpcError(404, SOS_MESSAGES.NOT_FOUND, [SOS_MESSAGES.NOT_FOUND]);
+    }
+
+    const allowedNextStatus = VALID_SOS_STATUS[findSos.status];
+    if (!allowedNextStatus.includes(data.status)) {
+      throwGrpcError(400, SOS_MESSAGES.INVALID_STATUS, [
+        SOS_MESSAGES.INVALID_STATUS,
+      ]);
+    }
+
+    this.validateSosUpdatePermission(
+      findSos,
+      data.accountId,
+      data.role,
+      data.status,
+    );
+
+    return await prismaIncident.emergencyRequest.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        status: data.status,
+      },
+    });
+  }
+
+  private validateSosUpdatePermission(
+    sos: SosModel,
+    accountId: string,
+    role: Role,
+    newStatus: EmergencyStatus,
+  ): void {
+    switch (role) {
+      case Role.USER:
+        this.checkUserPermission(sos, accountId, newStatus);
+        break;
+      case Role.SOS:
+        this.checkSosPermission(sos, accountId, newStatus);
+        break;
+      case Role.ADMIN:
+        this.checkSosPermissionAdmin(newStatus);
+        break;
+    }
+  }
+
+  private checkUserPermission(
+    sos: SosModel,
+    accountId: string,
+    status: EmergencyStatus,
+  ) {
+    if (sos.requesterId !== accountId) {
+      throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [
+        SOS_MESSAGES.CANNOT_UPDATE_OTHER,
+      ]);
+    }
+    if (status !== EmergencyStatus.Cancelled) {
+      throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [SERVER_MESSAGE.FORBIDDEN]);
+    }
+    if (sos.status !== EmergencyStatus.Assigned) {
+      throwGrpcError(400, SOS_MESSAGES.CANNOT_CANCEL, [
+        SOS_MESSAGES.CANNOT_CANCEL,
+      ]);
+    }
+  }
+
+  private checkSosPermission(
+    sos: SosModel,
+    accountId: string,
+    status: EmergencyStatus,
+  ) {
+    if (sos.agentId !== accountId) {
+      throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [
+        SOS_MESSAGES.CANNOT_UPDATE_OTHER,
+      ]);
+    }
+    if (status === EmergencyStatus.Cancelled) {
+      throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [SERVER_MESSAGE.FORBIDDEN]);
+    }
+  }
+
+  private checkSosPermissionAdmin(status: EmergencyStatus) {
+    if (status !== EmergencyStatus.Cancelled) {
+      throwGrpcError(403, SOS_MESSAGES.JUST_ONLY_CANCEL, [
+        SOS_MESSAGES.JUST_ONLY_CANCEL,
+      ]);
+    }
   }
 }

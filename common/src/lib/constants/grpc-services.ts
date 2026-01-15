@@ -130,6 +130,6 @@ export const PACKAGE_METHODS = {
 export const SOS_METHODS = {
   CREATE: 'CreateSos',
   GET_ONE: 'GetSos',
-  UPDATE: 'UpdateSos',
+  UPDATE_STATUS: 'UpdateSosStatus',
   GET_ALL: 'GetAllSos',
 };

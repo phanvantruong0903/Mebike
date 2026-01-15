@@ -147,6 +147,7 @@ export const SERVER_MESSAGE = {
   DELETED_NOT_IMPLEMENTED: 'Delete method is not implemented',
   BAD_REQUEST: 'Bad Request',
   UNAUTHORIZED: 'Unauthorized',
+  FORBIDDEN: 'Forbidden',
 };
 
 export const RENTAL_MESSAGES = {
@@ -255,4 +256,9 @@ export const SOS_MESSAGES = {
   UPDATE_FAIL: 'Update SOS failed',
   GET_ONE_SUCCESS: 'SOS retrieved successfully',
   GET_ONE_FAILED: 'SOS retrieved failed',
+  UPDATE_FAILED: 'Update SOS failed',
+  INVALID_STATUS: 'Invalid SOS status',
+  CANNOT_CANCEL: 'Cannot cancel SOS that is not in processing status',
+  CANNOT_UPDATE_OTHER: 'Cannot update other SOS',
+  JUST_ONLY_CANCEL: 'Just only cancel SOS',
 };

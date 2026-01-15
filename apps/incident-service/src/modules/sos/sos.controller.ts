@@ -95,4 +95,20 @@ export class SosController {
       throw new RpcException(err?.message || SOS_MESSAGES.CREATE_FAILED);
     }
   }
+
+  @GrpcMethod(GRPC_SERVICES.INCIDENT, SOS_METHODS.UPDATE_STATUS)
+  async updateSosStatus(
+    data: UpdateSosDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.sosService.updateSosStatus(data);
+      return grpcResponse(result, SOS_MESSAGES.UPDATE_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || SOS_MESSAGES.UPDATE_FAILED);
+    }
+  }
 }
