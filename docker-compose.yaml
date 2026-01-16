@@ -188,7 +188,7 @@ services:
       - mebike-network
 
   portainer:
-    image: portainer/portainer-ce:2.30.1-alpine
+    image: portainer/portainer-ce:latest
     container_name: portainer
     restart: always
     ports:
