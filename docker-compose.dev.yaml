@@ -262,6 +262,20 @@ services:
     networks:
       - mebike-network
 
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    restart: 'unless-stopped'
+    ports:
+      - '7700:7700'
+    environment:
+      - MEILI_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - mebike-network
+
   api-gateway:
     build:
       context: .
@@ -603,3 +617,4 @@ volumes:
   rental_data:
   membership_data:
   incident_data:
+  meilisearch_data:

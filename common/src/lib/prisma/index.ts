@@ -5,6 +5,7 @@ import * as PaymentPrismaInternal from './payment/generated';
 import * as RentalPrismaInternal from './rental/generated';
 import * as MembershipPrismaInternal from './membership/generated';
 import * as IncidentPrismaInternal from './incident/generated';
+import { addDocument, deleteDocument, updateDocument } from '../meilisearch';
 
 export * as AuthPrisma from './auth/generated';
 export * as UserPrisma from './user/generated';
@@ -29,52 +30,192 @@ export const prismaAuth =
   globalForPrisma.prismaAuth ??
   new AuthPrismaInternal.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  }).$extends({
+    query: {
+      user: {
+        async create({ query, model, args }) {
+          const result = await query(args);
+          await addDocument(model, result);
+          return result;
+        },
+        async update({ query, model, args }) {
+          const result = await query(args);
+          await updateDocument(model, result);
+          return result;
+        },
+        async delete({ query, model, args }) {
+          const result = await query(args);
+          await deleteDocument(model, result.id);
+          return result;
+        },
+      },
+    },
   });
 
 export const prismaUser =
   globalForPrisma.prismaUser ??
   new UserPrismaInternal.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  }).$extends({
+    query: {
+      profile: {
+        async create({ query, model, args }) {
+          const result = await query(args);
+          await addDocument(model, result);
+          return result;
+        },
+        async update({ query, model, args }) {
+          const result = await query(args);
+          await updateDocument(model, result);
+          return result;
+        },
+        async delete({ query, model, args }) {
+          const result = await query(args);
+          await deleteDocument(model, result.id);
+          return result;
+        },
+      },
+    },
   });
 
 export const prismaFleet =
   globalForPrisma.prismaFleet ??
   new FleetPrismaInternal.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  }).$extends({
+    query: {
+      $allModels: {
+        async create({ query, model, args }) {
+          const result = await query(args);
+          await addDocument(model, result);
+          return result;
+        },
+        async update({ query, model, args }) {
+          const result = await query(args);
+          await updateDocument(model, result);
+          return result;
+        },
+        async delete({ query, model, args }) {
+          const result = await query(args);
+          await deleteDocument(model, result.id);
+          return result;
+        },
+      },
+    },
   });
 
 export const prismaPayment =
   globalForPrisma.prismaPayment ??
   new PaymentPrismaInternal.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  }).$extends({
+    query: {
+      $allModels: {
+        async create({ query, model, args }) {
+          const result = await query(args);
+          await addDocument(model, result);
+          return result;
+        },
+        async update({ query, model, args }) {
+          const result = await query(args);
+          await updateDocument(model, result);
+          return result;
+        },
+        async delete({ query, model, args }) {
+          const result = await query(args);
+          await deleteDocument(model, result.id);
+          return result;
+        },
+      },
+    },
   });
 
 export const prismaRental =
   globalForPrisma.prismaRental ??
   new RentalPrismaInternal.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  }).$extends({
+    query: {
+      $allModels: {
+        async create({ query, model, args }) {
+          const result = await query(args);
+          await addDocument(model, result);
+          return result;
+        },
+        async update({ query, model, args }) {
+          const result = await query(args);
+          await updateDocument(model, result);
+          return result;
+        },
+        async delete({ query, model, args }) {
+          const result = await query(args);
+          await deleteDocument(model, result.id);
+          return result;
+        },
+      },
+    },
   });
 
 export const prismaMembership =
   globalForPrisma.prismaMembership ??
   new MembershipPrismaInternal.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  }).$extends({
+    query: {
+      $allModels: {
+        async create({ query, model, args }) {
+          const result = await query(args);
+          await addDocument(model, result);
+          return result;
+        },
+        async update({ query, model, args }) {
+          const result = await query(args);
+          await updateDocument(model, result);
+          return result;
+        },
+        async delete({ query, model, args }) {
+          const result = await query(args);
+          await deleteDocument(model, result.id);
+          return result;
+        },
+      },
+    },
   });
 
 export const prismaIncident =
   globalForPrisma.prismaIncident ??
   new IncidentPrismaInternal.PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  }).$extends({
+    query: {
+      $allModels: {
+        async create({ query, model, args }) {
+          const result = await query(args);
+          await addDocument(model, result);
+          return result;
+        },
+        async update({ query, model, args }) {
+          const result = await query(args);
+          await updateDocument(model, result);
+          return result;
+        },
+        async delete({ query, model, args }) {
+          const result = await query(args);
+          await deleteDocument(model, result.id);
+          return result;
+        },
+      },
+    },
   });
 
 if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prismaAuth = prismaAuth;
-  globalForPrisma.prismaUser = prismaUser;
-  globalForPrisma.prismaFleet = prismaFleet;
-  globalForPrisma.prismaPayment = prismaPayment;
-  globalForPrisma.prismaRental = prismaRental;
-  globalForPrisma.prismaMembership = prismaMembership;
-  globalForPrisma.prismaIncident = prismaIncident;
+  globalForPrisma.prismaAuth = prismaAuth as any;
+  globalForPrisma.prismaUser = prismaUser as any;
+  globalForPrisma.prismaFleet = prismaFleet as any;
+  globalForPrisma.prismaPayment = prismaPayment as any;
+  globalForPrisma.prismaRental = prismaRental as any;
+  globalForPrisma.prismaMembership = prismaMembership as any;
+  globalForPrisma.prismaIncident = prismaIncident as any;
 }
 
 export type User = AuthPrismaInternal.User;
