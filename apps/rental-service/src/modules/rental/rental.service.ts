@@ -314,4 +314,14 @@ export class RentalService
       this.ensureFleetService().ChangeBikeStatus({ id, status }),
     );
   }
+
+  async getByIds(ids: string[]) {
+    return await prismaRental.rental.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+  }
 }

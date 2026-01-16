@@ -103,6 +103,7 @@ export const RENTAL_METHODS = {
   GET_ONE: 'GetRental',
   GET_ALL: 'GetRentalList',
   SUMMARIZE: 'SummarizeRentals',
+  GET_BY_IDS: 'GetRentalsByIds',
 };
 
 export const RESERVATION_METHODS = {

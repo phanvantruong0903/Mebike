@@ -66,6 +66,7 @@ const VALID_SOS_STATUS: Record<EmergencyStatus, EmergencyStatus[]> = {
   [EmergencyStatus.Processing]: [
     EmergencyStatus.Resolved,
     EmergencyStatus.Unsolvable,
+    EmergencyStatus.Cancelled,
   ],
   [EmergencyStatus.Resolved]: [],
   [EmergencyStatus.Cancelled]: [],
@@ -302,15 +303,34 @@ export class SosService extends BaseService<
       data.accountId,
       data.role,
       data.status,
+      data.resolvedPhotos,
     );
+
+    const updateData: any = {
+      status: data.status,
+    };
+
+    if (
+      data.status === EmergencyStatus.Resolved ||
+      data.status === EmergencyStatus.Unsolvable
+    ) {
+      if (data.resolvedPhotos) {
+        updateData.resolvedPhotos = data.resolvedPhotos;
+      }
+    }
+
+    if (data.status === EmergencyStatus.Resolved) {
+      updateData.resolvedAt = new Date();
+    }
+    if (data.status === EmergencyStatus.Processing) {
+      updateData.startedAt = new Date();
+    }
 
     return await prismaIncident.emergencyRequest.update({
       where: {
         id: data.id,
       },
-      data: {
-        status: data.status,
-      },
+      data: updateData,
     });
   }
 
@@ -319,17 +339,22 @@ export class SosService extends BaseService<
     accountId: string,
     role: Role,
     newStatus: EmergencyStatus,
+    photos?: string[],
   ): void {
     switch (role) {
       case Role.USER:
         this.checkUserPermission(sos, accountId, newStatus);
         break;
       case Role.SOS:
-        this.checkSosPermission(sos, accountId, newStatus);
+        this.checkSosPermission(sos, accountId, newStatus, photos);
         break;
       case Role.ADMIN:
         this.checkSosPermissionAdmin(newStatus);
         break;
+      default:
+        throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [
+          SERVER_MESSAGE.FORBIDDEN,
+        ]);
     }
   }
 
@@ -357,6 +382,7 @@ export class SosService extends BaseService<
     sos: SosModel,
     accountId: string,
     status: EmergencyStatus,
+    photos?: string[],
   ) {
     if (sos.agentId !== accountId) {
       throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [
@@ -365,6 +391,16 @@ export class SosService extends BaseService<
     }
     if (status === EmergencyStatus.Cancelled) {
       throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [SERVER_MESSAGE.FORBIDDEN]);
+    }
+    if (
+      status === EmergencyStatus.Resolved ||
+      status === EmergencyStatus.Unsolvable
+    ) {
+      if (!photos || photos.length === 0) {
+        throwGrpcError(400, SOS_MESSAGES.PHOTOS_REQUIRED, [
+          SOS_MESSAGES.PHOTOS_REQUIRED,
+        ]);
+      }
     }
   }
 

@@ -7,6 +7,7 @@ service RentalService {
   rpc EndRental (EndRentalRequest) returns (RentalResponse);
   rpc GetRental (GetRentalRequest) returns (RentalResponse);
   rpc GetRentalList (GetRentalListRequest) returns (RentalListResponse);
+  rpc GetRentalsByIds (GetRentalsByIdsRequest) returns (RentalByIdsResponse);
 }
 
 message Rental {
@@ -27,6 +28,18 @@ message Rental {
 
 message RentalList {
   repeated Rental data = 1;
+}
+
+message GetRentalsByIdsRequest {
+  repeated string ids = 1;
+}
+
+message RentalByIdsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Rental data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
 }
 
 message CreateRentalRequest {

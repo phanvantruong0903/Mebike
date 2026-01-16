@@ -23,6 +23,7 @@ model EmergencyRequest {
 
   issue              String
   photos             String[]
+  resolvedPhotos     String[] @default([])
   isContinuingRental Boolean  @default(false)
 
   latitude  Decimal @db.Decimal(10, 8)

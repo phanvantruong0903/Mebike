@@ -56,5 +56,6 @@ import { UserModule } from '../user/user.module';
     StationDataloader,
     UserProfileDataLoader,
   ],
+  exports: [RentalService],
 })
 export class RentalModule {}

@@ -1,4 +1,14 @@
-import { IsEnum, IsIn, IsNotEmpty, IsUUID } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
+  IsUUID,
+} from 'class-validator';
 import { EmergencyStatus, Role } from '../../../prisma/index';
 
 export class UpdateSosDto {
@@ -20,4 +30,15 @@ export class UpdateSosDto {
   @IsEnum(Role)
   @IsNotEmpty()
   role!: Role;
+
+  @IsString()
+  @IsOptional()
+  agentNotes?: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  @IsUrl({}, { each: true })
+  @IsOptional()
+  resolvedPhotos?: string[];
 }

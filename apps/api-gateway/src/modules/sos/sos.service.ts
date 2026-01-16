@@ -6,14 +6,20 @@ import {
   GRPC_SERVICES,
   CreateSosInput,
   SosResponse,
+  UpdateSosDto,
+  SosListResponse,
+  GetSosInput,
+  UserProfile,
+  Role,
+  Sos,
+  SOS_MESSAGES,
 } from '@mebike/common';
+import { GraphQLError } from 'graphql/error';
 
 interface SosServiceClient {
-  // GetStation(data: { id: string }): Observable<StationResponse>;
-  // UpdateStation(
-  //   data: UpdateStationInput & { id: string },
-  // ): Observable<StationResponse>;
-  // GetAllStations(data: GetStationInput): Observable<StationListResponse>;
+  GetSos(data: { id: string }): Observable<SosResponse>;
+  UpdateSosStatus(data: UpdateSosDto): Observable<SosResponse>;
+  GetAllSos(data: GetSosInput): Observable<SosListResponse>;
   CreateSos(data: CreateSosInput): Observable<SosResponse>;
   // GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
   // UpdateStationStatus(
@@ -37,52 +43,29 @@ export class SosService implements OnModuleInit {
     return await firstValueFrom(this.incidentService.CreateSos(data));
   }
 
-  // async updateStation(id: string, data: UpdateStationInput) {
-  //   return await firstValueFrom(
-  //     this.fleetService.UpdateStation({ id, ...data }),
-  //   );
-  // }
+  async updateSosStatus(data: UpdateSosDto) {
+    return await firstValueFrom(this.incidentService.UpdateSosStatus(data));
+  }
 
-  // async changeStationStatus(data: UpdateStationStatusInput) {
-  //   return await firstValueFrom(this.fleetService.UpdateStationStatus(data));
-  // }
+  async getAllSos(data: GetSosInput) {
+    const response = await firstValueFrom(this.incidentService.GetAllSos(data));
+    return {
+      ...response,
+      data: response.data ?? [],
+    };
+  }
 
-  // async getAllStation(data: GetStationInput) {
-  //   const response = await firstValueFrom(
-  //     this.fleetService.GetAllStations(data),
-  //   );
-  //   const stations = response.data as Station[];
-  //   return {
-  //     ...response,
-  //     data: stations
-  //       ? stations.map((station) => ({
-  //           ...station,
-  //           bikes: station.bikes ?? [],
-  //         }))
-  //       : [],
-  //     activeStation: response.activeStation,
-  //     inactiveStation: response.inactiveStation,
-  //   };
-  // }
+  async getSos(data: { id: string }, user: UserProfile) {
+    const response = await firstValueFrom(this.incidentService.GetSos(data));
+    const sos = response.data as unknown as Sos;
 
-  // async getStation(data: { id: string }) {
-  //   const response = await firstValueFrom(this.fleetService.GetStation(data));
-  //   const station = response.data as Station;
-  //   return {
-  //     ...response,
-  //     data: station
-  //       ? {
-  //           ...station,
-  //           bikes: station.bikes ?? [],
-  //         }
-  //       : station,
-  //   };
-  // }
-
-  // async getStationByIds(ids: string[]): Promise<Station[]> {
-  //   const response = await firstValueFrom(
-  //     this.fleetService.GetStationsByIds({ ids }),
-  //   );
-  //   return response.data || [];
-  // }
+    if (user.role === Role.USER && user.accountId !== sos.requesterId) {
+      throw new GraphQLError(SOS_MESSAGES.FORBIDDEN, {
+        extensions: {
+          statusCode: 403,
+        },
+      });
+    }
+    return response;
+  }
 }

@@ -92,4 +92,7 @@ export const GRAPHQL_NAME_PACKAGE = {
 
 export const GRAPHQL_NAME_SOS = {
   CREATE: 'CreateSos',
+  UPDATE_STATUS: 'UpdateSosStatus',
+  GET_ALL: 'GetAllSos',
+  GET_ONE: 'GetSos',
 };

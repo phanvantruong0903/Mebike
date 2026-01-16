@@ -1,1 +1,3 @@
-export * from './CreateStrationInput';
+export * from './CreateSosInput';
+export * from './UpdateSosInput';
+export * from './GetSosInput';

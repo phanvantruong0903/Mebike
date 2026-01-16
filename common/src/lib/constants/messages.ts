@@ -171,6 +171,8 @@ export const RENTAL_MESSAGES = {
   INVALID_ID: 'Invalid id format',
   GET_ONE_SUCCESS: 'Rental retrieved successfully',
   GET_ONE_FAILED: 'Rental retrieved failed',
+  GET_BY_IDS_SUCCESS: 'Rentals retrieved successfully',
+  GET_BY_IDS_FAIL: 'Rentals retrieved failed',
 };
 
 export const RESERVATION_MESSAGES = {
@@ -261,4 +263,6 @@ export const SOS_MESSAGES = {
   CANNOT_CANCEL: 'Cannot cancel SOS that is not in processing status',
   CANNOT_UPDATE_OTHER: 'Cannot update other SOS',
   JUST_ONLY_CANCEL: 'Just only cancel SOS',
+  PHOTOS_REQUIRED: 'Photos are required',
+  FORBIDDEN: 'Forbidden: You can only view your own SOS',
 };
