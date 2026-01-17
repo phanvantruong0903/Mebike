@@ -15,8 +15,4 @@ export class GetTransactionDto {
   @Min(1, { message: 'Limit must be at least 1' })
   @Type(() => Number)
   limit!: number;
-
-  @IsString()
-  @IsOptional()
-  search?: string;
 }

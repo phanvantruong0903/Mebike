@@ -18,8 +18,9 @@ import {
   grpcPaginateResponse,
   ChangeUserStatusDto,
   SERVER_MESSAGE,
-  buildSearchFilter,
   KAFKA_TOPIC,
+  UserStatus,
+  GetUserDto,
 } from '@mebike/common';
 import { UserService } from './user.services';
 
@@ -115,22 +116,15 @@ export class UserController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_ALL)
-  async getAllUsers(data: {
-    page: number;
-    limit: number;
-    search?: string;
-  }): Promise<ReturnType<typeof grpcPaginateResponse>> {
+  async getAllUsers(
+    data: GetUserDto,
+  ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
       const { page, limit } = data;
+      const filter: any = {};
+      if (data.status) filter.status = data.status;
 
-      const searchFields = ['name', 'phone'];
-      const searchFilter = buildSearchFilter(data.search, searchFields);
-
-      const result = await this.baseHandler.getAllLogic(
-        page,
-        limit,
-        searchFilter,
-      );
+      const result = await this.baseHandler.getAllLogic(page, limit, filter);
       return grpcPaginateResponse(result, USER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

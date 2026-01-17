@@ -41,8 +41,11 @@ export class SosController {
     data: GetSosDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit } = data;
-      const result = await this.baseHandler.getAllLogic(page, limit);
+      const { page, limit, status } = data;
+      const filter: any = {};
+      if (status) filter.status = status;
+
+      const result = await this.baseHandler.getAllLogic(page, limit, filter);
       return grpcPaginateResponse(result, SOS_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

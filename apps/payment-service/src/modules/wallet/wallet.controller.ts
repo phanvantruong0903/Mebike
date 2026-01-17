@@ -2,7 +2,6 @@ import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
-  buildSearchFilter,
   ChangeWalletStatusDto,
   GetAllWalletsDto,
   GRPC_SERVICES,
@@ -50,13 +49,9 @@ export class WalletController {
   async getAllWallets(
     data: GetAllWalletsDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
-    const searchFields = ['id', 'accountId'];
-    const searchFilter = buildSearchFilter(data.search, searchFields);
-
     const response = await this.baseGrpcHandler.getAllLogic(
       data.page,
       data.limit,
-      searchFilter,
     );
     return grpcPaginateResponse(
       response,

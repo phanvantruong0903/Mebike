@@ -81,10 +81,12 @@ export class SosResolver {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
+    const status = data?.status;
+
     return this.sosService.getAllSos({
       page,
       limit,
-      search: data.search,
+      status,
     });
   }
 

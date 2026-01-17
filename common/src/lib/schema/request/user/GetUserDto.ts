@@ -1,8 +1,8 @@
 import { Min, IsNumber, IsOptional, IsEnum, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
-import { BikeStatus } from '../../../prisma';
+import { UserStatus } from '../../../prisma';
 
-export class GetBikeDto {
+export class GetUserDto {
   @IsNumber()
   @Min(1, { message: 'Page must be at least 1' })
   @Type(() => Number)
@@ -14,14 +14,6 @@ export class GetBikeDto {
   limit!: number;
 
   @IsOptional()
-  @IsEnum(BikeStatus)
-  status?: BikeStatus;
-
-  @IsOptional()
-  @IsUUID()
-  stationId?: string;
-
-  @IsOptional()
-  @IsUUID()
-  supplierId?: string;
+  @IsEnum(UserStatus)
+  status?: UserStatus;
 }

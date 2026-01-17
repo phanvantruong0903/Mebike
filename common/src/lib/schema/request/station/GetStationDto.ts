@@ -1,5 +1,6 @@
-import { Min, Max, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Min, Max, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
+import { StationStatus } from '../../../prisma';
 
 export class GetStationDto {
   @IsNumber()
@@ -27,6 +28,6 @@ export class GetStationDto {
   longitude?: number;
 
   @IsOptional()
-  @IsString()
-  search?: string;
+  @IsEnum(StationStatus)
+  status?: StationStatus;
 }

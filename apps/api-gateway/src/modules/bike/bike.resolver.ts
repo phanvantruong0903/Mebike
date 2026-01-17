@@ -74,10 +74,14 @@ export class BikeResolver {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
+    const status = data?.status;
+    const stationId = data?.stationId;
+
     return this.bikeService.getAllBike({
       page,
       limit,
-      search: data.search,
+      status,
+      stationId,
     });
   }
 
@@ -112,6 +116,7 @@ export class BikeResolver {
 
   @Query(() => BikeSearchPage, { name: GRAPHQL_NAME_BIKE.SEARCH })
   async searchBike(
+    @Args('q', { nullable: true }) q: string,
     @Args('params', {
       nullable: true,
       type: () => GetBikeInput,
@@ -121,7 +126,7 @@ export class BikeResolver {
   ): Promise<BikeSearchPage> {
     const page = data.page ?? 1;
     const limit = data.limit ?? 10;
-    const search = data.search ?? '';
+    const search = q ?? '';
 
     return this.bikeService.searchBike(page, limit, search);
   }

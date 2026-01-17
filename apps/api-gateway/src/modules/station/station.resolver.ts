@@ -57,13 +57,13 @@ export class StationResolver {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
-    const { latitude, longitude, search } = data || {};
+    const { latitude, longitude, status } = data || {};
     return this.stationService.getAllStation({
       page,
       limit,
       latitude,
       longitude,
-      search,
+      status,
     });
   }
 
@@ -85,6 +85,7 @@ export class StationResolver {
 
   @Query(() => StationSearchPage, { name: GRAPQL_NAME_STATION.SEARCH })
   async searchStation(
+    @Args('q', { nullable: true }) q: string,
     @Args('params', {
       nullable: true,
       type: () => GetStationInput,
@@ -94,7 +95,7 @@ export class StationResolver {
   ): Promise<StationSearchPage> {
     const page = data.page ?? 1;
     const limit = data.limit ?? 10;
-    const search = data.search ?? '';
+    const search = q ?? '';
 
     return this.stationService.searchStation(page, limit, search);
   }

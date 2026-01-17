@@ -47,7 +47,7 @@ message GetAllStationsRequest {
   int32 limit = 2;
   optional string latitude = 3;
   optional string longitude = 4;
-  optional string search = 5;
+  optional string status = 5;
 }
 
 message Station {

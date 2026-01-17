@@ -17,7 +17,7 @@ interface UserServiceClient {
   GetAllUsers(data: {
     page: number;
     limit: number;
-    search?: string;
+    status?: UserStatus;
   }): Observable<UserListResponse>;
   GetUser(data: { id: string }): Observable<UserResponse>;
   UpdateUser(data: { id: string } & UpdateUserInput): Observable<UserResponse>;
@@ -48,7 +48,7 @@ export class UserService implements OnModuleInit {
     );
   }
 
-  async getAllUser(data: { page: number; limit: number; search: string }) {
+  async getAllUser(data: { page: number; limit: number; status?: UserStatus }) {
     const response = await lastValueFrom(this.userService.GetAllUsers(data));
     return {
       ...response,

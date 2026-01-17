@@ -12,7 +12,6 @@ import {
   CreateBikeDto,
   UpdateBikeDto,
   GetBikeDto,
-  buildSearchFilter,
   ChangeBikeStatusDto,
 } from '@mebike/common';
 import { BikeService } from './bike.service';
@@ -89,13 +88,21 @@ export class BikeController {
     data: GetBikeDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const searchFields = ['id', 'chipId', 'supplierId', 'stationId'];
-      const searchFilter = buildSearchFilter(data.search, searchFields);
+      const filter: any = {};
+      if (data.stationId) {
+        filter.stationId = data.stationId;
+      }
+      if (data.status) {
+        filter.status = data.status;
+      }
+      if (data.supplierId) {
+        filter.supplierId = data.supplierId;
+      }
 
       const result = await this.baseHandler.getAllLogic(
         data.page,
         data.limit,
-        searchFilter,
+        filter,
         undefined,
         {
           station: true,

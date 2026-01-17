@@ -1,5 +1,6 @@
-import { Min, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Min, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
+import { EmergencyStatus } from '../../../prisma';
 
 export class GetSosDto {
   @IsNumber()
@@ -13,6 +14,6 @@ export class GetSosDto {
   limit!: number;
 
   @IsOptional()
-  @IsString()
-  search?: string;
+  @IsEnum(EmergencyStatus)
+  status?: EmergencyStatus;
 }

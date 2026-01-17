@@ -62,9 +62,7 @@ export class SupplierResolver {
   ): Promise<SupplierListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
-
-    return this.supplierService.getAllSuppliers({ page, limit, search });
+    return this.supplierService.getAllSuppliers({ page, limit });
   }
 
   @Mutation(() => SupplierResponse, {
@@ -98,6 +96,7 @@ export class SupplierResolver {
 
   @Query(() => SupplierSearchPage, { name: GRAPHQL_NAME_SUPPLIER.SEARCH })
   async searchSupplier(
+    @Args('q', { nullable: true }) q: string,
     @Args('params', {
       nullable: true,
       type: () => GetSupplierInput,
@@ -107,7 +106,7 @@ export class SupplierResolver {
   ): Promise<SupplierSearchPage> {
     const page = data.page ?? 1;
     const limit = data.limit ?? 10;
-    const search = data.search ?? '';
+    const search = q ?? '';
 
     return this.supplierService.searchSupplier(page, limit, search);
   }

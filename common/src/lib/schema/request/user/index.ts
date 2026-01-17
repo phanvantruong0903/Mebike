@@ -5,3 +5,4 @@ export * from './graphql';
 export * from './ChangeStatusDto';
 export * from './ResetPasswordRequestDto';
 export * from './ResetPasswordDto';
+export * from './GetUserDto';
