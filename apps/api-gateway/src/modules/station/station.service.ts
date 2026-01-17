@@ -11,6 +11,9 @@ import {
   Station,
   UpdateStationInput,
   UpdateStationStatusInput,
+  meiliClient,
+  BikeSearchResult,
+  StationSearchPage,
 } from '@mebike/common';
 
 interface StationServiceClient {
@@ -91,5 +94,31 @@ export class StationService implements OnModuleInit {
       this.fleetService.GetStationsByIds({ ids }),
     );
     return response.data || [];
+  }
+
+  async autoComplete(query: string): Promise<BikeSearchResult[]> {
+    const result = await meiliClient.index('Station').search(query, {
+      limit: 10,
+      attributesToRetrieve: ['id', 'name', 'address'],
+    });
+    return result.hits as BikeSearchResult[];
+  }
+
+  async searchStation(
+    page: number,
+    limit: number,
+    search: string,
+  ): Promise<StationSearchPage> {
+    const result = await meiliClient.index('Station').search(search, {
+      limit,
+      offset: (page - 1) * limit,
+      attributesToRetrieve: ['id', 'name', 'address'],
+    });
+    return {
+      data: result.hits as Station[],
+      total: result.estimatedTotalHits || 0,
+      page,
+      totalPages: Math.ceil(result.estimatedTotalHits / limit),
+    };
   }
 }

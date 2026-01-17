@@ -2,7 +2,9 @@ import { meiliClient } from './client';
 
 export const addDocument = async (index: string, document: any) => {
   try {
-    await meiliClient.index(index).addDocuments([document]);
+    await meiliClient
+      .index(index)
+      .addDocuments([document], { primaryKey: 'id' });
   } catch (error) {
     console.error(error);
   }

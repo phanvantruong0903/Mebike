@@ -24,6 +24,8 @@ export const GRAPHQL_NAME_SUPPLIER = {
   UPDATE: 'UpdateSupplier',
   CHANGE_STATUS: 'ChangeSupplierStatus',
   GET_STATS: 'GetSupplierStats',
+  AUTO_COMPLETE: 'AutoCompleteSupplier',
+  SEARCH: 'SearchSupplier',
 };
 
 export const GRAPQL_NAME_STATION = {
@@ -32,6 +34,8 @@ export const GRAPQL_NAME_STATION = {
   CREATE: 'CreateStation',
   UPDATE: 'UpdateStation',
   UPDATE_STATUS: 'UpdateStationStatus',
+  AUTO_COMPLETE: 'AutoCompleteStation',
+  SEARCH: 'SearchStation',
 };
 
 export const GRAPHQL_NAME_BIKE = {
@@ -40,6 +44,8 @@ export const GRAPHQL_NAME_BIKE = {
   CREATE: 'CreateBike',
   UPDATE: 'UpdateBike',
   CHANGE_STATUS: 'ChangeBikeStatus',
+  AUTO_COMPLETE: 'AutoCompleteBike',
+  SEARCH: 'SearchBike',
 };
 
 export const GRAPHQL_NAME_PAYMENT = {

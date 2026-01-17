@@ -12,6 +12,9 @@ import {
   CreateSupplierInput,
   GetSupplierInput,
   Supplier,
+  SupplierSearchResult,
+  meiliClient,
+  SupplierSearchPage,
 } from '@mebike/common';
 
 interface SupplierServiceClient {
@@ -95,5 +98,31 @@ export class SupplierService implements OnModuleInit {
       this.fleetService.GetSupplierByIds({ ids }),
     );
     return response.data || [];
+  }
+
+  async autoComplete(query: string): Promise<SupplierSearchResult[]> {
+    const result = await meiliClient.index('Supplier').search(query, {
+      limit: 10,
+      attributesToRetrieve: ['id', 'name'],
+    });
+    return result.hits as SupplierSearchResult[];
+  }
+
+  async searchSupplier(
+    page: number,
+    limit: number,
+    search: string,
+  ): Promise<SupplierSearchPage> {
+    const result = await meiliClient.index('Supplier').search(search, {
+      limit,
+      offset: (page - 1) * limit,
+      attributesToRetrieve: ['id', 'name'],
+    });
+    return {
+      data: result.hits as Supplier[],
+      total: result.estimatedTotalHits || 0,
+      page,
+      totalPages: Math.ceil(result.estimatedTotalHits / limit),
+    };
   }
 }

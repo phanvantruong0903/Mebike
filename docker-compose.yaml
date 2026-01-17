@@ -333,6 +333,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MEILISEARCH_HOST=meilisearch:7700
+      - MEILI_MASTER_KEY=${MEILISEARCH_MASTER_KEY}
     labels:
       - 'traefik.enable=true'
 

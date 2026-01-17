@@ -10,6 +10,8 @@ import {
   StationListResponse,
   GetStationInput,
   UpdateStationStatusInput,
+  BikeSearchResult,
+  StationSearchPage,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -72,6 +74,29 @@ export class StationResolver {
     @Args('body') body: UpdateStationStatusInput,
   ): Promise<StationResponse> {
     return this.stationService.changeStationStatus(body);
+  }
+
+  @Query(() => [BikeSearchResult], { name: GRAPQL_NAME_STATION.AUTO_COMPLETE })
+  async autoCompleteStation(
+    @Args('query', { type: () => String }) query: string,
+  ): Promise<BikeSearchResult[]> {
+    return this.stationService.autoComplete(query);
+  }
+
+  @Query(() => StationSearchPage, { name: GRAPQL_NAME_STATION.SEARCH })
+  async searchStation(
+    @Args('params', {
+      nullable: true,
+      type: () => GetStationInput,
+      defaultValue: {},
+    })
+    data: GetStationInput,
+  ): Promise<StationSearchPage> {
+    const page = data.page ?? 1;
+    const limit = data.limit ?? 10;
+    const search = data.search ?? '';
+
+    return this.stationService.searchStation(page, limit, search);
   }
 
   @Query(() => String)

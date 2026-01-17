@@ -11,6 +11,8 @@ import {
   GetSupplierInput,
   ChangeSupplierStatusInput,
   SupplierStatsResponse,
+  SupplierSearchResult,
+  SupplierSearchPage,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -83,6 +85,31 @@ export class SupplierResolver {
   @Roles(Role.ADMIN)
   async getSupplierStats(): Promise<SupplierStatsResponse> {
     return this.supplierService.getSupplierStats();
+  }
+
+  @Query(() => [SupplierSearchResult], {
+    name: GRAPHQL_NAME_SUPPLIER.AUTO_COMPLETE,
+  })
+  async autoCompleteSupplier(
+    @Args('query', { type: () => String }) query: string,
+  ): Promise<SupplierSearchResult[]> {
+    return this.supplierService.autoComplete(query);
+  }
+
+  @Query(() => SupplierSearchPage, { name: GRAPHQL_NAME_SUPPLIER.SEARCH })
+  async searchSupplier(
+    @Args('params', {
+      nullable: true,
+      type: () => GetSupplierInput,
+      defaultValue: {},
+    })
+    data: GetSupplierInput,
+  ): Promise<SupplierSearchPage> {
+    const page = data.page ?? 1;
+    const limit = data.limit ?? 10;
+    const search = data.search ?? '';
+
+    return this.supplierService.searchSupplier(page, limit, search);
   }
 
   @Query(() => String)

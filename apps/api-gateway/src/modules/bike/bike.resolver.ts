@@ -20,6 +20,8 @@ import {
   Bike,
   Supplier,
   BikeStatus,
+  BikeSearchResult,
+  BikeSearchPage,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -99,6 +101,29 @@ export class BikeResolver {
   async supplier(@Parent() bike: Bike): Promise<Supplier | null> {
     if (!bike.supplier?.id) return null;
     return this.supplierDataloader.batchSupplier.load(bike.supplier.id);
+  }
+
+  @Query(() => [BikeSearchResult], { name: GRAPHQL_NAME_BIKE.AUTO_COMPLETE })
+  async autoCompleteBike(
+    @Args('query', { type: () => String }) query: string,
+  ): Promise<BikeSearchResult[]> {
+    return this.bikeService.autoComplete(query);
+  }
+
+  @Query(() => BikeSearchPage, { name: GRAPHQL_NAME_BIKE.SEARCH })
+  async searchBike(
+    @Args('params', {
+      nullable: true,
+      type: () => GetBikeInput,
+      defaultValue: {},
+    })
+    data: GetBikeInput,
+  ): Promise<BikeSearchPage> {
+    const page = data.page ?? 1;
+    const limit = data.limit ?? 10;
+    const search = data.search ?? '';
+
+    return this.bikeService.searchBike(page, limit, search);
   }
 
   @Query(() => String)

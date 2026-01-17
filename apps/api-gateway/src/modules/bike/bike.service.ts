@@ -11,6 +11,8 @@ import {
   BikeStatus,
   Bike,
   GRPC_SERVICES,
+  meiliClient,
+  BikeSearchResult,
 } from '@mebike/common';
 
 interface BikeServiceClient {
@@ -68,5 +70,27 @@ export class BikeService implements OnModuleInit {
       this.fleetService.GetBikesByIds({ ids }),
     );
     return response.data || [];
+  }
+
+  async autoComplete(query: string): Promise<BikeSearchResult[]> {
+    const result = await meiliClient.index('Bike').search(query, {
+      limit: 10,
+      attributesToRetrieve: ['id', 'chipId'],
+    });
+    return result.hits as BikeSearchResult[];
+  }
+
+  async searchBike(page: number, limit: number, query: string) {
+    const result = await meiliClient.index('Bike').search(query, {
+      limit,
+      offset: (page - 1) * limit,
+      attributesToRetrieve: ['id', 'chipId'],
+    });
+    return {
+      data: result.hits as BikeSearchResult[],
+      total: result.estimatedTotalHits || 0,
+      page,
+      totalPages: Math.ceil(result.estimatedTotalHits / limit),
+    };
   }
 }
