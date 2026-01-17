@@ -1,17 +1,12 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { StationSearchResult } from './StationSearchResult';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Station } from './Station';
+import { PaginationMeta } from '../../../../graphql';
 
 @ObjectType()
 export class StationSearchPage {
-  @Field(() => [StationSearchResult])
-  data!: StationSearchResult[];
+  @Field(() => [Station])
+  data!: Station[];
 
-  @Field(() => Int)
-  total!: number;
-
-  @Field(() => Int)
-  page!: number;
-
-  @Field(() => Int)
-  totalPages!: number;
+  @Field(() => PaginationMeta)
+  pagination!: PaginationMeta;
 }

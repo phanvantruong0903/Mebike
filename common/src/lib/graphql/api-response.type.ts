@@ -7,7 +7,7 @@ interface ApiResponseOptions {
 }
 
 @ObjectType()
-class PaginationMeta {
+export class PaginationMeta {
   @Field(() => Int, { nullable: true })
   total?: number;
 

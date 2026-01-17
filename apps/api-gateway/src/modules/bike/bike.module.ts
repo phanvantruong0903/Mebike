@@ -10,7 +10,7 @@ import {
 } from '@mebike/common';
 import { ConfigModule } from '@nestjs/config';
 import { BikeService } from './bike.service';
-import { BikeResolver } from './bike.resolver';
+import { BikeResolver, BikeResultResolver } from './bike.resolver';
 import { SupplierModule } from '../supplier/supplier.module';
 import { StationModule } from '../station/station.module';
 import { StationDataloader } from './station.dataloader';
@@ -44,7 +44,13 @@ import { SupplierDataloader } from './supplier.dataloader';
       },
     ]),
   ],
-  providers: [BikeService, BikeResolver, StationDataloader, SupplierDataloader],
+  providers: [
+    BikeService,
+    BikeResolver,
+    StationDataloader,
+    SupplierDataloader,
+    BikeResultResolver,
+  ],
   exports: [BikeService],
 })
 export class BikeModule {}

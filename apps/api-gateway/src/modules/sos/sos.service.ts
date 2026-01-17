@@ -8,18 +8,18 @@ import {
   SosResponse,
   UpdateSosDto,
   SosListResponse,
-  GetSosInput,
   UserProfile,
   Role,
   Sos,
   SOS_MESSAGES,
+  GetSosDto,
 } from '@mebike/common';
 import { GraphQLError } from 'graphql/error';
 
 interface SosServiceClient {
   GetSos(data: { id: string }): Observable<SosResponse>;
   UpdateSosStatus(data: UpdateSosDto): Observable<SosResponse>;
-  GetAllSos(data: GetSosInput): Observable<SosListResponse>;
+  GetAllSos(data: GetSosDto): Observable<SosListResponse>;
   CreateSos(data: CreateSosInput): Observable<SosResponse>;
   // GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
   // UpdateStationStatus(
@@ -47,8 +47,15 @@ export class SosService implements OnModuleInit {
     return await firstValueFrom(this.incidentService.UpdateSosStatus(data));
   }
 
-  async getAllSos(data: GetSosInput) {
-    const response = await firstValueFrom(this.incidentService.GetAllSos(data));
+  async getAllSos(
+    data: Omit<GetSosDto, 'accountId' | 'role'>,
+    user: UserProfile,
+  ) {
+    const accountId = user.accountId;
+    const role = user.role;
+    const response = await firstValueFrom(
+      this.incidentService.GetAllSos({ ...data, accountId, role }),
+    );
     return {
       ...response,
       data: response.data ?? [],
@@ -60,6 +67,13 @@ export class SosService implements OnModuleInit {
     const sos = response.data as unknown as Sos;
 
     if (user.role === Role.USER && user.accountId !== sos.requesterId) {
+      throw new GraphQLError(SOS_MESSAGES.FORBIDDEN, {
+        extensions: {
+          statusCode: 403,
+        },
+      });
+    }
+    if (user.role === Role.SOS && sos.agentId !== user.accountId) {
       throw new GraphQLError(SOS_MESSAGES.FORBIDDEN, {
         extensions: {
           statusCode: 403,

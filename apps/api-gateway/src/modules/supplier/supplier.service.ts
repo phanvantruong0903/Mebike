@@ -41,10 +41,14 @@ export class SupplierService implements OnModuleInit {
     @Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     this.fleetService = this.client.getService<SupplierServiceClient>(
       GRPC_SERVICES.FLEET,
     );
+    await meiliClient.index('Supplier').updateSettings({
+      searchableAttributes: ['name', 'id'],
+      filterableAttributes: ['status'],
+    });
   }
 
   async createSupplier(data: CreateSupplierInput) {
@@ -103,7 +107,6 @@ export class SupplierService implements OnModuleInit {
   async autoComplete(query: string): Promise<SupplierSearchResult[]> {
     const result = await meiliClient.index('Supplier').search(query, {
       limit: 10,
-      attributesToRetrieve: ['id', 'name'],
     });
     return result.hits as SupplierSearchResult[];
   }
@@ -116,13 +119,15 @@ export class SupplierService implements OnModuleInit {
     const result = await meiliClient.index('Supplier').search(search, {
       limit,
       offset: (page - 1) * limit,
-      attributesToRetrieve: ['id', 'name'],
     });
     return {
       data: result.hits as Supplier[],
-      total: result.estimatedTotalHits || 0,
-      page,
-      totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      pagination: {
+        total: result.estimatedTotalHits || 0,
+        page,
+        limit,
+        totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      },
     };
   }
 }

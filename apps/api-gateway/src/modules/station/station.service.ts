@@ -12,8 +12,11 @@ import {
   UpdateStationInput,
   UpdateStationStatusInput,
   meiliClient,
-  BikeSearchResult,
   StationSearchPage,
+  UserProfile,
+  Role,
+  StationSearchResult,
+  StationStatus,
 } from '@mebike/common';
 
 interface StationServiceClient {
@@ -37,10 +40,14 @@ export class StationService implements OnModuleInit {
     @Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     this.fleetService = this.client.getService<StationServiceClient>(
       GRPC_SERVICES.FLEET,
     );
+    await meiliClient.index('Station').updateSettings({
+      searchableAttributes: ['name', 'address', 'id'],
+      filterableAttributes: ['status'],
+    });
   }
 
   async createStation(data: CreateStationInput) {
@@ -96,29 +103,44 @@ export class StationService implements OnModuleInit {
     return response.data || [];
   }
 
-  async autoComplete(query: string): Promise<BikeSearchResult[]> {
+  async autoComplete(
+    query: string,
+    user: UserProfile,
+  ): Promise<StationSearchResult[]> {
+    const filter =
+      user.role === Role.USER
+        ? `status = '${StationStatus.Active}'`
+        : undefined;
     const result = await meiliClient.index('Station').search(query, {
       limit: 10,
-      attributesToRetrieve: ['id', 'name', 'address'],
+      filter,
     });
-    return result.hits as BikeSearchResult[];
+    return result.hits as StationSearchResult[];
   }
 
   async searchStation(
     page: number,
     limit: number,
     search: string,
+    user: UserProfile,
   ): Promise<StationSearchPage> {
+    const filter =
+      user.role === Role.USER
+        ? `status = '${StationStatus.Active}'`
+        : undefined;
     const result = await meiliClient.index('Station').search(search, {
       limit,
       offset: (page - 1) * limit,
-      attributesToRetrieve: ['id', 'name', 'address'],
+      filter,
     });
     return {
       data: result.hits as Station[],
-      total: result.estimatedTotalHits || 0,
-      page,
-      totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      pagination: {
+        total: result.estimatedTotalHits || 0,
+        page,
+        limit,
+        totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      },
     };
   }
 }

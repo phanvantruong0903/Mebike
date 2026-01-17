@@ -11,6 +11,8 @@ import {
   SOS_MESSAGES,
   GetSosByIdDto,
   grpcResponse,
+  Role,
+  EmergencyStatus,
 } from '@mebike/common';
 import { SosService } from './sos.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
@@ -41,9 +43,21 @@ export class SosController {
     data: GetSosDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit, status } = data;
+      const { page, limit, status, accountId, role } = data;
       const filter: any = {};
       if (status) filter.status = status;
+      if (role === Role.USER) filter.requesterId = accountId;
+      if (role === Role.SOS) {
+        filter.agentId = accountId;
+        filter.status = {
+          in: [
+            EmergencyStatus.Assigned,
+            EmergencyStatus.Processing,
+            EmergencyStatus.Resolved,
+            EmergencyStatus.Unsolvable,
+          ],
+        };
+      }
 
       const result = await this.baseHandler.getAllLogic(page, limit, filter);
       return grpcPaginateResponse(result, SOS_MESSAGES.GET_ALL_SUCCESS);

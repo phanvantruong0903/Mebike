@@ -1,17 +1,12 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { BikeSearchResult } from './BikeSearchResult';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { BikeResult } from './BikeSearchResult';
+import { PaginationMeta } from '../../../../graphql';
 
 @ObjectType()
 export class BikeSearchPage {
-  @Field(() => [BikeSearchResult])
-  data!: BikeSearchResult[];
+  @Field(() => [BikeResult])
+  data!: BikeResult[];
 
-  @Field(() => Int)
-  total!: number;
-
-  @Field(() => Int)
-  page!: number;
-
-  @Field(() => Int)
-  totalPages!: number;
+  @Field(() => PaginationMeta)
+  pagination!: PaginationMeta;
 }

@@ -10,12 +10,14 @@ import {
   StationListResponse,
   GetStationInput,
   UpdateStationStatusInput,
-  BikeSearchResult,
   StationSearchPage,
+  UserProfile,
+  StationSearchResult,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { StationService } from './station.service';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver()
 export class StationResolver {
@@ -76,11 +78,14 @@ export class StationResolver {
     return this.stationService.changeStationStatus(body);
   }
 
-  @Query(() => [BikeSearchResult], { name: GRAPQL_NAME_STATION.AUTO_COMPLETE })
+  @Query(() => [StationSearchResult], {
+    name: GRAPQL_NAME_STATION.AUTO_COMPLETE,
+  })
   async autoCompleteStation(
     @Args('query', { type: () => String }) query: string,
-  ): Promise<BikeSearchResult[]> {
-    return this.stationService.autoComplete(query);
+    @CurrentUser() user: UserProfile,
+  ): Promise<StationSearchResult[]> {
+    return this.stationService.autoComplete(query, user);
   }
 
   @Query(() => StationSearchPage, { name: GRAPQL_NAME_STATION.SEARCH })
@@ -92,12 +97,13 @@ export class StationResolver {
       defaultValue: {},
     })
     data: GetStationInput,
+    @CurrentUser() user: UserProfile,
   ): Promise<StationSearchPage> {
     const page = data.page ?? 1;
     const limit = data.limit ?? 10;
     const search = q ?? '';
 
-    return this.stationService.searchStation(page, limit, search);
+    return this.stationService.searchStation(page, limit, search, user);
   }
 
   @Query(() => String)

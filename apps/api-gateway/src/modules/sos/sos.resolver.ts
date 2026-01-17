@@ -77,17 +77,21 @@ export class SosResolver {
       defaultValue: {},
     })
     data: GetSosInput,
+    @CurrentUser() user: UserProfile,
   ): Promise<SosListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
     const status = data?.status;
 
-    return this.sosService.getAllSos({
-      page,
-      limit,
-      status,
-    });
+    return this.sosService.getAllSos(
+      {
+        page,
+        limit,
+        status,
+      },
+      user,
+    );
   }
 
   @Query(() => SosResponse, { name: GRAPHQL_NAME_SOS.GET_ONE })

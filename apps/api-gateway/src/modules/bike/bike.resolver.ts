@@ -22,6 +22,7 @@ import {
   BikeStatus,
   BikeSearchResult,
   BikeSearchPage,
+  BikeResult,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -107,10 +108,10 @@ export class BikeResolver {
     return this.supplierDataloader.batchSupplier.load(bike.supplier.id);
   }
 
-  @Query(() => [BikeSearchResult], { name: GRAPHQL_NAME_BIKE.AUTO_COMPLETE })
+  @Query(() => BikeSearchResult, { name: GRAPHQL_NAME_BIKE.AUTO_COMPLETE })
   async autoCompleteBike(
     @Args('query', { type: () => String }) query: string,
-  ): Promise<BikeSearchResult[]> {
+  ): Promise<BikeSearchResult> {
     return this.bikeService.autoComplete(query);
   }
 
@@ -134,5 +135,25 @@ export class BikeResolver {
   @Query(() => String)
   _healthCheck(): string {
     return 'API is running';
+  }
+}
+
+@Resolver(() => BikeResult)
+export class BikeResultResolver {
+  constructor(
+    private readonly stationDataloader: StationDataloader,
+    private readonly supplierDataloader: SupplierDataloader,
+  ) {}
+
+  @ResolveField(() => Station, { nullable: true })
+  async station(@Parent() bike: BikeResult): Promise<Station | null> {
+    if (!bike.stationId) return null;
+    return this.stationDataloader.batchStations.load(bike.stationId);
+  }
+
+  @ResolveField(() => Supplier, { nullable: true })
+  async supplier(@Parent() bike: BikeResult): Promise<Supplier | null> {
+    if (!bike.supplierId) return null;
+    return this.supplierDataloader.batchSupplier.load(bike.supplierId);
   }
 }

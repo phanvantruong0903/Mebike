@@ -1,22 +1,40 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { BikeStatus } from '../../../../prisma';
 import { Station } from '../../station';
 import { Supplier } from '../../supplier';
-import { BikeStatus } from '../../../../prisma';
 
 @ObjectType()
-export class BikeSearchResult {
-  @Field()
+export class BikeResult {
+  @Field(() => ID)
   id!: string;
 
   @Field()
   chipId!: string;
 
+  @Field()
+  stationId!: string;
+
+  @Field()
+  supplierId!: string;
+
   @Field(() => BikeStatus)
   status!: BikeStatus;
 
-  @Field(() => Supplier, { nullable: true })
-  supplier?: Supplier;
+  @Field()
+  createdAt!: string;
+
+  @Field()
+  updatedAt!: string;
 
   @Field(() => Station, { nullable: true })
   station?: Station;
+
+  @Field(() => Supplier, { nullable: true })
+  supplier?: Supplier;
+}
+
+@ObjectType()
+export class BikeSearchResult {
+  @Field(() => [BikeResult])
+  data!: BikeResult[];
 }

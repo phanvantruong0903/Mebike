@@ -12,7 +12,7 @@ import {
   Bike,
   GRPC_SERVICES,
   meiliClient,
-  BikeSearchResult,
+  BikeResult,
 } from '@mebike/common';
 
 interface BikeServiceClient {
@@ -35,10 +35,14 @@ export class BikeService implements OnModuleInit {
     @Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     this.fleetService = this.client.getService<BikeServiceClient>(
       GRPC_SERVICES.FLEET,
     );
+    await meiliClient.index('Bike').updateSettings({
+      searchableAttributes: ['chipId', 'id', 'supplier.name', 'station.name'],
+      filterableAttributes: ['status', 'supplier.id', 'station.id'],
+    });
   }
 
   async createBike(data: CreateBikeInput) {
@@ -72,25 +76,28 @@ export class BikeService implements OnModuleInit {
     return response.data || [];
   }
 
-  async autoComplete(query: string): Promise<BikeSearchResult[]> {
+  async autoComplete(query: string): Promise<{ data: BikeResult[] }> {
     const result = await meiliClient.index('Bike').search(query, {
       limit: 10,
-      attributesToRetrieve: ['id', 'chipId'],
     });
-    return result.hits as BikeSearchResult[];
+    return {
+      data: result.hits as BikeResult[],
+    };
   }
 
   async searchBike(page: number, limit: number, query: string) {
     const result = await meiliClient.index('Bike').search(query, {
       limit,
       offset: (page - 1) * limit,
-      attributesToRetrieve: ['id', 'chipId'],
     });
     return {
-      data: result.hits as BikeSearchResult[],
-      total: result.estimatedTotalHits || 0,
-      page,
-      totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      data: result.hits as BikeResult[],
+      pagination: {
+        total: result.estimatedTotalHits || 0,
+        page,
+        limit,
+        totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      },
     };
   }
 }
