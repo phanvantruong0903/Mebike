@@ -4,7 +4,7 @@ package reservation;
 
 service RentalService {
   rpc CreateReservation (CreateReservationRequest) returns (ReservationResponse);
-  rpc ConfirmReservation (ConfirmReservationRequest) returns (ReservationResponse);
+  rpc ActivateReservation (ActivateReservationRequest) returns (ReservationResponse);
   rpc GetReservation (GetReservationRequest) returns (ReservationResponse);
   rpc GetReservationList (GetReservationListRequest) returns (ReservationListResponse);
 }
@@ -23,10 +23,6 @@ message Reservation {
   string updatedAt = 11;
 }
 
-message ReservationList {
-  repeated Reservation data = 1;
-}
-
 message CreateReservationRequest {
   string accountId = 1;
   string bikeId = 2;
@@ -34,7 +30,7 @@ message CreateReservationRequest {
   optional string subscriptionId = 4;
 }
 
-message ConfirmReservationRequest {
+message ActivateReservationRequest {
   string accountId = 1;
   string id = 2;
 }
@@ -60,7 +56,7 @@ message ReservationResponse {
 message ReservationListResponse {
   bool success = 1;
   string message = 2;
-  ReservationList data = 3;
+  repeated Reservation data = 3;
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;
