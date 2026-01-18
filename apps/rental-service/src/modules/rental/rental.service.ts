@@ -5,16 +5,21 @@ import {
   BikeResponse,
   BikeStatus,
   CreateRentalDto,
+  DebitRentalDto,
   EndRentalDto,
   GRPC_PACKAGE,
   GRPC_SERVICES,
+  PAYMENT_MESSAGES,
   prismaRental,
   RENTAL_MESSAGES,
   RentalModel,
   RentalStatus,
   SERVER_MESSAGE,
   throwGrpcError,
+  TransactionType,
   TrendValue,
+  Wallet,
+  WalletResponse,
 } from '@mebike/common';
 import { Inject, Injectable } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
@@ -28,14 +33,26 @@ interface FleetServiceClient {
   }): Observable<BikeResponse>;
 }
 
+interface PaymentServiceClient {
+  GetWallet(data: { accountId: string }): Observable<WalletResponse>;
+  DebitRental(data: DebitRentalDto): Observable<WalletResponse>;
+}
+
 @Injectable()
 export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
   private fleetService!: FleetServiceClient;
+  private paymentService!: PaymentServiceClient;
 
-  constructor(@Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc) {
+  constructor(
+    @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
+    @Inject(GRPC_PACKAGE.PAYMENT) private readonly paymentClient: ClientGrpc,
+  ) {
     super(prismaRental.rental);
-    this.fleetService = this.client.getService<FleetServiceClient>(
+    this.fleetService = this.fleetClient.getService<FleetServiceClient>(
       GRPC_SERVICES.FLEET,
+    );
+    this.paymentService = this.paymentClient.getService<PaymentServiceClient>(
+      GRPC_SERVICES.PAYMENT,
     );
   }
 
@@ -46,6 +63,15 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
       ]);
     }
     return this.fleetService;
+  }
+
+  private getPaymentService(): PaymentServiceClient {
+    if (!this.paymentService) {
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+        `Failed to load ${GRPC_SERVICES.PAYMENT}. Check proto definitions.`,
+      ]);
+    }
+    return this.paymentService;
   }
 
   override async create(data: CreateRentalDto): Promise<RentalModel> {
@@ -64,6 +90,17 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     if (!bike.station?.id) {
       throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
         BIKE_MESSAGES.NOT_ASSIGNED_STATION,
+      ]);
+    }
+
+    const minimumRent = Number(process.env.RE_MINIMUM_RENT_AMOUNT || '2000');
+    const hasEnoughBalance = await this.hasEnoughBalance(
+      data.accountId,
+      minimumRent,
+    );
+    if (!hasEnoughBalance) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
       ]);
     }
 
@@ -109,6 +146,7 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
           status: RentalStatus.Completed,
         },
       }),
+      this.rentalPayment(rental.accountId, totalPrice, rental.id),
       this.changeBikeStatus(rental.bikeId, BikeStatus.Available),
     ]);
 
@@ -260,7 +298,7 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
 
   generateTotalPrice(minutes: number) {
     const halfHourUnit = Math.max(1, Math.ceil(minutes / 30));
-    const pricePer30Min = Number(process.env.PRICE_PER_30_MINS || '2000');
+    const pricePer30Min = Number(process.env.RE_PRICE_PER_30_MINS || '2000');
     return pricePer30Min * halfHourUnit;
   }
 
@@ -273,5 +311,32 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
   async changeBikeStatus(id: string, status: BikeStatus) {
     const service = this.getFleetService();
     return await firstValueFrom(service.ChangeBikeStatus({ id, status }));
+  }
+
+  // wallet functions
+  async hasEnoughBalance(accountId: string, amount: number) {
+    const service = this.getPaymentService();
+    const walletResponse = await firstValueFrom(
+      service.GetWallet({ accountId }),
+    );
+    const wallet = walletResponse.data as Wallet;
+    if (!wallet) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+      ]);
+    }
+    return wallet.balance >= amount;
+  }
+
+  async rentalPayment(accountId: string, amount: number, rentalId: string) {
+    const service = this.getPaymentService();
+    return await firstValueFrom(
+      service.DebitRental({
+        accountId,
+        amount,
+        transactionType: TransactionType.RENTALFEE,
+        rentalId,
+      }),
+    );
   }
 }

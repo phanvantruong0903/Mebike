@@ -40,6 +40,60 @@ import {
           };
         },
       },
+      {
+        name: GRPC_PACKAGE.PAYMENT,
+        imports: [ConsulModule],
+        inject: [ConsulService],
+        useFactory: async (consulService: ConsulService) => {
+          const paymentService = await consulService.discoverService(
+            CONSULT_SERVICE_ID.PAYMENT,
+          );
+          return {
+            transport: Transport.GRPC,
+            options: {
+              package: 'payment',
+              protoPath: join(
+                process.cwd(),
+                'common/src/lib/proto/payment.proto',
+              ),
+              url: `${paymentService.address}:${paymentService.port}`,
+            },
+            channelOptions: {
+              'grpc.max_reconnect_backoff_ms': 5000,
+              'grpc.initial_reconnect_backoff_ms': 1000,
+            },
+            maxRetryAttempts: 5,
+            retryDelay: 3000,
+          };
+        },
+      },
+      {
+        name: GRPC_PACKAGE.PAYMENT,
+        imports: [ConsulModule],
+        inject: [ConsulService],
+        useFactory: async (consulService: ConsulService) => {
+          const paymentService = await consulService.discoverService(
+            CONSULT_SERVICE_ID.PAYMENT,
+          );
+          return {
+            transport: Transport.GRPC,
+            options: {
+              package: 'wallet',
+              protoPath: join(
+                process.cwd(),
+                'common/src/lib/proto/wallet.proto',
+              ),
+              url: `${paymentService.address}:${paymentService.port}`,
+            },
+            channelOptions: {
+              'grpc.max_reconnect_backoff_ms': 5000,
+              'grpc.initial_reconnect_backoff_ms': 1000,
+            },
+            maxRetryAttempts: 5,
+            retryDelay: 3000,
+          };
+        },
+      },
     ]),
   ],
   controllers: [RentalController],
