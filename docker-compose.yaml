@@ -398,6 +398,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - TEMPORAL_ADDRESS=temporal:7233
       - NODE_ENV=production
+      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50051']
       interval: 10s
@@ -430,6 +431,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50052']
       interval: 10s
@@ -491,6 +493,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
       interval: 10s
@@ -523,6 +526,7 @@ services:
       - VNPAY_HASHSECRET=${VNPAY_HASHSECRET}
       - VNP_URL=${VNP_URL}
       - VNP_RETURNURL=${VNP_RETURNURL}
+      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50056']
       interval: 10s
@@ -554,6 +558,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50058']
       interval: 5s
@@ -582,6 +587,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50059']
       interval: 5s
@@ -620,6 +626,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - TEMPORAL_ADDRESS=temporal:7233
       - NODE_ENV=production
+      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50049']
       interval: 5s
