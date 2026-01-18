@@ -44,10 +44,19 @@ export class StationService implements OnModuleInit {
     this.fleetService = this.client.getService<StationServiceClient>(
       GRPC_SERVICES.FLEET,
     );
+    await this.createStationIndex();
     await meiliClient.index('Station').updateSettings({
       searchableAttributes: ['name', 'address', 'id'],
       filterableAttributes: ['status'],
     });
+  }
+
+  async createStationIndex() {
+    try {
+      await meiliClient.getIndex('Station');
+    } catch {
+      await meiliClient.createIndex('Station', { primaryKey: 'id' });
+    }
   }
 
   async createStation(data: CreateStationInput) {

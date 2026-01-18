@@ -39,10 +39,19 @@ export class BikeService implements OnModuleInit {
     this.fleetService = this.client.getService<BikeServiceClient>(
       GRPC_SERVICES.FLEET,
     );
+    await this.createBikeIndex();
     await meiliClient.index('Bike').updateSettings({
       searchableAttributes: ['chipId', 'id', 'supplier.name', 'station.name'],
       filterableAttributes: ['status', 'supplier.id', 'station.id'],
     });
+  }
+
+  async createBikeIndex() {
+    try {
+      await meiliClient.getIndex('Bike');
+    } catch {
+      await meiliClient.createIndex('Bike', { primaryKey: 'id' });
+    }
   }
 
   async createBike(data: CreateBikeInput) {
