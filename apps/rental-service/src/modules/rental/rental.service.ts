@@ -1,156 +1,48 @@
 import {
   BaseService,
-  Bike,
-  BIKE_MESSAGES,
-  BikeResponse,
-  BikeStatus,
   CreateRentalDto,
-  DebitRentalDto,
   EndRentalDto,
-  GRPC_PACKAGE,
-  GRPC_SERVICES,
-  PAYMENT_MESSAGES,
   prismaRental,
   RENTAL_MESSAGES,
   RentalModel,
   RentalStatus,
   SERVER_MESSAGE,
   throwGrpcError,
-  TransactionType,
   TrendValue,
-  Wallet,
-  WalletResponse,
 } from '@mebike/common';
-import { Inject, Injectable } from '@nestjs/common';
-import type { ClientGrpc } from '@nestjs/microservices';
-import { firstValueFrom, Observable } from 'rxjs';
-
-interface FleetServiceClient {
-  GetBike(data: { id: string }): Observable<BikeResponse>;
-  ChangeBikeStatus(data: {
-    id: string;
-    status: BikeStatus;
-  }): Observable<BikeResponse>;
-}
-
-interface PaymentServiceClient {
-  GetWallet(data: { accountId: string }): Observable<WalletResponse>;
-  DebitRental(data: DebitRentalDto): Observable<WalletResponse>;
-}
+import { Injectable } from '@nestjs/common';
+import { TemporalService } from '../../saga/temporal-service';
 
 @Injectable()
 export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
-  private fleetService!: FleetServiceClient;
-  private paymentService!: PaymentServiceClient;
-
-  constructor(
-    @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
-    @Inject(GRPC_PACKAGE.PAYMENT) private readonly paymentClient: ClientGrpc,
-  ) {
+  constructor(private readonly temporalService: TemporalService) {
     super(prismaRental.rental);
-    this.fleetService = this.fleetClient.getService<FleetServiceClient>(
-      GRPC_SERVICES.FLEET,
-    );
-    this.paymentService = this.paymentClient.getService<PaymentServiceClient>(
-      GRPC_SERVICES.PAYMENT,
-    );
-  }
-
-  private getFleetService(): FleetServiceClient {
-    if (!this.fleetService) {
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        `Failed to load ${GRPC_SERVICES.FLEET}. Check proto definitions.`,
-      ]);
-    }
-    return this.fleetService;
-  }
-
-  private getPaymentService(): PaymentServiceClient {
-    if (!this.paymentService) {
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        `Failed to load ${GRPC_SERVICES.PAYMENT}. Check proto definitions.`,
-      ]);
-    }
-    return this.paymentService;
   }
 
   override async create(data: CreateRentalDto): Promise<RentalModel> {
-    const bikeResponse = await this.getBikeById(data.bikeId);
-    if (!bikeResponse || !bikeResponse.data) {
-      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
-    }
-
-    const bike = bikeResponse.data as Bike;
-    if (bike.status !== BikeStatus.Available) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        BIKE_MESSAGES.NOT_AVAILABLE,
-      ]);
-    }
-
-    if (!bike.station?.id) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        BIKE_MESSAGES.NOT_ASSIGNED_STATION,
-      ]);
-    }
-
     const minimumRent = Number(process.env.RE_MINIMUM_RENT_AMOUNT || '2000');
-    const hasEnoughBalance = await this.hasEnoughBalance(
-      data.accountId,
-      minimumRent,
-    );
-    if (!hasEnoughBalance) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
-      ]);
+    try {
+      return await this.temporalService.startRentalCreation({
+        ...data,
+        minimumRent,
+      });
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : 'Rental creation failed';
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [msg]);
     }
-
-    const [createdRental] = await Promise.all([
-      prismaRental.rental.create({
-        data: {
-          ...data,
-          startStationId: bike.station.id,
-        },
-      }),
-      this.changeBikeStatus(data.bikeId, BikeStatus.Booked),
-    ]);
-
-    return createdRental;
   }
 
   async end(data: EndRentalDto): Promise<RentalModel> {
-    const rental = await prismaRental.rental.findUnique({
-      where: { id: data.id, status: RentalStatus.Rented },
-    });
-    if (!rental) {
-      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-        RENTAL_MESSAGES.NOT_FOUND_WITH_STATUS(RentalStatus.Rented),
-      ]);
+    try {
+      return await this.temporalService.startRentalEnding({
+        rentalId: data.id,
+      });
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : 'Rental ending failed';
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [msg]);
     }
-
-    const now = new Date();
-    const duration = this.generateDuration(rental.startTime, now);
-    const totalPrice = this.generateTotalPrice(duration);
-
-    if (!rental.bikeId) {
-      throw new Error(RENTAL_MESSAGES.FIELD_NOT_FOUND('bikeId'));
-    }
-
-    const [updatedRental] = await Promise.all([
-      prismaRental.rental.update({
-        where: { id: data.id },
-        data: {
-          endStationId: rental.startStationId,
-          endTime: now,
-          duration: duration,
-          totalPrice: totalPrice,
-          status: RentalStatus.Completed,
-        },
-      }),
-      this.rentalPayment(rental.accountId, totalPrice, rental.id),
-      this.changeBikeStatus(rental.bikeId, BikeStatus.Available),
-    ]);
-
-    return updatedRental;
   }
 
   async getOne(id: string): Promise<RentalModel | null> {
@@ -300,43 +192,5 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     const halfHourUnit = Math.max(1, Math.ceil(minutes / 30));
     const pricePer30Min = Number(process.env.RE_PRICE_PER_30_MINS || '2000');
     return pricePer30Min * halfHourUnit;
-  }
-
-  // bike functions
-  async getBikeById(id: string) {
-    const service = this.getFleetService();
-    return await firstValueFrom(service.GetBike({ id }));
-  }
-
-  async changeBikeStatus(id: string, status: BikeStatus) {
-    const service = this.getFleetService();
-    return await firstValueFrom(service.ChangeBikeStatus({ id, status }));
-  }
-
-  // wallet functions
-  async hasEnoughBalance(accountId: string, amount: number) {
-    const service = this.getPaymentService();
-    const walletResponse = await firstValueFrom(
-      service.GetWallet({ accountId }),
-    );
-    const wallet = walletResponse.data as Wallet;
-    if (!wallet) {
-      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-        PAYMENT_MESSAGES.WALLET_NOT_FOUND,
-      ]);
-    }
-    return wallet.balance >= amount;
-  }
-
-  async rentalPayment(accountId: string, amount: number, rentalId: string) {
-    const service = this.getPaymentService();
-    return await firstValueFrom(
-      service.DebitRental({
-        accountId,
-        amount,
-        transactionType: TransactionType.RENTALFEE,
-        rentalId,
-      }),
-    );
   }
 }
