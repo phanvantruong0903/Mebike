@@ -74,7 +74,7 @@ export class PaymentprocessorController {
   async debitRental(
     data: DebitRentalDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    const response = await this.paymentprocessorService.debit(data);
+    const response = await this.paymentprocessorService.debitRental(data);
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }
 }

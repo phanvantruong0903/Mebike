@@ -31,6 +31,13 @@ interface VnpParams {
   [key: string]: string | number;
 }
 
+interface DebitData {
+  accountId: string;
+  amount: number;
+  description: string;
+  transactionType: TransactionType;
+}
+
 function sortObject(obj: VnpParams): VnpParams {
   const sorted: VnpParams = {};
   const str = Object.keys(obj).sort();
@@ -135,7 +142,7 @@ export class PaymentprocessorService {
     return result;
   }
 
-  async debit(data: DebitRentalDto) {
+  async debit(data: DebitData) {
     await this.validateData(
       data.accountId,
       data.amount,
@@ -148,6 +155,16 @@ export class PaymentprocessorService {
       data.description,
       data.transactionType,
     );
+  }
+
+  async debitRental(data: DebitRentalDto) {
+    const rentalDescription = `Debit for Rental Service - Rental ID: ${data.rentalId}`;
+    return await this.debit({
+      accountId: data.accountId,
+      amount: data.amount,
+      description: rentalDescription,
+      transactionType: data.transactionType,
+    });
   }
 
   async checkWalletExist(accountId: string): Promise<WalletModel> {

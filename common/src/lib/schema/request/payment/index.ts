@@ -4,6 +4,7 @@ export * from './GetTransactionDto';
 export * from './UpdateWithDrawStatusDto';
 export * from './UpdateWalletStatusDto';
 export * from './GetAllWalletDto';
-export * from './DebitRentalDto';
+export * from './DebitDto';
 export * from './CreateWalletDto';
 export * from './GetWithdrawDto';
+export * from './DebitRentalDto';
