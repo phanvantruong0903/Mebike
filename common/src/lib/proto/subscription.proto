@@ -60,14 +60,10 @@ message Pagination {
   int32 totalPages = 4;
 }
 
-message SubscriptionList {
-  repeated Subscription data = 1;
-}
-
 message SubscriptionListResponse {
   bool success = 1;
   string message = 2;
-  SubscriptionList data = 3;
+  repeated Subscription data = 3;
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;

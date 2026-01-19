@@ -26,7 +26,7 @@ model Subscription {
 model Package {
   id                    String       @id @default(uuid())
   name                  String       @unique
-  price                 Decimal     
+  price                 Decimal     @db.Decimal(10,2)
   maxUsages             Int?
   usageType             UsageType      @default(Finite)
   status                PackageStatus   @default(Active)

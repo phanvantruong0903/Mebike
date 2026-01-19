@@ -37,7 +37,7 @@ export class PackageController {
     data: CreatePackageDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.packageService.create(data);
+      const result = await this.baseHandler.createLogic(data);
 
       return grpcResponse<PackageModel>(
         result,
@@ -57,7 +57,7 @@ export class PackageController {
     data: UpdatePackageDto & { id: string },
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.packageService.update(data?.id, data);
+      const result = await this.baseHandler.updateLogic(data?.id, data);
 
       return grpcResponse<PackageModel>(
         result,
