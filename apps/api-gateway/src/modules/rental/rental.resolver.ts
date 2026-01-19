@@ -28,7 +28,7 @@ import { RentalService } from './rental.service';
 import { BikeDataloader } from './bike.dataloader';
 import { StationDataloader } from '../bike/station.dataloader';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { UserProfileDataLoader } from './user-profile.dataloader';
+import { UserProfileDataLoader } from '../user/user-profile.dataloader';
 
 @Resolver(() => Rental)
 export class RentalResolver {

@@ -15,8 +15,8 @@ import { StationModule } from '../station/station.module';
 import { BikeDataloader } from './bike.dataloader';
 import { BikeModule } from '../bike/bike.module';
 import { StationDataloader } from '../bike/station.dataloader';
-import { UserProfileDataLoader } from './user-profile.dataloader';
 import { UserModule } from '../user/user.module';
+import { UserProfileDataLoader } from '../user/user-profile.dataloader';
 
 @Module({
   imports: [
