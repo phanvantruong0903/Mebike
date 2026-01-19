@@ -30,6 +30,9 @@ import {
   VerifyEmailDto,
   GRPC_PACKAGE,
   STATION_MESSAGES,
+  RefreshTokenDto,
+  VerifyOtpDto,
+  VerifyEmailRequestDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
@@ -117,22 +120,10 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REFRESH_TOKEN)
-  async refreshToken(data: {
-    refreshToken: string;
-    accessToken: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async refreshToken(
+    data: RefreshTokenDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const { refreshToken, accessToken } = data;
-
-    if (!refreshToken) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
-      ]);
-    }
-    if (!accessToken) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
-      ]);
-    }
 
     const result = await this.authService.refreshToken(
       refreshToken,
@@ -188,10 +179,9 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_OTP)
-  async verifyOtp(data: {
-    email: string;
-    otp: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async verifyOtp(
+    data: VerifyOtpDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const { email, otp } = data;
       const storedOtp = await this.redis.get(
@@ -322,15 +312,10 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_EMAIL)
-  async verifyEmail(data: {
-    accountId: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async verifyEmail(
+    data: VerifyEmailRequestDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const { accountId } = data;
-    if (!accountId) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        USER_MESSAGES.ID_REQUIRED,
-      ]);
-    }
 
     try {
       await this.authService.verifyEmail(accountId);

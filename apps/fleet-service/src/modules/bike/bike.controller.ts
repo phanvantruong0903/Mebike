@@ -13,6 +13,8 @@ import {
   UpdateBikeDto,
   GetBikeDto,
   ChangeBikeStatusDto,
+  GetBikeDetailDto,
+  GetBikesByIdsDto,
 } from '@mebike/common';
 import { BikeService } from './bike.service';
 
@@ -50,13 +52,11 @@ export class BikeController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_ONE)
-  async getBikeDetail({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getBikeDetail(
+    data: GetBikeDetailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.bikeService.getBikeDetail(id);
+      const result = await this.bikeService.getBikeDetail(data.id);
       return grpcResponse<BikeModel>(result, BIKE_MESSAGES.GET_DETAIL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -149,9 +149,9 @@ export class BikeController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_BIKES_BY_IDS)
-  async getBikesByIds(data: {
-    ids: string[];
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getBikesByIds(
+    data: GetBikesByIdsDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const { ids } = data;
     const bikes = await this.bikeService.getBikesByIds(ids);
     return grpcResponse(bikes, BIKE_MESSAGES.GET_ALL_SUCCESS);

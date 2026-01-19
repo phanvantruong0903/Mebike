@@ -23,6 +23,9 @@ import {
   REDIS_KEY_PREFIX,
   GetStationDto,
   UpdateStationStatusDto,
+  GetStationDetailDto,
+  GetStationsByIdsDto,
+  StationExistDto,
 } from '@mebike/common';
 import { StationService } from './station.service';
 import Redis from 'ioredis';
@@ -76,13 +79,11 @@ export class StationController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.GET_ONE)
-  async getStationDetail({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getStationDetail(
+    data: GetStationDetailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.stationService.getStationDetail(id);
+      const result = await this.stationService.getStationDetail(data.id);
       return grpcResponse<StationModel>(
         result,
         STATION_MESSAGES.GET_DETAIL_SUCCESS,
@@ -162,9 +163,9 @@ export class StationController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.GET_STATIONS_BY_IDS)
-  async getStationsByIds(data: {
-    ids: string[];
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getStationsByIds(
+    data: GetStationsByIdsDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const { ids } = data;
     const stations = await this.stationService.getStationsByIds(ids);
     return grpcResponse(stations, STATION_MESSAGES.GET_ALL_SUCCESS);
@@ -207,9 +208,9 @@ export class StationController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.STATION_EXIST)
-  async stationExist(data: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async stationExist(
+    data: StationExistDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const exists = await this.stationService.checkStationExist(data.id);
     return grpcResponse(
       { exists },

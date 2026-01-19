@@ -5,3 +5,6 @@ export * from './UserDto';
 export * from './RegisterUserDto';
 export * from './LogoutDto';
 export * from './VerifiEmailDto';
+export * from './RefreshTokenDto';
+export * from './VerifyOtpDto';
+export * from './VerifyEmailRequestDto';

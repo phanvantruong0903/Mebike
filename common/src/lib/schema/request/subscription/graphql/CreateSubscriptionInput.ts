@@ -3,13 +3,13 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 @InputType()
 export class CreateSubscriptionInput {
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsNotEmpty()
-  accountId!: string;
+  accountId?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsNotEmpty()
-  packageId!: string;
+  packageId?: string;
 }

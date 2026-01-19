@@ -14,16 +14,16 @@ import {
 
 @InputType()
 export class CreatePackageInput {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  name?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsNumberString()
   @IsNotEmpty()
   @Matches(/^\d*\.?\d+$/)
-  price!: string;
+  price?: string;
 
   @Field(() => UsageType, { defaultValue: UsageType.Finite })
   @IsEnum(UsageType)

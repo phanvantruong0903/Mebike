@@ -6,11 +6,13 @@ import {
   MinLength,
   IsNotEmpty,
   IsUrl,
+  IsUUID,
 } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsNotEmpty()
   @IsString()
+  @IsUUID()
   id!: string;
 
   @IsOptional()

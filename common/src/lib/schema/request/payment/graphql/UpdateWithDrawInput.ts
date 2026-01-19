@@ -3,11 +3,11 @@ import { WithdrawStatus } from '../../../../prisma/index';
 
 @InputType()
 export class UpdateWithDrawStatusInput {
-  @Field()
-  id!: string;
+  @Field({ nullable: true })
+  id?: string;
 
-  @Field(() => WithdrawStatus)
-  status!: WithdrawStatus;
+  @Field(() => WithdrawStatus, { nullable: true })
+  status?: WithdrawStatus;
 
   @Field(() => String, { nullable: true })
   reason?: string;

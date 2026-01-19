@@ -6,3 +6,8 @@ export * from './ChangeStatusDto';
 export * from './ResetPasswordRequestDto';
 export * from './ResetPasswordDto';
 export * from './GetUserDto';
+export * from './GetUserDetailDto';
+export * from './DeleteUserDto';
+export * from './UserVerifyDto';
+export * from './GetUsersByAccountIdsDto';
+export * from './FindFreeSosDto';

@@ -2,24 +2,24 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateSosInput {
-  @Field(() => String)
-  rentalId!: string;
+  @Field(() => String, { nullable: true })
+  rentalId?: string;
 
   @Field(() => String, { nullable: true })
   requesterId?: string;
 
-  @Field(() => String)
-  issue!: string;
+  @Field(() => String, { nullable: true })
+  issue?: string;
 
-  @Field(() => [String])
-  photos!: string[];
+  @Field(() => [String], { nullable: true })
+  photos?: string[];
 
-  @Field(() => Boolean)
-  isContinuingRental!: boolean;
+  @Field(() => Boolean, { nullable: true })
+  isContinuingRental?: boolean;
 
-  @Field(() => String)
-  latitude!: string;
+  @Field(() => String, { nullable: true })
+  latitude?: string;
 
-  @Field(() => String)
-  longitude!: string;
+  @Field(() => String, { nullable: true })
+  longitude?: string;
 }

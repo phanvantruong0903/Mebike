@@ -4,10 +4,11 @@ import { CreateUserInput } from './CreateUserInput';
 @InputType()
 export class RegisterUserInput extends OmitType(CreateUserInput, [
   'role',
+  'workStationId',
 ] as const) {
-  @Field()
-  password!: string;
+  @Field({ nullable: true })
+  password?: string;
 
-  @Field()
-  confirmPassword!: string;
+  @Field({ nullable: true })
+  confirmPassword?: string;
 }

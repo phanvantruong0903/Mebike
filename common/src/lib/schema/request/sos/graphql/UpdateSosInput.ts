@@ -3,12 +3,12 @@ import { EmergencyStatus } from '../../../../prisma';
 
 @InputType()
 export class UpdateSosInput {
-  @Field(() => String)
-  id!: string;
+  @Field(() => String, { nullable: true })
+  id?: string;
 
-  @Field(() => [String])
-  resolvedPhotos!: string[];
+  @Field(() => [String], { nullable: true })
+  resolvedPhotos?: string[];
 
-  @Field(() => EmergencyStatus)
-  status!: EmergencyStatus;
+  @Field(() => EmergencyStatus, { nullable: true })
+  status?: EmergencyStatus;
 }
