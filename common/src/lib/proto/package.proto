@@ -7,6 +7,7 @@ service MembershipService {
   rpc UpdatePackage (UpdatePackageRequest) returns (PackageResponse);
   rpc GetPackage (GetPackageRequest) returns (PackageResponse);
   rpc GetPackageList (GetPackageListRequest) returns (PackageListResponse);
+  rpc TogglePackageStatus (TogglePackageStatusRequest) returns (PackageResponse);
 }
 
 message Package {
@@ -37,6 +38,10 @@ message UpdatePackageRequest {
 }
 
 message GetPackageRequest {
+  string id = 1;
+}
+
+message TogglePackageStatusRequest {
   string id = 1;
 }
 

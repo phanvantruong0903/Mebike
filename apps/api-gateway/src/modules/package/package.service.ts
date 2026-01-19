@@ -18,6 +18,7 @@ interface PackageServiceClient {
   ): Observable<PackageResponse>;
   GetPackage(data: { id: string }): Observable<PackageResponse>;
   GetPackageList(data: GetPackageListInput): Observable<PackageListResponse>;
+  TogglePackageStatus(data: { id: string }): Observable<PackageResponse>;
 }
 
 @Injectable()
@@ -54,5 +55,11 @@ export class PackageService implements OnModuleInit {
 
   async getPackage(id: string) {
     return await firstValueFrom(this.packageService.GetPackage({ id }));
+  }
+
+  async togglePackageStatus(id: string) {
+    return await firstValueFrom(
+      this.packageService.TogglePackageStatus({ id }),
+    );
   }
 }

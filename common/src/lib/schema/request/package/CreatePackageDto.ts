@@ -23,7 +23,7 @@ export class CreatePackageDto {
 
   @IsEnum(UsageType)
   @IsOptional()
-  usageType?: UsageType = UsageType.Finite;
+  usageType?: UsageType;
 
   @ValidateIf((o) => o.usageType !== UsageType.Infinite)
   @IsInt()
@@ -35,5 +35,5 @@ export class CreatePackageDto {
 
   @IsEnum(PackageStatus)
   @IsOptional()
-  status?: PackageStatus = PackageStatus.Active;
+  status?: PackageStatus;
 }

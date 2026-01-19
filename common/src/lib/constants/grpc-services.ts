@@ -119,4 +119,5 @@ export const PACKAGE_METHODS = {
   UPDATE: 'UpdatePackage',
   GET_ONE: 'GetPackage',
   GET_ALL: 'GetPackageList',
+  TOGGLE_STATUS: 'TogglePackageStatus',
 };

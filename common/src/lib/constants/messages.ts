@@ -234,4 +234,8 @@ export const PACKAGE_MESSAGES = {
   UPDATE_FAIL: 'Update Package failed',
   GET_ONE_SUCCESS: 'Package retrieved successfully',
   GET_ONE_FAILED: 'Package retrieved failed',
+  EXISTS: (name: string) => `Package ${name} already exists`,
+  MAX_USAGES_MUST_BE_POSITIVE: 'Max usages must be positive',
+  TOGGLE_STATUS_SUCCESS: 'Toggle Package status successfully',
+  TOGGLE_STATUS_FAIL: 'Toggle Package status failed',
 };
