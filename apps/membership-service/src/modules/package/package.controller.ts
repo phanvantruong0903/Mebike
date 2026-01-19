@@ -143,4 +143,24 @@ export class PackageController {
       );
     }
   }
+
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.GET_PACKAGES_BY_IDS)
+  async getPackagesByIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.packageService.getByIds(data.ids);
+
+      return grpcResponse<PackageModel[]>(
+        result,
+        PACKAGE_MESSAGES.GET_ALL_SUCCESS,
+      );
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || PACKAGE_MESSAGES.GET_ALL_FAIL);
+    }
+  }
 }

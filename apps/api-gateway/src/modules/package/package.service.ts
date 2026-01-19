@@ -9,6 +9,7 @@ import {
   GetPackageListInput,
   PackageListResponse,
   UpdatePackageInput,
+  Package,
 } from '@mebike/common';
 
 interface PackageServiceClient {
@@ -19,6 +20,7 @@ interface PackageServiceClient {
   GetPackage(data: { id: string }): Observable<PackageResponse>;
   GetPackageList(data: GetPackageListInput): Observable<PackageListResponse>;
   TogglePackageStatus(data: { id: string }): Observable<PackageResponse>;
+  GetPackagesByIds(data: { ids: string[] }): Observable<{ data: Package[] }>;
 }
 
 @Injectable()
@@ -61,5 +63,12 @@ export class PackageService implements OnModuleInit {
     return await firstValueFrom(
       this.packageService.TogglePackageStatus({ id }),
     );
+  }
+
+  async getPackagesByIds(ids: string[]): Promise<Package[]> {
+    const response = await firstValueFrom(
+      this.packageService.GetPackagesByIds({ ids }),
+    );
+    return response.data || [];
   }
 }

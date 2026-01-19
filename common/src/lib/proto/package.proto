@@ -8,6 +8,7 @@ service MembershipService {
   rpc GetPackage (GetPackageRequest) returns (PackageResponse);
   rpc GetPackageList (GetPackageListRequest) returns (PackageListResponse);
   rpc TogglePackageStatus (TogglePackageStatusRequest) returns (PackageResponse);
+  rpc GetPackagesByIds (GetPackagesByIdsRequest) returns (PackageArrayResponse);
 }
 
 message Package {
@@ -45,6 +46,10 @@ message TogglePackageStatusRequest {
   string id = 1;
 }
 
+message GetPackagesByIdsRequest {
+  repeated string ids = 1;
+}
+
 message GetPackageListRequest {
   int32 page = 1;
   int32 limit = 2;
@@ -73,4 +78,12 @@ message PackageListResponse {
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;
+}
+
+message PackageArrayResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Package data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
 }

@@ -141,4 +141,13 @@ export class PackageService extends BaseService<
       ]);
     }
   }
+
+  async getByIds(ids: string[]): Promise<PackageModel[]> {
+    const packages = await prismaMembership.package.findMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+    return packages;
+  }
 }
