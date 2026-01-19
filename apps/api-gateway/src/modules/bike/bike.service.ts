@@ -3,7 +3,6 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
-  UpdateBikeInput,
   GetBikeInput,
   CreateBikeInput,
   BikeResponse,
@@ -13,11 +12,12 @@ import {
   GRPC_SERVICES,
   meiliClient,
   BikeResult,
+  UpdateBikeDto,
 } from '@mebike/common';
 
 interface BikeServiceClient {
   GetBike(data: { id: string }): Observable<BikeResponse>;
-  UpdateBike(data: UpdateBikeInput & { id: string }): Observable<BikeResponse>;
+  UpdateBike(data: UpdateBikeDto): Observable<BikeResponse>;
   GetAllBikes(data: GetBikeInput): Observable<BikeListResponse>;
   CreateBike(data: CreateBikeInput): Observable<BikeResponse>;
   ChangeBikeStatus(data: {
@@ -58,7 +58,7 @@ export class BikeService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.CreateBike(data));
   }
 
-  async updateBike(data: UpdateBikeInput & { id: string }) {
+  async updateBike(data: UpdateBikeDto) {
     return await firstValueFrom(this.fleetService.UpdateBike(data));
   }
 

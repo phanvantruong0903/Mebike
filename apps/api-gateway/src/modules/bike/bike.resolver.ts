@@ -14,6 +14,7 @@ import {
   CreateBikeInput,
   GRAPHQL_NAME_BIKE,
   UpdateBikeInput,
+  UpdateBikeDto,
   BikeListResponse,
   GetBikeInput,
   Station,
@@ -55,7 +56,7 @@ export class BikeResolver {
     return this.bikeService.updateBike({
       id,
       ...body,
-    });
+    } as unknown as UpdateBikeDto);
   }
 
   @Query(() => BikeResponse, { name: GRAPHQL_NAME_BIKE.GET_ONE })

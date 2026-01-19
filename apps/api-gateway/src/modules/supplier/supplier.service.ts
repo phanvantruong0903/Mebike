@@ -7,24 +7,22 @@ import {
   SupplierResponse,
   SupplierListResponse,
   SupplierStatsResponse,
-  UpdateSupplierInput,
-  ChangeSupplierStatusInput,
+  UpdateSupplierDto,
   CreateSupplierInput,
   GetSupplierInput,
   Supplier,
   SupplierSearchResult,
   meiliClient,
   SupplierSearchPage,
+  ChangeSupplierStatusDto,
 } from '@mebike/common';
 
 interface SupplierServiceClient {
   GetSupplier(data: { id: string }): Observable<SupplierResponse>;
-  UpdateSupplier(
-    data: UpdateSupplierInput & { id: string },
-  ): Observable<SupplierResponse>;
+  UpdateSupplier(data: UpdateSupplierDto): Observable<SupplierResponse>;
   GetAllSuppliers(data: GetSupplierInput): Observable<SupplierListResponse>;
   ChangeSupplierStatus(
-    data: ChangeSupplierStatusInput & { id: string },
+    data: ChangeSupplierStatusDto,
   ): Observable<SupplierResponse>;
   GetSupplierStats(
     data: Record<string, never>,
@@ -64,7 +62,7 @@ export class SupplierService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.CreateSupplier(data));
   }
 
-  async updateSupplier(data: UpdateSupplierInput & { id: string }) {
+  async updateSupplier(data: UpdateSupplierDto) {
     return await firstValueFrom(this.fleetService.UpdateSupplier(data));
   }
 
@@ -84,7 +82,7 @@ export class SupplierService implements OnModuleInit {
     };
   }
 
-  async changeSupplierStatus(data: ChangeSupplierStatusInput & { id: string }) {
+  async changeSupplierStatus(data: ChangeSupplierStatusDto) {
     return await firstValueFrom(this.fleetService.ChangeSupplierStatus(data));
   }
 

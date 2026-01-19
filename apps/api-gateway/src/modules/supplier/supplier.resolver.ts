@@ -5,14 +5,15 @@ import {
   Role,
   CreateSupplierInput,
   UpdateSupplierInput,
+  UpdateSupplierDto,
   SupplierResponse,
   GRAPHQL_NAME_SUPPLIER,
   SupplierListResponse,
   GetSupplierInput,
-  ChangeSupplierStatusInput,
   SupplierStatsResponse,
   SupplierSearchResult,
   SupplierSearchPage,
+  ChangeSupplierStatusDto,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -41,7 +42,7 @@ export class SupplierResolver {
     return this.supplierService.updateSupplier({
       id,
       ...body,
-    });
+    } as unknown as UpdateSupplierDto);
   }
 
   @Query(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ONE })
@@ -71,9 +72,10 @@ export class SupplierResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async changeSupplierStatus(
-    @Args('body') body: ChangeSupplierStatusInput,
+    @Args('body') body: CreateSupplierInput,
   ): Promise<SupplierResponse> {
-    return this.supplierService.changeSupplierStatus(body);
+    const data = body as unknown as ChangeSupplierStatusDto;
+    return this.supplierService.changeSupplierStatus(data);
   }
 
   @Query(() => SupplierStatsResponse, {

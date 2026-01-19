@@ -6,9 +6,6 @@ export class CreateSosInput {
   rentalId?: string;
 
   @Field(() => String, { nullable: true })
-  requesterId?: string;
-
-  @Field(() => String, { nullable: true })
   issue?: string;
 
   @Field(() => [String], { nullable: true })

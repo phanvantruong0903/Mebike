@@ -11,6 +11,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
   CreateSosInput,
+  CreateSosDto,
   UserProfile,
   SosResponse,
   GRAPHQL_NAME_SOS,
@@ -21,6 +22,7 @@ import {
   Bike,
   Station,
   Rental,
+  UpdateSosDto,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -48,8 +50,10 @@ export class SosResolver {
     @Args('body') body: CreateSosInput,
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
-    const accountId = user.accountId;
-    return this.sosService.createSos({ ...body, requesterId: accountId });
+    return this.sosService.createSos({
+      ...body,
+      requesterId: user.accountId,
+    } as unknown as CreateSosDto);
   }
 
   @Mutation(() => SosResponse, { name: GRAPHQL_NAME_SOS.UPDATE_STATUS })
@@ -59,12 +63,11 @@ export class SosResolver {
     @Args('body') body: UpdateSosInput,
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
-    const accountId = user.accountId;
     return this.sosService.updateSosStatus({
       ...body,
-      accountId,
+      accountId: user.accountId,
       role: user.role,
-    });
+    } as unknown as UpdateSosDto);
   }
 
   @Query(() => SosListResponse, { name: GRAPHQL_NAME_SOS.GET_ALL })

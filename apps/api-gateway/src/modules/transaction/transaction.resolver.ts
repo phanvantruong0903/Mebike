@@ -10,6 +10,7 @@ import {
   GetTransactionInput,
   UserProfile,
   CreateWithDrawInput,
+  CreateWithDrawDto,
   WithdrawResponse,
   WithdrawListResponse,
 } from '@mebike/common';
@@ -79,7 +80,10 @@ export class TransactionResolver {
     @Args('body') body: CreateWithDrawInput,
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawResponse> {
-    return this.transactionService.createWithdraw(body, user.accountId);
+    return this.transactionService.createWithdraw({
+      ...body,
+      accountId: user.accountId,
+    } as unknown as CreateWithDrawDto);
   }
 
   @Query(() => WithdrawListResponse, {

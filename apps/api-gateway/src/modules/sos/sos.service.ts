@@ -13,6 +13,7 @@ import {
   Sos,
   SOS_MESSAGES,
   GetSosDto,
+  CreateSosDto,
 } from '@mebike/common';
 import { GraphQLError } from 'graphql/error';
 
@@ -20,7 +21,7 @@ interface SosServiceClient {
   GetSos(data: { id: string }): Observable<SosResponse>;
   UpdateSosStatus(data: UpdateSosDto): Observable<SosResponse>;
   GetAllSos(data: GetSosDto): Observable<SosListResponse>;
-  CreateSos(data: CreateSosInput): Observable<SosResponse>;
+  CreateSos(data: CreateSosDto): Observable<SosResponse>;
   // GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
   // UpdateStationStatus(
   //   data: UpdateStationStatusInput,
@@ -39,7 +40,7 @@ export class SosService implements OnModuleInit {
     );
   }
 
-  async createSos(data: CreateSosInput) {
+  async createSos(data: CreateSosDto) {
     return await firstValueFrom(this.incidentService.CreateSos(data));
   }
 

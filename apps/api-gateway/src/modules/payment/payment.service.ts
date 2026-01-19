@@ -6,6 +6,7 @@ import {
   GRPC_SERVICES,
   CreatePaymentInput,
   PaymentResponse,
+  CreatePaymentUrlDto,
 } from '@mebike/common';
 
 interface PaymentServiceClient {
@@ -31,7 +32,7 @@ export class PaymentService implements OnModuleInit {
     );
   }
 
-  async createPayment(data: CreatePaymentInput) {
+  async createPayment(data: CreatePaymentUrlDto) {
     return await firstValueFrom(this.paymentService.CreatePaymentUrl(data));
   }
 
