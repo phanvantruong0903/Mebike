@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsString()
@@ -8,4 +8,8 @@ export class CreateSubscriptionDto {
   @IsString()
   @IsNotEmpty()
   packageId!: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isActivated?: boolean;
 }

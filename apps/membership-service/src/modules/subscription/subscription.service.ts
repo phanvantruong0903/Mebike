@@ -2,9 +2,11 @@ import {
   BaseService,
   CreateSubscriptionDto,
   prismaMembership,
+  SERVER_MESSAGE,
   SUBSCRIPTION_MESSAGES,
   SubscriptionModel,
   SubscriptionStatus,
+  throwGrpcError,
 } from '@mebike/common';
 import {
   ConflictException,
@@ -25,11 +27,40 @@ export class SubscriptionService extends BaseService<
   override async create(
     data: CreateSubscriptionDto,
   ): Promise<SubscriptionModel> {
-    return await prismaMembership.subscription.create({
-      data: {
-        ...data,
+    const existingSubsription = await prismaMembership.subscription.findFirst({
+      where: {
+        accountId: data.accountId,
+        status: { in: [SubscriptionStatus.Pending, SubscriptionStatus.Active] },
       },
     });
+    if (existingSubsription) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        SUBSCRIPTION_MESSAGES.ALREADY_HAVE_SUBSCRIPTION,
+      ]);
+    }
+    return await prismaMembership.package
+      .findUniqueOrThrow({
+        where: { id: data.packageId },
+      })
+      .then(async () => {
+        return await prismaMembership.subscription.create({
+          data: {
+            accountId: data.accountId,
+            packageId: data.packageId,
+            ...(data.isActivated && {
+              status: SubscriptionStatus.Active,
+              activatedAt: new Date(),
+              expiredAt: this.generateExpirationDate(new Date()),
+            }),
+          },
+        });
+      })
+      .catch((error) => {
+        if (error instanceof NotFoundException) throw error;
+        throwGrpcError(409, SERVER_MESSAGE.DATABASE_ERROR, [
+          SUBSCRIPTION_MESSAGES.CREATE_FAILED,
+        ]);
+      });
   }
 
   async activate(id: string): Promise<SubscriptionModel> {

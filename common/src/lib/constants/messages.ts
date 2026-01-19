@@ -218,6 +218,7 @@ export const SUBSCRIPTION_MESSAGES = {
   ACTIVATE_FAILED: 'Subscription activated failed',
   EXPIRE_SUCCESS: 'Subscription expired successfully',
   EXPIRE_FAILED: 'Subscription expired failed',
+  ALREADY_HAVE_SUBSCRIPTION: 'User already has subscription',
 };
 
 export const PACKAGE_MESSAGES = {

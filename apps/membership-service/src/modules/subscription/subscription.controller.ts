@@ -45,7 +45,6 @@ export class SubscriptionController {
         throw error;
       }
       const err = error as Error;
-      console.log(err);
       throw new RpcException(
         err?.message || SUBSCRIPTION_MESSAGES.CREATE_FAILED,
       );
