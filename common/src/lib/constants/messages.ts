@@ -142,6 +142,7 @@ export const SERVER_MESSAGE = {
   DELETED_NOT_IMPLEMENTED: 'Delete method is not implemented',
   BAD_REQUEST: 'Bad Request',
   UNAUTHORIZED: 'Unauthorized',
+  FORBIDDEN: 'Forbidden',
 };
 
 export const RENTAL_MESSAGES = {
@@ -219,6 +220,8 @@ export const SUBSCRIPTION_MESSAGES = {
   EXPIRE_SUCCESS: 'Subscription expired successfully',
   EXPIRE_FAILED: 'Subscription expired failed',
   ALREADY_HAVE_SUBSCRIPTION: 'User already has subscription',
+  CANNOT_ACTIVATE_OTHER_USER_SUBSCRIPTION:
+    'Access denied, cannot activate other user subscription',
 };
 
 export const PACKAGE_MESSAGES = {

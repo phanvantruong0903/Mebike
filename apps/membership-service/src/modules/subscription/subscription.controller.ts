@@ -2,6 +2,7 @@ import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
+  ActivateSubscriptionDto,
   BaseGrpcHandler,
   buildFilter,
   buildSearchFilter,
@@ -10,9 +11,12 @@ import {
   GRPC_SERVICES,
   grpcPaginateResponse,
   grpcResponse,
+  SERVER_MESSAGE,
   SUBSCRIPTION_MESSAGES,
   SUBSCRIPTION_METHODS,
   SubscriptionModel,
+  SubscriptionStatus,
+  throwGrpcError,
 } from '@mebike/common';
 
 @Controller()
@@ -112,13 +116,15 @@ export class SubscriptionController {
   }
 
   @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.ACTIVATE)
-  async activateSubscription({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async activateSubscription(
+    data: ActivateSubscriptionDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.subscriptionService.activate(id);
+      await this.subscriptionService.checkSubscriptionOwner(
+        { id: data.id, status: SubscriptionStatus.Pending },
+        data.accountId,
+      );
+      const result = await this.subscriptionService.activate(data.id);
 
       if (!result) {
         throw new RpcException(SUBSCRIPTION_MESSAGES.NOT_FOUND);

@@ -124,4 +124,23 @@ export class SubscriptionService extends BaseService<
   generateExpirationDate(date: Date): Date {
     return new Date(date.getTime() + 30 * 24 * 60 * 60 * 1000);
   }
+
+  async checkSubscriptionOwner(
+    where: { id: string; status?: SubscriptionStatus },
+    accountId: string,
+  ): Promise<void> {
+    const subscription = await prismaMembership.subscription.findUnique({
+      where,
+    });
+    if (!subscription) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        SUBSCRIPTION_MESSAGES.NOT_FOUND,
+      ]);
+    }
+    if (subscription.accountId !== accountId) {
+      throwGrpcError(403, SERVER_MESSAGE.FORBIDDEN, [
+        SUBSCRIPTION_MESSAGES.CANNOT_ACTIVATE_OTHER_USER_SUBSCRIPTION,
+      ]);
+    }
+  }
 }
