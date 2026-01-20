@@ -1,4 +1,4 @@
-import { Min, IsNumber, IsOptional, IsEnum, IsUUID } from 'class-validator';
+import { Min, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserStatus } from '../../../prisma';
 
