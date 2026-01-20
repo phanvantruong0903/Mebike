@@ -39,6 +39,14 @@ interface DebitParams {
   transactionType: TransactionType;
 }
 
+/**
+ * Produce a new object with keys sorted alphabetically and values URL-encoded.
+ *
+ * Filters out entries whose value is `undefined`, `null`, or an empty string. Encodes each value using percent-encoding and replaces percent-encoded spaces (`%20`) with `+`.
+ *
+ * @param obj - Input map of VNPay parameters with string or numeric values
+ * @returns A new `VnpParams` object containing only the filtered keys in alphabetical order and their URL-encoded string values (spaces encoded as `+`)
+ */
 function sortObject(obj: VnpParams): VnpParams {
   const sorted: VnpParams = {};
   const str = Object.keys(obj).sort();
