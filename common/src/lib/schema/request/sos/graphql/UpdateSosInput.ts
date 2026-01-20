@@ -11,4 +11,7 @@ export class UpdateSosInput {
 
   @Field(() => EmergencyStatus, { nullable: true })
   status?: EmergencyStatus;
+
+  @Field(() => String, { nullable: true })
+  agentNotes?: string;
 }

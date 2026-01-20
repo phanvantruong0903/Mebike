@@ -268,4 +268,5 @@ export const SOS_MESSAGES = {
   FORBIDDEN: 'Forbidden: You can only view your own SOS',
   CANNOT_CREATE_NOT_IN_PROGRESS_RENTAL:
     'Cannot create for rental not In Progress',
+  AGENT_NOTES_REQUIRED: 'Agent notes are required',
 };

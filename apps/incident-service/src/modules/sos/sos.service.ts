@@ -320,14 +320,26 @@ export class SosService extends BaseService<
       data.status === EmergencyStatus.Resolved ||
       data.status === EmergencyStatus.Unsolvable
     ) {
-      if (data.resolvedPhotos) {
-        updateData.resolvedPhotos = data.resolvedPhotos;
+      if (!data.resolvedPhotos) {
+        throwGrpcError(400, SOS_MESSAGES.PHOTOS_REQUIRED, [
+          SOS_MESSAGES.PHOTOS_REQUIRED,
+        ]);
+      }
+      updateData.resolvedPhotos = data.resolvedPhotos;
+      if (data.status === EmergencyStatus.Unsolvable && !data.agentNotes) {
+        throwGrpcError(400, SOS_MESSAGES.AGENT_NOTES_REQUIRED, [
+          SOS_MESSAGES.AGENT_NOTES_REQUIRED,
+        ]);
+      }
+
+      if (data.agentNotes) {
+        updateData.agentNotes = data.agentNotes;
+      }
+      if (data.status === EmergencyStatus.Resolved) {
+        updateData.resolvedAt = new Date();
       }
     }
 
-    if (data.status === EmergencyStatus.Resolved) {
-      updateData.resolvedAt = new Date();
-    }
     if (data.status === EmergencyStatus.Processing) {
       updateData.startedAt = new Date();
     }

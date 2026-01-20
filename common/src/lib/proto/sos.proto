@@ -80,4 +80,6 @@ message UpdateSosStatusRequest {
   string status = 2;
   string accountId = 3;
   string role = 4;
+  optional string agentNotes = 5;
+  repeated string resolvedPhotos = 6;
 }
