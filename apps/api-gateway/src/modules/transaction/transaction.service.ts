@@ -4,7 +4,6 @@ import { lastValueFrom, Observable } from 'rxjs';
 import { GraphQLError } from 'graphql';
 import {
   CreateWithDrawDto,
-  CreateWithDrawInput,
   GRPC_PACKAGE,
   GRPC_SERVICES,
   PAYMENT_MESSAGES,

@@ -247,7 +247,17 @@ export class PaymentprocessorService {
 
     try {
       return await prismaPayment.$transaction(
-        async (tx) => {
+        async (
+          tx: Omit<
+            typeof prismaPayment,
+            | '$connect'
+            | '$disconnect'
+            | '$on'
+            | '$transaction'
+            | '$use'
+            | '$extends'
+          >,
+        ) => {
           const wallet = await tx.wallet.findUnique({
             where: {
               accountId,
@@ -339,7 +349,17 @@ export class PaymentprocessorService {
 
     try {
       return await prismaPayment.$transaction(
-        async (tx) => {
+        async (
+          tx: Omit<
+            typeof prismaPayment,
+            | '$connect'
+            | '$disconnect'
+            | '$on'
+            | '$transaction'
+            | '$use'
+            | '$extends'
+          >,
+        ) => {
           const wallet = await tx.wallet.findUnique({
             where: {
               accountId,

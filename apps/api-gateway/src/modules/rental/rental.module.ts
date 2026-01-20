@@ -48,7 +48,6 @@ import { UserModule } from '../user/user.module';
     ]),
   ],
   providers: [RentalService, RentalResolver, BikeDataloader],
-  exports: [BikeDataloader],
-  exports: [RentalService],
+  exports: [BikeDataloader, RentalService],
 })
 export class RentalModule {}

@@ -19,7 +19,6 @@ import {
   ChangeUserStatusDto,
   SERVER_MESSAGE,
   KAFKA_TOPIC,
-  UserStatus,
   GetUserDto,
   GetUserDetailDto,
   DeleteUserDto,

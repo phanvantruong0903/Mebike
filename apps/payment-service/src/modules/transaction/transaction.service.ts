@@ -42,7 +42,17 @@ export class TransactionService extends BaseService<
     data: CreateWithDrawDto,
   ): Promise<WithdrawModel> {
     return await prismaPayment.$transaction(
-      async (tx) => {
+      async (
+        tx: Omit<
+          typeof prismaPayment,
+          | '$connect'
+          | '$disconnect'
+          | '$on'
+          | '$transaction'
+          | '$use'
+          | '$extends'
+        >,
+      ) => {
         const wallet = await tx.wallet.findUnique({
           where: {
             accountId: data.accountId,
@@ -137,11 +147,7 @@ export class TransactionService extends BaseService<
   }
 
   async getAllWithdraws(data: GetAllWithdrawDto) {
-    const searchFields = ['id'];
-    let searchFilter = buildSearchFilter(data.search, searchFields);
-
-    searchFilter = {
-      ...searchFilter,
+    const searchFilter = {
       ...(data.accountId && { accountId: data.accountId }),
     };
 
@@ -174,7 +180,17 @@ export class TransactionService extends BaseService<
 
     try {
       return await prismaPayment.$transaction(
-        async (tx) => {
+        async (
+          tx: Omit<
+            typeof prismaPayment,
+            | '$connect'
+            | '$disconnect'
+            | '$on'
+            | '$transaction'
+            | '$use'
+            | '$extends'
+          >,
+        ) => {
           const findWallet = await tx.wallet.findUnique({
             where: { accountId: accountId },
           });

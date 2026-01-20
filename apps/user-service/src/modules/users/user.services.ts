@@ -34,16 +34,46 @@ export class UserService extends BaseService<
 
     const countTotalByRole = (role: Role) => {
       return stats
-        .filter((item) => item.role === role)
-        .reduce((acc, curr) => acc + curr._count.id, 0);
+        .filter(
+          (item: {
+            role: Role;
+            verify: UserVerifyStatus;
+            _count: { id: number };
+          }) => item.role === role,
+        )
+        .reduce(
+          (
+            acc: number,
+            curr: {
+              role: Role;
+              verify: UserVerifyStatus;
+              _count: { id: number };
+            },
+          ) => acc + curr._count.id,
+          0,
+        );
     };
 
     const result = {
-      totalUsers: stats.reduce((acc, curr) => acc + curr._count.id, 0),
+      totalUsers: stats.reduce(
+        (
+          acc: number,
+          curr: {
+            role: Role;
+            verify: UserVerifyStatus;
+            _count: { id: number };
+          },
+        ) => acc + curr._count.id,
+        0,
+      ),
       totalUser: countTotalByRole(Role.USER),
       totalUserUnverfied:
         stats.find(
-          (item) =>
+          (item: {
+            role: Role;
+            verify: UserVerifyStatus;
+            _count: { id: number };
+          }) =>
             item.role === Role.USER &&
             item.verify === UserVerifyStatus.Unverified,
         )?._count.id ?? 0,

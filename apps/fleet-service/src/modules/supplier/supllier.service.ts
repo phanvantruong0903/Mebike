@@ -33,7 +33,7 @@ export class SupplierService extends BaseService<
         by: ['status'],
         where: {
           supplierId: {
-            not: undefined,
+            not: null,
           },
         },
         _count: {

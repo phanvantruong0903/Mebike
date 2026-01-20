@@ -84,7 +84,10 @@ export class UserResolver {
   async changeStatus(
     @Args('data') data: ChangeUserStatusInput,
   ): Promise<UserResponse> {
-    return this.userService.changeStatus(data);
+    return this.userService.changeStatus({
+      accountId: data.accountId!,
+      status: data.status!,
+    });
   }
 
   @ResolveField(() => Account)
