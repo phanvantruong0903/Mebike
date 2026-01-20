@@ -14,8 +14,6 @@ import { RentalResolver } from './rental.resolver';
 import { StationModule } from '../station/station.module';
 import { BikeDataloader } from './bike.dataloader';
 import { BikeModule } from '../bike/bike.module';
-import { StationDataloader } from '../bike/station.dataloader';
-import { UserProfileDataLoader } from './user-profile.dataloader';
 import { UserModule } from '../user/user.module';
 
 @Module({
@@ -49,13 +47,8 @@ import { UserModule } from '../user/user.module';
       },
     ]),
   ],
-  providers: [
-    RentalService,
-    RentalResolver,
-    BikeDataloader,
-    StationDataloader,
-    UserProfileDataLoader,
-  ],
+  providers: [RentalService, RentalResolver, BikeDataloader],
+  exports: [BikeDataloader],
   exports: [RentalService],
 })
 export class RentalModule {}

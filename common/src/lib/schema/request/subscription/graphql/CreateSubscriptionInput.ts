@@ -1,15 +1,15 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class CreateSubscriptionInput {
-  @Field({ nullable: true })
-  @IsString()
-  @IsNotEmpty()
-  accountId?: string;
-
-  @Field({ nullable: true })
+  @Field()
   @IsString()
   @IsNotEmpty()
   packageId?: string;
+
+  @Field({ defaultValue: false })
+  @IsBoolean()
+  @IsOptional()
+  isActivated?: boolean;
 }

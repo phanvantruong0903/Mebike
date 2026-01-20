@@ -51,6 +51,6 @@ import { SupplierDataloader } from './supplier.dataloader';
     SupplierDataloader,
     BikeResultResolver,
   ],
-  exports: [BikeService],
+  exports: [BikeService, StationDataloader],
 })
 export class BikeModule {}

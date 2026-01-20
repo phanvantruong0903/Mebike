@@ -1,43 +1,24 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { PackageStatus, UsageType } from '../../../../prisma';
-import {
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsNumberString,
-  IsOptional,
-  IsPositive,
-  IsString,
-  Matches,
-  ValidateIf,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, Matches } from 'class-validator';
 
 @InputType()
 export class CreatePackageInput {
   @Field(() => String, { nullable: true })
-  @IsString()
-  @IsNotEmpty()
   name?: string;
 
-  @Field(() => String, { nullable: true })
-  @IsNumberString()
+  @Field(() => Number, { nullable: true })
+  @IsNumber()
   @IsNotEmpty()
   @Matches(/^\d*\.?\d+$/)
-  price?: string;
+  price?: number;
 
   @Field(() => UsageType, { defaultValue: UsageType.Finite })
-  @IsEnum(UsageType)
-  @IsOptional()
-  usageType?: UsageType = UsageType.Finite;
+  usageType?: UsageType;
 
   @Field(() => Int, { nullable: true })
-  @ValidateIf((o) => o.usageType !== UsageType.Infinite)
-  @IsInt()
-  @IsPositive()
   maxUsages?: number;
 
   @Field(() => PackageStatus, { defaultValue: PackageStatus.Active })
-  @IsEnum(PackageStatus)
-  @IsOptional()
-  status?: PackageStatus = PackageStatus.Active;
+  status?: PackageStatus;
 }

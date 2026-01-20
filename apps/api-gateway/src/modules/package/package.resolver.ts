@@ -73,6 +73,15 @@ export class PackageResolver {
     });
   }
 
+  @Mutation(() => PackageResponse, {
+    name: GRAPHQL_NAME_PACKAGE.TOGGLE_STATUS,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async togglePackageStatus(@Args('id') id: string): Promise<PackageResponse> {
+    return this.packageService.togglePackageStatus(id);
+  }
+
   @Query(() => String)
   _healthCheck(): string {
     return 'API is running';

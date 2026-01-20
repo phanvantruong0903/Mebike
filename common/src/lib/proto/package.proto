@@ -7,12 +7,14 @@ service MembershipService {
   rpc UpdatePackage (UpdatePackageRequest) returns (PackageResponse);
   rpc GetPackage (GetPackageRequest) returns (PackageResponse);
   rpc GetPackageList (GetPackageListRequest) returns (PackageListResponse);
+  rpc TogglePackageStatus (TogglePackageStatusRequest) returns (PackageResponse);
+  rpc GetPackagesByIds (GetPackagesByIdsRequest) returns (PackageArrayResponse);
 }
 
 message Package {
   string id = 1;
   string name = 2;
-  string price = 3;
+  double price = 3;
   int32 maxUsages = 4;
   string usageType = 5;
   string status = 6;
@@ -22,7 +24,7 @@ message Package {
 
 message CreatePackageRequest {
   string name = 1;
-  string price = 2;
+  double price = 2;
   optional int32 maxUsages = 3;
   optional string usageType = 4;
 }
@@ -30,7 +32,7 @@ message CreatePackageRequest {
 message UpdatePackageRequest {
   string id = 1;
   optional string name = 2;
-  optional string price = 3;
+  optional double price = 3;
   optional int32 maxUsages = 4;
   optional string usageType = 5;
   optional string status = 6;
@@ -38,6 +40,14 @@ message UpdatePackageRequest {
 
 message GetPackageRequest {
   string id = 1;
+}
+
+message TogglePackageStatusRequest {
+  string id = 1;
+}
+
+message GetPackagesByIdsRequest {
+  repeated string ids = 1;
 }
 
 message GetPackageListRequest {
@@ -61,15 +71,19 @@ message Pagination {
   int32 totalPages = 4;
 }
 
-message PackageList {
-  repeated Package data = 1;
-}
-
 message PackageListResponse {
   bool success = 1;
   string message = 2;
-  PackageList data = 3;
+  repeated Package data = 3;
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;
+}
+
+message PackageArrayResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Package data = 3;
+  int32 statusCode = 4;
+  repeated string errors = 5;
 }

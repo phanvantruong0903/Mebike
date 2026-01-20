@@ -2,7 +2,7 @@ import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { PaymentprocessorService } from './paymentprocessor.service';
 import {
-  DebitRentalDto,
+  DebitSubscriptionDto,
   GRPC_SERVICES,
   grpcResponse,
   PAYMENT_MESSAGES,
@@ -51,11 +51,13 @@ export class PaymentprocessorController {
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }
 
-  @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.DEBIT_RENTAL)
-  async debitRental(
-    data: DebitRentalDto,
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.DEBIT_SUBSCRIPTION)
+  async debitSubscription(
+    data: DebitSubscriptionDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    const response = await this.paymentprocessorService.debit(data);
+    const response = await this.paymentprocessorService.debitForSubscription(
+      data,
+    );
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }
 }

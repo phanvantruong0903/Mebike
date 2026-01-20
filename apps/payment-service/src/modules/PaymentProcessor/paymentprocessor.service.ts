@@ -5,7 +5,6 @@ import querystring from 'qs';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  DebitRentalDto,
   PAYMENT_MESSAGES,
   PaymentMethod,
   prismaPayment,
@@ -16,7 +15,9 @@ import {
   TransactionType,
   WalletModel,
   WalletStatus,
+  DebitSubscriptionDto,
 } from '@mebike/common';
+import { RpcException } from '@nestjs/microservices';
 
 interface PaymentData {
   amount: number;
@@ -31,6 +32,21 @@ interface VnpParams {
   [key: string]: string | number;
 }
 
+interface DebitParams {
+  accountId: string;
+  amount: number;
+  description: string;
+  transactionType: TransactionType;
+}
+
+/**
+ * Produce a new object with keys sorted alphabetically and values URL-encoded.
+ *
+ * Filters out entries whose value is `undefined`, `null`, or an empty string. Encodes each value using percent-encoding and replaces percent-encoded spaces (`%20`) with `+`.
+ *
+ * @param obj - Input map of VNPay parameters with string or numeric values
+ * @returns A new `VnpParams` object containing only the filtered keys in alphabetical order and their URL-encoded string values (spaces encoded as `+`)
+ */
 function sortObject(obj: VnpParams): VnpParams {
   const sorted: VnpParams = {};
   const str = Object.keys(obj).sort();
@@ -135,7 +151,7 @@ export class PaymentprocessorService {
     return result;
   }
 
-  async debit(data: DebitRentalDto) {
+  async debit(data: DebitParams) {
     await this.validateData(
       data.accountId,
       data.amount,
@@ -148,6 +164,18 @@ export class PaymentprocessorService {
       data.description,
       data.transactionType,
     );
+  }
+
+  async debitForSubscription(data: DebitSubscriptionDto) {
+    const description = PAYMENT_MESSAGES.DEBIT_SUBSCRIPTION_DESCRIPTION(
+      data.subscriptionId,
+    );
+    return await this.debit({
+      accountId: data.accountId,
+      amount: data.amount,
+      description,
+      transactionType: TransactionType.FEE,
+    });
   }
 
   async checkWalletExist(accountId: string): Promise<WalletModel> {
@@ -378,6 +406,9 @@ export class PaymentprocessorService {
         },
       );
     } catch (error: any) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
       try {
         await prismaPayment.transaction.create({
           data: {
