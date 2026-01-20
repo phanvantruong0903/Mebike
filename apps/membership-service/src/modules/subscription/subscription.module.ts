@@ -19,6 +19,7 @@ import { join } from 'path';
       {
         name: GRPC_PACKAGE.PAYMENT,
         imports: [ConsulModule],
+        inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
           const paymentService = await consulService.discoverService(
             CONSULT_SERVICE_ID.PAYMENT,
