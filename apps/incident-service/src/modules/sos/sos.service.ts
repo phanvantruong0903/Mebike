@@ -146,7 +146,7 @@ export class SosService extends BaseService<
       ]);
     }
     if (rental.status !== RentalStatus.Rented) {
-      throwGrpcError(404, SOS_MESSAGES.CANNOT_CREATE_NOT_IN_PROGRESS_RENTAL, [
+      throwGrpcError(400, SOS_MESSAGES.CANNOT_CREATE_NOT_IN_PROGRESS_RENTAL, [
         SOS_MESSAGES.NOT_FOUND,
       ]);
     }

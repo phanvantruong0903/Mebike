@@ -20,7 +20,8 @@ export interface SosCreationWorkflow {
 export async function sosCreationWorkflow(data: SosCreationWorkflow): Promise<{
   success: boolean;
   data?: any;
-  error?: string;
+  message?: string;
+  errors?: string[];
   statusCode?: number;
 }> {
   let sosId: string | undefined;
@@ -102,7 +103,8 @@ export async function sosCreationWorkflow(data: SosCreationWorkflow): Promise<{
 
     return {
       success: false,
-      error: errorMessage,
+      message: errorMessage,
+      errors: [errorMessage],
       statusCode,
     };
   }

@@ -4,7 +4,6 @@ import { Observable, firstValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
-  CreateSosInput,
   SosResponse,
   UpdateSosDto,
   SosListResponse,
@@ -22,10 +21,6 @@ interface SosServiceClient {
   UpdateSosStatus(data: UpdateSosDto): Observable<SosResponse>;
   GetAllSos(data: GetSosDto): Observable<SosListResponse>;
   CreateSos(data: CreateSosDto): Observable<SosResponse>;
-  // GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
-  // UpdateStationStatus(
-  //   data: UpdateStationStatusInput,
-  // ): Observable<StationResponse>;
 }
 
 @Injectable()

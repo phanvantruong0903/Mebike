@@ -51,6 +51,8 @@ message GetAllSosRequest {
   int32 page = 1;
   int32 limit = 2;
   optional string status = 3;
+  string accountId = 4;
+  string role = 5;
 }
 
 message GetAllSosResponse {

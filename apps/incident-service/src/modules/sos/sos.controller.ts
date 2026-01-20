@@ -100,7 +100,7 @@ export class SosController {
       );
 
       if (!result.success) {
-        throwGrpcError(result.statusCode, result.error, result.errors);
+        throwGrpcError(result.statusCode, result.message, result.errors);
       }
 
       return grpcResponse(result.data, SOS_MESSAGES.CREATE_SUCCESS);

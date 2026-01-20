@@ -1,4 +1,11 @@
-import { Min, IsNumber, IsOptional, IsEnum, IsUUID } from 'class-validator';
+import {
+  Min,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  IsUUID,
+  IsIn,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { EmergencyStatus, Role } from '../../../prisma';
 
@@ -21,5 +28,6 @@ export class GetSosDto {
   accountId!: string;
 
   @IsEnum(Role)
+  @IsIn([Role.ADMIN, Role.SOS, Role.USER])
   role!: Role;
 }
