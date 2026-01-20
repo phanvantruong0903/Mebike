@@ -25,6 +25,7 @@ export class UserService extends BaseService<
   }
 
   async getUserStat() {
+    // @ts-expect-error Prisma groupBy has complex type signatures that TypeScript cannot narrow down properly
     const stats = await prismaUser.profile.groupBy({
       by: ['role', 'verify'],
       _count: {
