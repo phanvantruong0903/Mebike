@@ -245,4 +245,5 @@ export const PACKAGE_MESSAGES = {
   MAX_USAGES_MUST_BE_POSITIVE: 'Max usages must be positive',
   TOGGLE_STATUS_SUCCESS: 'Toggle Package status successfully',
   TOGGLE_STATUS_FAIL: 'Toggle Package status failed',
+  REQUIRE: (field: string) => `${field} is required`,
 };
