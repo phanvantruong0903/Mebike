@@ -76,7 +76,7 @@ export const PAYMENT_METHODS = {
   CREATE_PAYMENT_URL: 'CreatePaymentUrl',
   PAYMENT_CALLBACK: 'PaymentCallback',
   CREATE_WALLET: 'CreateWallet',
-  DEBIT_RENTAL: 'DebitRental',
+  DEBIT_SUBSCRIPTION: 'DebitSubscription',
   GET_WALLET: 'GetWallet',
   GET_ALL_WALLET: 'GetAllWallets',
   CHANGE_WALLET_STATUS: 'ChangeWalletStatus',
@@ -119,4 +119,6 @@ export const PACKAGE_METHODS = {
   UPDATE: 'UpdatePackage',
   GET_ONE: 'GetPackage',
   GET_ALL: 'GetPackageList',
+  TOGGLE_STATUS: 'TogglePackageStatus',
+  GET_PACKAGES_BY_IDS: 'GetPackagesByIds',
 };

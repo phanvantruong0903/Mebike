@@ -76,7 +76,7 @@ model Withdraw {
 
 enum TransactionType {
   TOPUP
-  RENTALFEE
+  FEE
   WITHDRAWAL
   REFUND
 }

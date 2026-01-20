@@ -14,8 +14,6 @@ import { ReservationResolver } from './reservation.resolver';
 import { StationModule } from '../station/station.module';
 import { BikeDataloader } from './bike.dataloader';
 import { BikeModule } from '../bike/bike.module';
-import { StationDataloader } from '../bike/station.dataloader';
-import { UserProfileDataLoader } from '../rental/user-profile.dataloader';
 import { UserModule } from '../user/user.module';
 
 @Module({
@@ -49,12 +47,6 @@ import { UserModule } from '../user/user.module';
       },
     ]),
   ],
-  providers: [
-    ReservationService,
-    ReservationResolver,
-    BikeDataloader,
-    StationDataloader,
-    UserProfileDataLoader,
-  ],
+  providers: [ReservationService, ReservationResolver, BikeDataloader],
 })
 export class ReservationModule {}

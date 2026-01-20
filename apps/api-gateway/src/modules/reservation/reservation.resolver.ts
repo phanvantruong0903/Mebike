@@ -28,7 +28,7 @@ import { BikeDataloader } from './bike.dataloader';
 import { StationDataloader } from '../bike/station.dataloader';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ReservationService } from './reservation.service';
-import { UserProfileDataLoader } from '../rental/user-profile.dataloader';
+import { UserProfileDataLoader } from '../user/user-profile.dataloader';
 
 @Resolver(() => Reservation)
 export class ReservationResolver {

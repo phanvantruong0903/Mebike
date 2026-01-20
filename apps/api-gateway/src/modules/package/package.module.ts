@@ -11,6 +11,7 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { PackageService } from './package.service';
 import { PackageResolver } from './package.resolver';
+import { PackageDataloader } from './package.dataloader';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PackageResolver } from './package.resolver';
       },
     ]),
   ],
-  providers: [PackageService, PackageResolver],
+  providers: [PackageService, PackageResolver, PackageDataloader],
+  exports: [PackageService, PackageDataloader],
 })
 export class PackageModule {}

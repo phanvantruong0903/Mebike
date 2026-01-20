@@ -125,6 +125,9 @@ export const PAYMENT_MESSAGES = {
   FORBIDDEN: 'Forbidden: You can only view your own transactions',
   GET_ALL_WITHDRAW_SUCCESS: 'Withdraws retrieved successfully',
   GET_ONE_WITHDRAW_SUCCESS: 'Withdraw retrieved successfully',
+  // Description
+  DEBIT_SUBSCRIPTION_DESCRIPTION: (subscriptionId: string) =>
+    `Debit subscription for subscription ID: ${subscriptionId}`,
 };
 
 export const SERVER_MESSAGE = {
@@ -142,6 +145,7 @@ export const SERVER_MESSAGE = {
   DELETED_NOT_IMPLEMENTED: 'Delete method is not implemented',
   BAD_REQUEST: 'Bad Request',
   UNAUTHORIZED: 'Unauthorized',
+  FORBIDDEN: 'Forbidden',
 };
 
 export const RENTAL_MESSAGES = {
@@ -218,6 +222,9 @@ export const SUBSCRIPTION_MESSAGES = {
   ACTIVATE_FAILED: 'Subscription activated failed',
   EXPIRE_SUCCESS: 'Subscription expired successfully',
   EXPIRE_FAILED: 'Subscription expired failed',
+  ALREADY_HAVE_SUBSCRIPTION: 'User already has subscription',
+  CANNOT_ACTIVATE_OTHER_USER_SUBSCRIPTION:
+    'Access denied, cannot activate other user subscription',
 };
 
 export const PACKAGE_MESSAGES = {
@@ -234,4 +241,9 @@ export const PACKAGE_MESSAGES = {
   UPDATE_FAIL: 'Update Package failed',
   GET_ONE_SUCCESS: 'Package retrieved successfully',
   GET_ONE_FAILED: 'Package retrieved failed',
+  EXISTS: (name: string) => `Package ${name} already exists`,
+  MAX_USAGES_MUST_BE_POSITIVE: 'Max usages must be positive',
+  TOGGLE_STATUS_SUCCESS: 'Toggle Package status successfully',
+  TOGGLE_STATUS_FAIL: 'Toggle Package status failed',
+  REQUIRE: (field: string) => `${field} is required`,
 };

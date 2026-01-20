@@ -12,6 +12,7 @@ import { UserService } from './user.service';
 import { UserResolver } from './user.resolver';
 import { UserAccountDataloader } from './user-account.dataloader';
 import { AuthModule } from '../auth/auth.module';
+import { UserProfileDataLoader } from './user-profile.dataloader';
 
 @Module({
   imports: [
@@ -39,7 +40,12 @@ import { AuthModule } from '../auth/auth.module';
     ]),
     forwardRef(() => AuthModule),
   ],
-  providers: [UserService, UserResolver, UserAccountDataloader],
-  exports: [ClientsModule, UserService],
+  providers: [
+    UserService,
+    UserResolver,
+    UserAccountDataloader,
+    UserProfileDataLoader,
+  ],
+  exports: [ClientsModule, UserService, UserProfileDataLoader],
 })
 export class UserModule {}

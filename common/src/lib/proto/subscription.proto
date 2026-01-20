@@ -14,8 +14,8 @@ message Subscription {
   string id = 1;
   string accountId = 2;
   string packageId = 3;
-  optional string activatedAt = 4;
-  optional string expiredAt = 5;
+  string activatedAt = 4;
+  string expiredAt = 5;
   int32 usageCounts = 6;
   string status = 7;
   string createdAt = 8;
@@ -25,6 +25,7 @@ message Subscription {
 message CreateSubscriptionRequest {
   string accountId = 1;
   string packageId = 2;
+  optional bool isActivated = 3;
 }
 
 message GetSubscriptionRequest {
@@ -33,6 +34,7 @@ message GetSubscriptionRequest {
 
 message ActivateSubscriptionRequest {
   string id = 1;
+  string accountId = 2;
 }
 
 message ExpireSubscriptionRequest {
@@ -60,14 +62,10 @@ message Pagination {
   int32 totalPages = 4;
 }
 
-message SubscriptionList {
-  repeated Subscription data = 1;
-}
-
 message SubscriptionListResponse {
   bool success = 1;
   string message = 2;
-  SubscriptionList data = 3;
+  repeated Subscription data = 3;
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;
