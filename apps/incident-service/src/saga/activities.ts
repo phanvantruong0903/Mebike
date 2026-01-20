@@ -37,12 +37,18 @@ export class SosCreationActivity {
   }
 
   async createSos(data: CreateSosDto) {
-    const response = await this.sosService.createSos(data);
-    if (!response.id) {
-      throw new Error('Failed to create Sos');
-    }
+    try {
+      const response = await this.sosService.createSos(data);
+      if (!response.id) {
+        throw new Error('Failed to create Sos');
+      }
 
-    return response;
+      return response;
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+
+      throw new Error(JSON.stringify(errorObj));
+    }
   }
 
   async deleteSos(data: { id: string }) {

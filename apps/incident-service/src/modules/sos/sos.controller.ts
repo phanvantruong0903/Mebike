@@ -13,6 +13,7 @@ import {
   grpcResponse,
   Role,
   EmergencyStatus,
+  throwGrpcError,
 } from '@mebike/common';
 import { SosService } from './sos.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
@@ -99,7 +100,7 @@ export class SosController {
       );
 
       if (!result.success) {
-        throw new RpcException(result.error || SOS_MESSAGES.CREATE_FAILED);
+        throwGrpcError(result.statusCode, result.error, result.errors);
       }
 
       return grpcResponse(result.data, SOS_MESSAGES.CREATE_SUCCESS);

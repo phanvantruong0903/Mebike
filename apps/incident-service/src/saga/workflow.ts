@@ -17,9 +17,12 @@ export interface SosCreationWorkflow {
   longitude: number;
 }
 
-export async function sosCreationWorkflow(
-  data: SosCreationWorkflow,
-): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function sosCreationWorkflow(data: SosCreationWorkflow): Promise<{
+  success: boolean;
+  data?: any;
+  error?: string;
+  statusCode?: number;
+}> {
   let sosId: string | undefined;
   try {
     let isSuccess = false;
@@ -55,7 +58,11 @@ export async function sosCreationWorkflow(
       });
 
     let errorMessage = 'Unknown error';
+    let statusCode = 500;
+
     if (error && typeof error === 'object') {
+      let rawMessage = '';
+
       if ('cause' in error && error.cause && typeof error.cause === 'object') {
         if (
           'failure' in error.cause &&
@@ -63,7 +70,7 @@ export async function sosCreationWorkflow(
           typeof error.cause.failure === 'object' &&
           'message' in error.cause.failure
         ) {
-          errorMessage = String(error.cause.failure.message);
+          rawMessage = String(error.cause.failure.message);
         }
       } else if (
         'failure' in error &&
@@ -76,16 +83,27 @@ export async function sosCreationWorkflow(
           typeof error.failure.cause === 'object' &&
           'message' in error.failure.cause
         ) {
-          errorMessage = String(error.failure.cause.message);
+          rawMessage = String(error.failure.cause.message);
         }
       } else if ('message' in error) {
-        errorMessage = String(error.message);
+        rawMessage = String(error.message);
+      }
+
+      if (rawMessage) {
+        try {
+          const parsed = JSON.parse(rawMessage);
+          errorMessage = parsed.message || rawMessage;
+          statusCode = parsed.statusCode;
+        } catch {
+          errorMessage = rawMessage;
+        }
       }
     }
 
     return {
       success: false,
       error: errorMessage,
+      statusCode,
     };
   }
 }
