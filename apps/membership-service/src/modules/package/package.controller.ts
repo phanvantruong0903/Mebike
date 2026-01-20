@@ -55,10 +55,10 @@ export class PackageController {
 
   @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.UPDATE)
   async updatePackage(
-    data: UpdatePackageDto & { id: string },
+    data: UpdatePackageDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.packageService.updatePackage(data?.id, data);
+      const result = await this.packageService.updatePackage(data.id, data);
 
       return grpcResponse<PackageModel>(
         result,
