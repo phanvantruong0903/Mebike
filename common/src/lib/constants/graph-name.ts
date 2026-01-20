@@ -88,4 +88,5 @@ export const GRAPHQL_NAME_PACKAGE = {
   GET_ONE: 'Package',
   CREATE: 'CreatePackage',
   UPDATE: 'UpdatePackage',
+  TOGGLE_STATUS: 'TogglePackageStatus',
 };
