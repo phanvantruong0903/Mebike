@@ -125,6 +125,9 @@ export const PAYMENT_MESSAGES = {
   FORBIDDEN: 'Forbidden: You can only view your own transactions',
   GET_ALL_WITHDRAW_SUCCESS: 'Withdraws retrieved successfully',
   GET_ONE_WITHDRAW_SUCCESS: 'Withdraw retrieved successfully',
+  // Description
+  DEBIT_SUBSCRIPTION_DESCRIPTION: (subscriptionId: string) =>
+    `Debit subscription for subscription ID: ${subscriptionId}`,
 };
 
 export const SERVER_MESSAGE = {

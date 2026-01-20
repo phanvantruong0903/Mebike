@@ -5,7 +5,6 @@ import querystring from 'qs';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  DebitRentalDto,
   PAYMENT_MESSAGES,
   PaymentMethod,
   prismaPayment,
@@ -16,6 +15,7 @@ import {
   TransactionType,
   WalletModel,
   WalletStatus,
+  DebitSubscriptionDto,
 } from '@mebike/common';
 
 interface PaymentData {
@@ -29,6 +29,13 @@ interface PaymentData {
 
 interface VnpParams {
   [key: string]: string | number;
+}
+
+interface DebitParams {
+  accountId: string;
+  amount: number;
+  description: string;
+  transactionType: TransactionType;
 }
 
 function sortObject(obj: VnpParams): VnpParams {
@@ -135,7 +142,7 @@ export class PaymentprocessorService {
     return result;
   }
 
-  async debit(data: DebitRentalDto) {
+  async debit(data: DebitParams) {
     await this.validateData(
       data.accountId,
       data.amount,
@@ -148,6 +155,18 @@ export class PaymentprocessorService {
       data.description,
       data.transactionType,
     );
+  }
+
+  async debitForSubscription(data: DebitSubscriptionDto) {
+    const description = PAYMENT_MESSAGES.DEBIT_SUBSCRIPTION_DESCRIPTION(
+      data.subscriptionId,
+    );
+    return await this.debit({
+      accountId: data.accountId,
+      amount: data.amount,
+      description,
+      transactionType: TransactionType.FEE,
+    });
   }
 
   async checkWalletExist(accountId: string): Promise<WalletModel> {
