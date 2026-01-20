@@ -90,6 +90,8 @@ export class SupplierResolver {
   @Query(() => [SupplierSearchResult], {
     name: GRAPHQL_NAME_SUPPLIER.AUTO_COMPLETE,
   })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
   async autoCompleteSupplier(
     @Args('query', { type: () => String }) query: string,
   ): Promise<SupplierSearchResult[]> {
@@ -97,6 +99,8 @@ export class SupplierResolver {
   }
 
   @Query(() => SupplierSearchPage, { name: GRAPHQL_NAME_SUPPLIER.SEARCH })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
   async searchSupplier(
     @Args('q', { nullable: true }) q: string,
     @Args('params', {

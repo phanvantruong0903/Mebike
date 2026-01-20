@@ -13,6 +13,7 @@ import {
   StationSearchPage,
   UserProfile,
   StationSearchResult,
+  StationStatus,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -55,10 +56,15 @@ export class StationResolver {
       defaultValue: {},
     })
     data: GetStationInput,
+    @CurrentUser() user: UserProfile,
   ): Promise<StationListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
+    const isAdmin = user?.role === Role.ADMIN;
+    if (!isAdmin) {
+      data.status = StationStatus.Active;
+    }
     const { latitude, longitude, status } = data || {};
     return this.stationService.getAllStation({
       page,

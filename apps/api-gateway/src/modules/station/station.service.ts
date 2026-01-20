@@ -116,10 +116,12 @@ export class StationService implements OnModuleInit {
     query: string,
     user: UserProfile,
   ): Promise<StationSearchResult[]> {
-    const filter =
-      user.role === Role.USER
-        ? `status = '${StationStatus.Active}'`
-        : undefined;
+    let filter;
+    if (user?.role === Role.ADMIN) {
+      filter = undefined;
+    } else {
+      filter = `status = '${StationStatus.Active}'`;
+    }
     const result = await meiliClient.index('Station').search(query, {
       limit: 10,
       filter,
@@ -133,10 +135,12 @@ export class StationService implements OnModuleInit {
     search: string,
     user: UserProfile,
   ): Promise<StationSearchPage> {
-    const filter =
-      user.role === Role.USER
-        ? `status = '${StationStatus.Active}'`
-        : undefined;
+    let filter;
+    if (user?.role === Role.ADMIN) {
+      filter = undefined;
+    } else {
+      filter = `status = '${StationStatus.Active}'`;
+    }
     const result = await meiliClient.index('Station').search(search, {
       limit,
       offset: (page - 1) * limit,
