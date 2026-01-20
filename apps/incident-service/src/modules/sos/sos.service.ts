@@ -24,6 +24,7 @@ import {
   SOS_MESSAGES,
   Role,
   SERVER_MESSAGE,
+  RentalStatus,
 } from '@mebike/common';
 import Redis from 'ioredis';
 import { type ClientGrpc } from '@nestjs/microservices';
@@ -142,6 +143,11 @@ export class SosService extends BaseService<
     if (!rental) {
       throwGrpcError(404, RENTAL_MESSAGES.NOT_FOUND, [
         RENTAL_MESSAGES.NOT_FOUND,
+      ]);
+    }
+    if (rental.status !== RentalStatus.Rented) {
+      throwGrpcError(404, SOS_MESSAGES.CANNOT_CREATE_NOT_IN_PROGRESS_RENTAL, [
+        SOS_MESSAGES.NOT_FOUND,
       ]);
     }
 
