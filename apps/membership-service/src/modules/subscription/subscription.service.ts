@@ -20,7 +20,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { RpcException, type ClientGrpc } from '@nestjs/microservices';
+import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
 
 interface PaymentServiceClient {
@@ -92,9 +92,11 @@ export class SubscriptionService extends BaseService<
 
     if (!debitResponse.success) {
       await this.handlePaymentFailure(subscription.id);
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        SUBSCRIPTION_MESSAGES.CREATE_FAILED,
-      ]);
+      throwGrpcError(
+        debitResponse.statusCode || 500,
+        debitResponse.message,
+        debitResponse.errors,
+      );
     }
 
     try {

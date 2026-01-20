@@ -17,6 +17,7 @@ import {
   WalletStatus,
   DebitSubscriptionDto,
 } from '@mebike/common';
+import { RpcException } from '@nestjs/microservices';
 
 interface PaymentData {
   amount: number;
@@ -397,6 +398,9 @@ export class PaymentprocessorService {
         },
       );
     } catch (error: any) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
       try {
         await prismaPayment.transaction.create({
           data: {

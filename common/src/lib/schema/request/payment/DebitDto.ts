@@ -1,4 +1,4 @@
-import { Min, IsNumber, IsString, IsNotEmpty, Max } from 'class-validator';
+import { IsNumber, IsString, IsNotEmpty, IsPositive } from 'class-validator';
 
 export class DebitDto {
   @IsString()
@@ -7,7 +7,6 @@ export class DebitDto {
 
   @IsNumber()
   @IsNotEmpty()
-  @Min(2000, { message: 'Amount must be at least 2000' })
-  @Max(100000000, { message: 'Amount must be at most 100000000' })
+  @IsPositive()
   amount!: number;
 }
