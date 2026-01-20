@@ -31,11 +31,6 @@ export class SupplierService extends BaseService<
       }),
       (prismaFleet.bike.groupBy as any)({
         by: ['status'],
-        where: {
-          supplierId: {
-            not: null,
-          },
-        },
         _count: {
           id: true,
         },
