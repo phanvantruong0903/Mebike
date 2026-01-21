@@ -44,8 +44,11 @@ export class StationResolver {
   }
 
   @Query(() => StationResponse, { name: GRAPQL_NAME_STATION.GET_ONE })
-  async getStation(@Args('id') id: string): Promise<StationResponse> {
-    return this.stationService.getStation({ id });
+  async getStation(
+    @Args('id') id: string,
+    @CurrentUser() user: UserProfile,
+  ): Promise<StationResponse> {
+    return this.stationService.getStation({ id }, user);
   }
 
   @Query(() => StationListResponse, { name: GRAPQL_NAME_STATION.GET_ALL })
@@ -69,8 +72,8 @@ export class StationResolver {
     return this.stationService.getAllStation({
       page,
       limit,
-      latitude,
-      longitude,
+      latitude: latitude ? Number(latitude) : undefined,
+      longitude: longitude ? Number(longitude) : undefined,
       status,
     });
   }

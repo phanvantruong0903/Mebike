@@ -24,6 +24,7 @@
     "@nestjs/microservices": "^11.1.6",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.2.5",
     "@prisma/client": "^5.22.0",
     "@temporalio/activity": "^1.14.0",
     "@temporalio/client": "^1.14.0",
@@ -50,6 +51,7 @@
     "reflect-metadata": "^0.1.13",
     "resend": "^6.7.0",
     "rxjs": "^7.8.0",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

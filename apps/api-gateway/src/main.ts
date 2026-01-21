@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -36,6 +37,18 @@ async function bootstrap() {
   });
 
   app.useGlobalFilters(new RpcExceptionsFilter());
+
+  const config = new DocumentBuilder()
+    .setTitle('MeBike API')
+    .setDescription('MeBike REST API Documentation')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('bike', 'Bike management endpoints')
+    .addTag('station', 'Station management endpoints')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(port);
 }

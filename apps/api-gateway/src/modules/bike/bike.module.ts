@@ -15,6 +15,7 @@ import { SupplierModule } from '../supplier/supplier.module';
 import { StationModule } from '../station/station.module';
 import { StationDataloader } from './station.dataloader';
 import { SupplierDataloader } from './supplier.dataloader';
+import { BikeController } from './bike.controller';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { SupplierDataloader } from './supplier.dataloader';
       },
     ]),
   ],
+  controllers: [BikeController],
   providers: [
     BikeService,
     BikeResolver,
