@@ -11,6 +11,7 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { StationService } from './station.service';
 import { StationResolver } from './station.resolver';
+import { StationController } from './station.controller';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { StationResolver } from './station.resolver';
       },
     ]),
   ],
+  controllers: [StationController],
   providers: [StationService, StationResolver],
   exports: [StationService],
 })

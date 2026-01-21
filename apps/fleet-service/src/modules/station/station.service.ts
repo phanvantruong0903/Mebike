@@ -143,8 +143,8 @@ export class StationService extends BaseService<
       const [stations, total] = await Promise.all([
         prismaFleet.station.findMany({
           where: filter,
-          skip: (page - 1) * limit,
-          take: limit,
+          skip: ((page ?? 1) - 1) * (limit ?? 10),
+          take: limit ?? 10,
           include: {
             _count: {
               select: {
@@ -223,7 +223,7 @@ export class StationService extends BaseService<
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / (limit ?? 10)),
         stats,
       };
     }
@@ -350,14 +350,17 @@ export class StationService extends BaseService<
       .filter((item) => item !== null);
 
     const total = result.length;
-    const paginatedResult = result.slice((page - 1) * limit, page * limit);
+    const paginatedResult = result.slice(
+      ((page ?? 1) - 1) * (limit ?? 10),
+      (page ?? 1) * (limit ?? 10),
+    );
 
     return {
       data: paginatedResult,
       limit: limit,
       page: page,
       total: total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / (limit ?? 10)),
       stats,
     };
   }

@@ -134,8 +134,8 @@ export class StationController {
           {
             data: result.data,
             total: result.total,
-            page: result.page,
-            limit: result.limit,
+            page: result.page ?? 1,
+            limit: result.limit ?? 10,
             totalPages: result.totalPages,
           },
           STATION_MESSAGES.GET_ALL_SUCCESS,

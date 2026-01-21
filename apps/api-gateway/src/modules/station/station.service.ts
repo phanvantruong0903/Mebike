@@ -5,7 +5,6 @@ import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
   CreateStationInput,
-  GetStationInput,
   StationResponse,
   StationListResponse,
   Station,
@@ -17,14 +16,17 @@ import {
   Role,
   StationSearchResult,
   StationStatus,
+  GetStationDto,
+  STATION_MESSAGES,
 } from '@mebike/common';
+import { GraphQLError } from 'graphql/error';
 
 interface StationServiceClient {
   GetStation(data: { id: string }): Observable<StationResponse>;
   UpdateStation(
     data: UpdateStationInput & { id: string },
   ): Observable<StationResponse>;
-  GetAllStations(data: GetStationInput): Observable<StationListResponse>;
+  GetAllStations(data: GetStationDto): Observable<StationListResponse>;
   CreateStation(data: CreateStationInput): Observable<StationResponse>;
   GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
   UpdateStationStatus(
@@ -73,7 +75,7 @@ export class StationService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.UpdateStationStatus(data));
   }
 
-  async getAllStation(data: GetStationInput) {
+  async getAllStation(data: GetStationDto) {
     const response = await firstValueFrom(
       this.fleetService.GetAllStations(data),
     );
@@ -91,9 +93,17 @@ export class StationService implements OnModuleInit {
     };
   }
 
-  async getStation(data: { id: string }) {
+  async getStation(data: { id: string }, user?: UserProfile) {
     const response = await firstValueFrom(this.fleetService.GetStation(data));
     const station = response.data as Station;
+
+    if (user?.role !== Role.ADMIN && station.status !== StationStatus.Active) {
+      throw new GraphQLError(STATION_MESSAGES.NOT_FOUND, {
+        extensions: {
+          statusCode: 404,
+        },
+      });
+    }
     return {
       ...response,
       data: station
