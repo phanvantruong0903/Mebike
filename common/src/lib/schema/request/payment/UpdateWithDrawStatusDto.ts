@@ -1,9 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsIn,
+  IsUUID,
+} from 'class-validator';
 import { WithdrawStatus } from '../../../prisma/payment/generated';
 
 export class UpdateWithDrawStatusDto {
   @IsString()
   @IsNotEmpty()
+  @IsUUID()
   id!: string;
 
   @IsString()

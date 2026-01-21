@@ -20,6 +20,7 @@ message CreateUserRequest {
   int32 YOB = 4;
   string role = 5;
   string phone = 6;
+  string workStationId = 7;
 }
 
 message Token {

@@ -1,5 +1,6 @@
-import { Min, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Min, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
+import { WalletStatus } from '../../../prisma';
 
 export class GetAllWalletsDto {
   @IsNumber()
@@ -13,6 +14,6 @@ export class GetAllWalletsDto {
   limit!: number;
 
   @IsOptional()
-  @IsString()
-  search?: string;
+  @IsEnum(WalletStatus)
+  status?: WalletStatus;
 }

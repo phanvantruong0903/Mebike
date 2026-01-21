@@ -50,6 +50,12 @@
     },
     {
       "path": "./apps/membership-service"
+    },
+    {
+      "path": "./apps/incident-service-e2e"
+    },
+    {
+      "path": "./apps/incident-service"
     }
   ]
 }

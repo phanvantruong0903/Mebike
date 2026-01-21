@@ -3,9 +3,9 @@ import { UserStatus } from '../../../../prisma/index';
 
 @InputType()
 export class ChangeUserStatusInput {
-  @Field()
-  accountId!: string;
+  @Field({ nullable: true })
+  accountId?: string;
 
-  @Field(() => UserStatus)
-  status!: UserStatus;
+  @Field(() => UserStatus, { nullable: true })
+  status?: UserStatus;
 }

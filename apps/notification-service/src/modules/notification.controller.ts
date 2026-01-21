@@ -1,11 +1,18 @@
-import { Controller } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Controller, Inject } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { KAFKA_TOPIC } from '@mebike/common';
+import { Resend } from 'resend';
+import { ConfigService } from '@nestjs/config';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as Handlebars from 'handlebars';
 
 @Controller()
 export class NotificationController {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    @Inject('RESEND') private readonly resend: Resend,
+    private readonly configService: ConfigService,
+  ) {}
 
   @EventPattern(KAFKA_TOPIC.USER_RESET_PASSWORD)
   async sendMail(@Payload() data: any) {
@@ -24,14 +31,27 @@ export class NotificationController {
 
   private async sendEmailNotification(data: any) {
     try {
-      await this.mailerService.sendMail({
+      const templatePath = path.join(
+        __dirname,
+        'templates',
+        `${data.template}.hbs`,
+      );
+      const templateSource = fs.readFileSync(templatePath, 'utf-8');
+      const template = Handlebars.compile(templateSource);
+      const html = template(data.data);
+
+      await this.resend.emails.send({
+        from:
+          this.configService.get<string>('MAIL_FROM') ?? 'mebike@security.com',
         to: data.to,
         subject: data.subject,
-        template: data.template,
-        context: data.data,
+        html: html,
       });
     } catch (error) {
-      console.log(error);
+      console.error(
+        `[Notification Service] Failed to send email to: ${data.to}`,
+      );
+      console.error(error);
     }
   }
 }

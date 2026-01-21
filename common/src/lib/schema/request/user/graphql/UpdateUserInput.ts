@@ -6,7 +6,7 @@ export class UpdateUserInput extends PartialType(
   OmitType(CreateUserInput, ['email', 'role'] as const),
 ) {
   @Field({ nullable: true })
-  address!: string;
+  address?: string;
 
   @Field({ nullable: true })
   avatarUrl?: string;

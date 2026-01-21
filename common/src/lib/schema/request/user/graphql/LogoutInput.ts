@@ -2,9 +2,9 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class LogoutInput {
-  @Field()
-  accessToken!: string;
+  @Field({ nullable: true })
+  accessToken?: string;
 
-  @Field()
-  refreshToken!: string;
+  @Field({ nullable: true })
+  refreshToken?: string;
 }

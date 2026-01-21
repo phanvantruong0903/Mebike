@@ -10,6 +10,7 @@ import {
   GetTransactionInput,
   UserProfile,
   CreateWithDrawInput,
+  CreateWithDrawDto,
   WithdrawResponse,
   WithdrawListResponse,
 } from '@mebike/common';
@@ -59,7 +60,6 @@ export class TransactionResolver {
   ): Promise<TransactionListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
     if (user.role === Role.USER) {
       data.accountId = user.accountId;
     }
@@ -67,7 +67,6 @@ export class TransactionResolver {
     return this.transactionService.getAllTransaction({
       page,
       limit,
-      search,
       accountId: data.accountId,
     });
   }
@@ -81,7 +80,10 @@ export class TransactionResolver {
     @Args('body') body: CreateWithDrawInput,
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawResponse> {
-    return this.transactionService.createWithdraw(body, user.accountId);
+    return this.transactionService.createWithdraw({
+      ...body,
+      accountId: user.accountId,
+    } as unknown as CreateWithDrawDto);
   }
 
   @Query(() => WithdrawListResponse, {
@@ -100,7 +102,6 @@ export class TransactionResolver {
   ): Promise<WithdrawListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
     if (user.role === Role.USER) {
       data.accountId = user.accountId;
     }
@@ -108,7 +109,6 @@ export class TransactionResolver {
     return this.transactionService.getAllWithdraw({
       page,
       limit,
-      search,
       accountId: data.accountId,
     });
   }

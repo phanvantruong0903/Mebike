@@ -6,6 +6,7 @@ import {
   PaymentResponse,
   GRAPHQL_NAME_PAYMENT,
   CreatePaymentInput,
+  CreatePaymentUrlDto,
   getClientIp,
   UserProfile,
 } from '@mebike/common';
@@ -27,12 +28,11 @@ export class PaymentResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<PaymentResponse> {
     const ipAddr = getClientIp(context.req);
-
     return this.paymentService.createPayment({
       ...body,
       ipAddr,
       accountId: user.accountId,
-    });
+    } as unknown as CreatePaymentUrlDto);
   }
 
   @Query(() => String)

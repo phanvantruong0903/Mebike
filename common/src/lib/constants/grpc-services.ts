@@ -7,6 +7,7 @@ export const GRPC_SERVICES = {
   TRANSACTION: 'TransactionService',
   RENTAL: 'RentalService',
   MEMBERSHIP: 'MembershipService',
+  INCIDENT: 'IncidentService',
 } as const;
 
 export const GRPC_PACKAGE = {
@@ -18,6 +19,9 @@ export const GRPC_PACKAGE = {
   TRANSACTION: 'TRANSACTION_PACKAGE',
   RENTAL: 'RENTAL_PACKAGE',
   MEMBERSHIP: 'MEMBERSHIP_PACKAGE',
+  STATION: 'STATION_PACKAGE',
+  BIKE: 'BIKE_PACKAGE',
+  SOS: 'SOS_PACKAGE',
 };
 
 export const USER_METHODS = {
@@ -42,6 +46,7 @@ export const USER_METHODS = {
   USER_VERIFY: 'UserVerify',
   DELETE: 'DeleteUser',
   GET_USERS_BY_ACCOUNT_IDS: 'GetUsersByAccountIds',
+  FIND_FREE_SOS: 'FindFreeSos',
 } as const;
 
 export const SUPPLIER_METHODS = {
@@ -61,6 +66,7 @@ export const STATION_METHODS = {
   GET_ALL: 'GetAllStations',
   GET_STATIONS_BY_IDS: 'GetStationsByIds',
   UPDATE_STATUS: 'UpdateStationStatus',
+  STATION_EXIST: 'StationExist',
 } as const;
 
 export const BIKE_METHODS = {
@@ -97,6 +103,7 @@ export const RENTAL_METHODS = {
   GET_ONE: 'GetRental',
   GET_ALL: 'GetRentalList',
   SUMMARIZE: 'SummarizeRentals',
+  GET_BY_IDS: 'GetRentalsByIds',
 };
 
 export const RESERVATION_METHODS = {
@@ -121,4 +128,11 @@ export const PACKAGE_METHODS = {
   GET_ALL: 'GetPackageList',
   TOGGLE_STATUS: 'TogglePackageStatus',
   GET_PACKAGES_BY_IDS: 'GetPackagesByIds',
+};
+
+export const SOS_METHODS = {
+  CREATE: 'CreateSos',
+  GET_ONE: 'GetSos',
+  UPDATE_STATUS: 'UpdateSosStatus',
+  GET_ALL: 'GetAllSos',
 };

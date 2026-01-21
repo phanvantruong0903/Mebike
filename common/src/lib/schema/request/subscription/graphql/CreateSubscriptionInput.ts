@@ -6,7 +6,7 @@ export class CreateSubscriptionInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  packageId!: string;
+  packageId?: string;
 
   @Field({ defaultValue: false })
   @IsBoolean()

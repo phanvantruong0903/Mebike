@@ -3,7 +3,7 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom, Observable } from 'rxjs';
 import { GraphQLError } from 'graphql';
 import {
-  CreateWithDrawInput,
+  CreateWithDrawDto,
   GRPC_PACKAGE,
   GRPC_SERVICES,
   PAYMENT_MESSAGES,
@@ -63,7 +63,6 @@ export class TransactionService implements OnModuleInit {
   async getAllTransaction(data: {
     page: number;
     limit: number;
-    search?: string;
     accountId?: string;
   }) {
     const response = await lastValueFrom(
@@ -93,11 +92,11 @@ export class TransactionService implements OnModuleInit {
     return response;
   }
 
-  async createWithdraw(data: CreateWithDrawInput, accountId: string) {
+  async createWithdraw(data: CreateWithDrawDto) {
     return await lastValueFrom(
       this.paymentService.CreateWithdraw({
         ...data,
-        accountId,
+        accountId: data.accountId,
       }),
     );
   }

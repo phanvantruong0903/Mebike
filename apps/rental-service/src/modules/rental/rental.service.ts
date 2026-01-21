@@ -221,28 +221,28 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     const endOfDate = new Date(date);
     endOfDate.setHours(23, 59, 59, 999);
 
-    const result = await prismaRental.rental.groupBy({
-      by: ['startTime'],
+    const rentals = await prismaRental.rental.findMany({
       where: {
         startTime: {
           gte: startOfDate,
           lte: endOfDate,
         },
       },
-      _count: {
-        _all: true,
-      },
-      orderBy: {
-        startTime: 'asc',
+      select: {
+        startTime: true,
       },
     });
 
-    const fullDay = Array.from({ length: 24 }, (_, hour) => {
-      const found = result.find((g) => g.startTime.getTime() === hour);
+    const hourCounts = new Map<number, number>();
+    rentals.forEach((rental) => {
+      const hour = rental.startTime.getHours();
+      hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
+    });
 
+    const fullDay = Array.from({ length: 24 }, (_, hour) => {
       return {
         hour,
-        totalRentals: found ? found._count._all : 0,
+        totalRentals: hourCounts.get(hour) || 0,
       };
     });
 
@@ -273,5 +273,15 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
   async changeBikeStatus(id: string, status: BikeStatus) {
     const service = this.getFleetService();
     return await firstValueFrom(service.ChangeBikeStatus({ id, status }));
+  }
+
+  async getByIds(ids: string[]) {
+    return await prismaRental.rental.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
   }
 }

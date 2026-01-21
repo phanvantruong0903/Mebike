@@ -1,5 +1,6 @@
-import { Min, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Min, IsNumber, IsOptional, IsEnum, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
+import { BikeStatus } from '../../../prisma';
 
 export class GetBikeDto {
   @IsNumber()
@@ -13,6 +14,14 @@ export class GetBikeDto {
   limit!: number;
 
   @IsOptional()
-  @IsString()
-  search?: string;
+  @IsEnum(BikeStatus)
+  status?: BikeStatus;
+
+  @IsOptional()
+  @IsUUID()
+  stationId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  supplierId?: string;
 }

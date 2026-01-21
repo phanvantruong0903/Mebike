@@ -7,3 +7,8 @@ export * from './GetAllWalletDto';
 export * from './DebitSubscriptionDto';
 export * from './CreateWalletDto';
 export * from './GetWithdrawDto';
+export * from './CreatePaymentUrlDto';
+export * from './PaymentCallbackDto';
+export * from './GetTransactionDetailDto';
+export * from './GetWithdrawDetailDto';
+export * from './GetWalletDto';

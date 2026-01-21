@@ -14,12 +14,16 @@ import {
   CreateBikeInput,
   GRAPHQL_NAME_BIKE,
   UpdateBikeInput,
+  UpdateBikeDto,
   BikeListResponse,
   GetBikeInput,
   Station,
   Bike,
   Supplier,
   BikeStatus,
+  BikeSearchResult,
+  BikeSearchPage,
+  BikeResult,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -52,7 +56,7 @@ export class BikeResolver {
     return this.bikeService.updateBike({
       id,
       ...body,
-    });
+    } as unknown as UpdateBikeDto);
   }
 
   @Query(() => BikeResponse, { name: GRAPHQL_NAME_BIKE.GET_ONE })
@@ -72,10 +76,14 @@ export class BikeResolver {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
+    const status = data?.status;
+    const stationId = data?.stationId;
+
     return this.bikeService.getAllBike({
       page,
       limit,
-      search: data.search,
+      status,
+      stationId,
     });
   }
 
@@ -101,8 +109,52 @@ export class BikeResolver {
     return this.supplierDataloader.batchSupplier.load(bike.supplier.id);
   }
 
+  @Query(() => BikeSearchResult, { name: GRAPHQL_NAME_BIKE.AUTO_COMPLETE })
+  async autoCompleteBike(
+    @Args('query', { type: () => String }) query: string,
+  ): Promise<BikeSearchResult> {
+    return this.bikeService.autoComplete(query);
+  }
+
+  @Query(() => BikeSearchPage, { name: GRAPHQL_NAME_BIKE.SEARCH })
+  async searchBike(
+    @Args('q', { nullable: true }) q: string,
+    @Args('params', {
+      nullable: true,
+      type: () => GetBikeInput,
+      defaultValue: {},
+    })
+    data: GetBikeInput,
+  ): Promise<BikeSearchPage> {
+    const page = data.page ?? 1;
+    const limit = data.limit ?? 10;
+    const search = q ?? '';
+
+    return this.bikeService.searchBike(page, limit, search);
+  }
+
   @Query(() => String)
   _healthCheck(): string {
     return 'API is running';
+  }
+}
+
+@Resolver(() => BikeResult)
+export class BikeResultResolver {
+  constructor(
+    private readonly stationDataloader: StationDataloader,
+    private readonly supplierDataloader: SupplierDataloader,
+  ) {}
+
+  @ResolveField(() => Station, { nullable: true })
+  async station(@Parent() bike: BikeResult): Promise<Station | null> {
+    if (!bike.stationId) return null;
+    return this.stationDataloader.batchStations.load(bike.stationId);
+  }
+
+  @ResolveField(() => Supplier, { nullable: true })
+  async supplier(@Parent() bike: BikeResult): Promise<Supplier | null> {
+    if (!bike.supplierId) return null;
+    return this.supplierDataloader.batchSupplier.load(bike.supplierId);
   }
 }

@@ -1,5 +1,6 @@
 import { Controller, Inject, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ClientKafka, GrpcMethod, RpcException } from '@nestjs/microservices';
+import type { ClientGrpc } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import {
   BaseGrpcHandler,
@@ -27,15 +28,28 @@ import {
   LogoutDto,
   UserVerifyStatus,
   VerifyEmailDto,
+  GRPC_PACKAGE,
+  STATION_MESSAGES,
+  RefreshTokenDto,
+  VerifyOtpDto,
+  VerifyEmailRequestDto,
 } from '@mebike/common';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
 import { TemporalService } from '../../saga/temporal-service';
+import { firstValueFrom, Observable } from 'rxjs';
+
+interface FleetServiceClient {
+  StationExist(data: {
+    id: string;
+  }): Observable<ReturnType<typeof grpcResponse<{ exists: boolean }>>>;
+}
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class AuthGrpcController {
   private readonly baseHandler: BaseGrpcHandler<User, UserDto, never>;
+  private readonly fleetService!: FleetServiceClient;
 
   constructor(
     @Inject(KAFKA_SERVICE.AUTH_SERVICE)
@@ -44,14 +58,43 @@ export class AuthGrpcController {
     private readonly redis: Redis,
     private readonly authService: AuthService,
     private readonly temporalService: TemporalService,
+    @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
   ) {
     this.baseHandler = new BaseGrpcHandler(this.authService, CreateUserDto);
+    this.fleetService = this.fleetClient.getService<FleetServiceClient>(
+      GRPC_SERVICES.FLEET,
+    );
+  }
+
+  async checkStationExist(data: { id: string }): Promise<boolean> {
+    const response = await firstValueFrom(
+      this.fleetService.StationExist({ id: data.id }),
+    );
+    return (response.data as { exists: boolean }).exists;
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.CREATE)
   async createUser(
     data: CreateUserDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
+    if (data.role !== Role.SUPPLIER) {
+      if (!data.workStationId) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          STATION_MESSAGES.NOT_FOUND,
+        ]);
+      }
+      const stationExist = await this.checkStationExist({
+        id: data.workStationId,
+      });
+      if (!stationExist) {
+        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+          STATION_MESSAGES.NOT_FOUND,
+        ]);
+      }
+    } else {
+      data.workStationId = '';
+    }
+
     return this._handleCreateUserLogic(data, data.role, false);
   }
 
@@ -77,22 +120,10 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.REFRESH_TOKEN)
-  async refreshToken(data: {
-    refreshToken: string;
-    accessToken: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async refreshToken(
+    data: RefreshTokenDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const { refreshToken, accessToken } = data;
-
-    if (!refreshToken) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        USER_MESSAGES.REFRESH_TOKEN_REQUIRED,
-      ]);
-    }
-    if (!accessToken) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        USER_MESSAGES.ACCESS_TOKEN_REQUIRED,
-      ]);
-    }
 
     const result = await this.authService.refreshToken(
       refreshToken,
@@ -148,10 +179,9 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_OTP)
-  async verifyOtp(data: {
-    email: string;
-    otp: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async verifyOtp(
+    data: VerifyOtpDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const { email, otp } = data;
       const storedOtp = await this.redis.get(
@@ -231,6 +261,7 @@ export class AuthGrpcController {
         name: data.name,
         phone: data.phone,
         YOB: data.YOB,
+        workStationId: 'workStationId' in data ? data.workStationId : undefined,
       });
 
       if (shouldGenerateToken) {
@@ -281,15 +312,10 @@ export class AuthGrpcController {
   }
 
   @GrpcMethod(GRPC_SERVICES.AUTH, USER_METHODS.VERIFY_EMAIL)
-  async verifyEmail(data: {
-    accountId: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async verifyEmail(
+    data: VerifyEmailRequestDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const { accountId } = data;
-    if (!accountId) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        USER_MESSAGES.ID_REQUIRED,
-      ]);
-    }
 
     try {
       await this.authService.verifyEmail(accountId);

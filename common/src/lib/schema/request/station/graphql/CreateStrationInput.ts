@@ -3,28 +3,28 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 @InputType()
 export class CreateStationInput {
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  name?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsNotEmpty()
-  address!: string;
+  address?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsNotEmpty()
-  latitude!: string;
+  latitude?: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsNotEmpty()
-  longitude!: string;
+  longitude?: string;
 
-  @Field(() => Number)
+  @Field(() => Number, { nullable: true })
   @IsNumber()
   @IsNotEmpty()
-  capacity!: number;
+  capacity?: number;
 }

@@ -41,6 +41,7 @@ export const USER_MESSAGES = {
   USER_VERIFY_SUCCESS: 'User verified successfully',
   DELETE_FAILED: 'Delete User failed',
   GET_USERS_BY_ACCOUNT_IDS_SUCCESS: 'Get users by account ids successfully',
+  FIND_FREE_SOS_SUCCESS: 'Find free SOS successfully',
 };
 
 export const SUPPLIER_MESSAGES = {
@@ -72,6 +73,10 @@ export const STATION_MESSAGES = {
   UPDATE_FAIL: 'Update Station failed',
   GET_ALL_STATS_SUCCESS: 'Station stats retrieved successfully',
   STATION_FULL: 'Station is full',
+  NO_STATION_NEARBY:
+    'We are experiencing high demand. Please try your request again shortly. ',
+  NO_STATION_NEARBY_AND_BIKE:
+    'Sorry, there are no cars available in your area right now. Please try again shortly.',
 };
 
 export const BIKE_MESSAGES = {
@@ -169,6 +174,8 @@ export const RENTAL_MESSAGES = {
   GET_ONE_SUCCESS: 'Rental retrieved successfully',
   GET_ONE_FAILED: 'Rental retrieved failed',
   BIKE_NOT_ASSIGNED: 'Bike not assigned to this reservation',
+  GET_BY_IDS_SUCCESS: 'Rentals retrieved successfully',
+  GET_BY_IDS_FAIL: 'Rentals retrieved failed',
 };
 
 export const RESERVATION_MESSAGES = {
@@ -246,4 +253,31 @@ export const PACKAGE_MESSAGES = {
   TOGGLE_STATUS_SUCCESS: 'Toggle Package status successfully',
   TOGGLE_STATUS_FAIL: 'Toggle Package status failed',
   REQUIRE: (field: string) => `${field} is required`,
+};
+
+export const SOS_MESSAGES = {
+  EXISTED: 'SOS already exists',
+  CREATE_SUCCESS: 'SOS created successfully',
+  UPDATE_SUCCESS: 'SOS updated successfully',
+  GET_ALL_SUCCESS: 'SOS retrieved successfully',
+  GET_ALL_FAIL: 'SOS retrieved failed',
+  GET_DETAIL_SUCCESS: 'SOS details retrieved successfully',
+  DELETE_SUCCESS: 'SOS deleted successfully',
+  NOT_FOUND: 'SOS not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create SOS failed',
+  VALIDATION_FAILED: 'SOS name incorrect',
+  UPDATE_FAIL: 'Update SOS failed',
+  GET_ONE_SUCCESS: 'SOS retrieved successfully',
+  GET_ONE_FAILED: 'SOS retrieved failed',
+  UPDATE_FAILED: 'Update SOS failed',
+  INVALID_STATUS: 'Invalid SOS status',
+  CANNOT_CANCEL: 'Cannot cancel SOS that is not in processing status',
+  CANNOT_UPDATE_OTHER: 'Cannot update other SOS',
+  JUST_ONLY_CANCEL: 'Just only cancel SOS',
+  PHOTOS_REQUIRED: 'Photos are required',
+  FORBIDDEN: 'Forbidden: You can only view your own SOS',
+  CANNOT_CREATE_NOT_IN_PROGRESS_RENTAL:
+    'Cannot create for rental not In Progress',
+  AGENT_NOTES_REQUIRED: 'Agent notes are required',
 };

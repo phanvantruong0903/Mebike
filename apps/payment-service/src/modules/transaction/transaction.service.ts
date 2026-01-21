@@ -1,6 +1,5 @@
 import {
   BaseService,
-  buildSearchFilter,
   CreateWithDrawDto,
   GetAllWithdrawDto,
   PAYMENT_MESSAGES,
@@ -38,10 +37,9 @@ export class TransactionService extends BaseService<
     super(prismaPayment.transaction);
   }
 
-  async createWithdrawTransaction(
-    data: CreateWithDrawDto,
-  ): Promise<WithdrawModel> {
+  async createWithdrawTransaction(data: CreateWithDrawDto) {
     return await prismaPayment.$transaction(
+      // @ts-expect-error - Prisma transaction callback type inference issue, tx parameter type is complex and verbose to annotate
       async (tx) => {
         const wallet = await tx.wallet.findUnique({
           where: {
@@ -85,9 +83,7 @@ export class TransactionService extends BaseService<
     );
   }
 
-  async updateWithdrawTransactionStatus(
-    data: UpdateWithDrawStatusDto,
-  ): Promise<WithdrawModel> {
+  async updateWithdrawTransactionStatus(data: UpdateWithDrawStatusDto) {
     const findWithdraw = await prismaPayment.withdraw.findUnique({
       where: {
         id: data.id,
@@ -137,11 +133,7 @@ export class TransactionService extends BaseService<
   }
 
   async getAllWithdraws(data: GetAllWithdrawDto) {
-    const searchFields = ['id'];
-    let searchFilter = buildSearchFilter(data.search, searchFields);
-
-    searchFilter = {
-      ...searchFilter,
+    const searchFilter = {
       ...(data.accountId && { accountId: data.accountId }),
     };
 
@@ -174,6 +166,7 @@ export class TransactionService extends BaseService<
 
     try {
       return await prismaPayment.$transaction(
+        // @ts-expect-error - Prisma transaction callback type inference issue, tx parameter type is complex and verbose to annotate
         async (tx) => {
           const findWallet = await tx.wallet.findUnique({
             where: { accountId: accountId },

@@ -18,8 +18,13 @@ import {
   grpcPaginateResponse,
   ChangeUserStatusDto,
   SERVER_MESSAGE,
-  buildSearchFilter,
   KAFKA_TOPIC,
+  GetUserDto,
+  GetUserDetailDto,
+  DeleteUserDto,
+  UserVerifyDto,
+  GetUsersByAccountIdsDto,
+  FindFreeSosDto,
 } from '@mebike/common';
 import { UserService } from './user.services';
 
@@ -61,13 +66,11 @@ export class UserController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_ONE)
-  async getUserDetail({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getUserDetail(
+    data: GetUserDetailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.userService.getUserDetail(id);
+      const result = await this.userService.getUserDetail(data.id);
       return grpcResponse(result, USER_MESSAGES.GET_DETAIL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -97,9 +100,9 @@ export class UserController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.DELETE)
-  async deleteUser(data: {
-    accountId: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async deleteUser(
+    data: DeleteUserDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       await this.userService.deleteUser(data.accountId);
       return grpcResponse(null, USER_MESSAGES.DELETE_SUCCESS);
@@ -115,22 +118,15 @@ export class UserController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_ALL)
-  async getAllUsers(data: {
-    page: number;
-    limit: number;
-    search?: string;
-  }): Promise<ReturnType<typeof grpcPaginateResponse>> {
+  async getAllUsers(
+    data: GetUserDto,
+  ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
       const { page, limit } = data;
+      const filter: any = {};
+      if (data.status) filter.status = data.status;
 
-      const searchFields = ['name', 'phone'];
-      const searchFilter = buildSearchFilter(data.search, searchFields);
-
-      const result = await this.baseHandler.getAllLogic(
-        page,
-        limit,
-        searchFilter,
-      );
+      const result = await this.baseHandler.getAllLogic(page, limit, filter);
       return grpcPaginateResponse(result, USER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -179,7 +175,7 @@ export class UserController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.USER_VERIFY)
-  async userVerify(data: { accountId: string }) {
+  async userVerify(data: UserVerifyDto) {
     const result = await this.userService.userVerify(data);
     return grpcResponse(result, USER_MESSAGES.USER_VERIFY_SUCCESS);
   }
@@ -201,8 +197,14 @@ export class UserController {
   }
 
   @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.GET_USERS_BY_ACCOUNT_IDS)
-  async getUsersByAccountIds(data: { accountIds: string[] }) {
+  async getUsersByAccountIds(data: GetUsersByAccountIdsDto) {
     const result = await this.userService.getUsersByAccountIds(data.accountIds);
     return grpcResponse(result, USER_MESSAGES.GET_USERS_BY_ACCOUNT_IDS_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.USER, USER_METHODS.FIND_FREE_SOS)
+  async findFreeSos(data: FindFreeSosDto) {
+    const result = await this.userService.findFreeSos(data.stationId);
+    return grpcResponse(result, USER_MESSAGES.FIND_FREE_SOS_SUCCESS);
   }
 }

@@ -48,6 +48,6 @@ import { UserModule } from '../user/user.module';
     ]),
   ],
   providers: [RentalService, RentalResolver, BikeDataloader],
-  exports: [BikeDataloader],
+  exports: [BikeDataloader, RentalService],
 })
 export class RentalModule {}

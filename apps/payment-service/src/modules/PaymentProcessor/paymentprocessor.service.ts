@@ -247,6 +247,7 @@ export class PaymentprocessorService {
 
     try {
       return await prismaPayment.$transaction(
+        // @ts-expect-error - Prisma transaction callback type inference issue, tx parameter type is complex and verbose to annotate
         async (tx) => {
           const wallet = await tx.wallet.findUnique({
             where: {
@@ -339,6 +340,7 @@ export class PaymentprocessorService {
 
     try {
       return await prismaPayment.$transaction(
+        // @ts-expect-error - Prisma transaction callback type inference issue, tx parameter type is complex and verbose to annotate
         async (tx) => {
           const wallet = await tx.wallet.findUnique({
             where: {

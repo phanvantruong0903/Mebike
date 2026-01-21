@@ -9,3 +9,4 @@ export * from './lib/jwt';
 export * from './lib/schema';
 export * from './lib/prisma';
 export * from './lib/redis';
+export * from './lib/meilisearch';

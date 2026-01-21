@@ -16,19 +16,20 @@ datasource db {
 }
 
 model Profile {
-  id         String           @id @default(uuid())
-  accountId  String           @unique
-  name       String
-  address    String           @default("")
-  YOB        Int
-  phone      String
-  role       Role             @default(USER)
-  verify     UserVerifyStatus @default(Unverified)
-  nfcCardUid String?          @default("")
-  avatarUrl  String?          @default("")
-  status     UserStatus       @default(Active)
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  id            String           @id @default(uuid())
+  accountId     String           @unique
+  name          String
+  address       String           @default("")
+  YOB           Int
+  phone         String
+  role          Role             @default(USER)
+  verify        UserVerifyStatus @default(Unverified)
+  nfcCardUid    String?          @default("")
+  avatarUrl     String?          @default("")
+  workStationId String?
+  status        UserStatus       @default(Active)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@map("profiles")
 }
@@ -44,6 +45,7 @@ enum Role {
   ADMIN
   STAFF
   SOS
+  SUPPLIER
 }
 
 enum UserStatus {
