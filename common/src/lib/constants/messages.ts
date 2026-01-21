@@ -132,7 +132,9 @@ export const PAYMENT_MESSAGES = {
   GET_ONE_WITHDRAW_SUCCESS: 'Withdraw retrieved successfully',
   // Description
   DEBIT_SUBSCRIPTION_DESCRIPTION: (subscriptionId: string) =>
-    `Debit subscription for subscription ID: ${subscriptionId}`,
+    `Debit subscription for subscriptionID: ${subscriptionId}`,
+  DEBIT_RENTAL_DESCRIPTION: (rentalId: string) =>
+    `Debit rental for rentalID: ${rentalId}`,
 };
 
 export const SERVER_MESSAGE = {

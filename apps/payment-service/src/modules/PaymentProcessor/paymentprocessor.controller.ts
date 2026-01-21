@@ -10,6 +10,7 @@ import {
   CreatePaymentUrlDto,
   PaymentCallbackDto,
   CreateWalletDto,
+  DebitRentalDto,
 } from '@mebike/common';
 
 @Controller()
@@ -58,6 +59,14 @@ export class PaymentprocessorController {
     const response = await this.paymentprocessorService.debitForSubscription(
       data,
     );
+    return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
+  }
+
+  @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.DEBIT_RENTAL)
+  async debitRental(
+    data: DebitRentalDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    const response = await this.paymentprocessorService.debitForRental(data);
     return grpcResponse(response, PAYMENT_MESSAGES.DEPOSIT_SUCCESS);
   }
 }

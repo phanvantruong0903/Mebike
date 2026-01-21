@@ -83,6 +83,7 @@ export const PAYMENT_METHODS = {
   PAYMENT_CALLBACK: 'PaymentCallback',
   CREATE_WALLET: 'CreateWallet',
   DEBIT_SUBSCRIPTION: 'DebitSubscription',
+  DEBIT_RENTAL: 'DebitRental',
   GET_WALLET: 'GetWallet',
   GET_ALL_WALLET: 'GetAllWallets',
   CHANGE_WALLET_STATUS: 'ChangeWalletStatus',

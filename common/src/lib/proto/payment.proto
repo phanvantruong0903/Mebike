@@ -14,8 +14,7 @@ service PaymentService {
 message DebitRentalRequest {
   string accountId = 1;
   int32 amount = 2;
-  string transactionType = 3;
-  string rentalId = 4;
+  string rentalId = 3;
 }
 
 message DebitRentalResponse {

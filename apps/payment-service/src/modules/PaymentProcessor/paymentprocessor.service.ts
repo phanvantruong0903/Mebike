@@ -16,6 +16,7 @@ import {
   WalletModel,
   WalletStatus,
   DebitSubscriptionDto,
+  DebitRentalDto,
 } from '@mebike/common';
 import { RpcException } from '@nestjs/microservices';
 
@@ -169,6 +170,18 @@ export class PaymentprocessorService {
   async debitForSubscription(data: DebitSubscriptionDto) {
     const description = PAYMENT_MESSAGES.DEBIT_SUBSCRIPTION_DESCRIPTION(
       data.subscriptionId,
+    );
+    return await this.debit({
+      accountId: data.accountId,
+      amount: data.amount,
+      description,
+      transactionType: TransactionType.FEE,
+    });
+  }
+
+  async debitForRental(data: DebitRentalDto) {
+    const description = PAYMENT_MESSAGES.DEBIT_RENTAL_DESCRIPTION(
+      data.rentalId,
     );
     return await this.debit({
       accountId: data.accountId,
