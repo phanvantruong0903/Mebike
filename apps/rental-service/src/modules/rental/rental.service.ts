@@ -194,17 +194,6 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     return pricePer30Min * halfHourUnit;
   }
 
-  // bike functions
-  async getBikeById(id: string) {
-    const service = this.getFleetService();
-    return await firstValueFrom(service.GetBike({ id }));
-  }
-
-  async changeBikeStatus(id: string, status: BikeStatus) {
-    const service = this.getFleetService();
-    return await firstValueFrom(service.ChangeBikeStatus({ id, status }));
-  }
-
   async getByIds(ids: string[]) {
     return await prismaRental.rental.findMany({
       where: {

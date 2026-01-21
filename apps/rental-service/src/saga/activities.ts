@@ -14,7 +14,6 @@ import {
   RentalStatus,
   SERVER_MESSAGE,
   throwGrpcError,
-  TransactionType,
   Wallet,
   WalletResponse,
 } from '@mebike/common';
@@ -276,7 +275,6 @@ export class RentalActivities {
         this.paymentService.DebitRental({
           accountId: data.accountId,
           amount: data.amount,
-          transactionType: TransactionType.RENTALFEE,
           rentalId: data.rentalId,
         }),
       );

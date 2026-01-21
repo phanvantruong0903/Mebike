@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Client, Connection } from '@temporalio/client';
 import { Worker } from '@temporalio/worker';
 import { rentalCreationWorkflow, rentalEndingWorkflow } from './workflow';
@@ -14,37 +8,31 @@ import { join } from 'node:path';
 import { CreateRentalDto, RentalModel } from '@mebike/common';
 
 @Injectable()
-export class TemporalService
-  implements OnModuleInit, OnModuleDestroy, OnApplicationBootstrap
-{
-  private readonly logger = new Logger(TemporalService.name);
+export class TemporalService implements OnModuleDestroy {
   private client!: Client;
   private worker?: Worker;
 
   constructor(private readonly moduleRef: ModuleRef) {
-    this.logger.log('TemporalService instance created');
+    this.initialize();
   }
 
-  async onModuleInit() {
-    this.logger.log('TemporalService.onModuleInit called');
+  private async initialize() {
     try {
-      const address = process.env.TEMPORAL_ADDRESS || 'localhost:7233';
-      this.logger.log(`Connecting to Temporal at: ${address}`);
       const connection = await Connection.connect({
-        address,
+        address: process.env.TEMPORAL_ADDRESS || 'localhost:7233',
       });
-      this.logger.log('Temporal Connection established');
+
       this.client = new Client({
         connection,
       });
-      this.logger.log(`Temporal Client created: ${!!this.client}`);
-    } catch (err) {
-      this.logger.error('Error in TemporalService.onModuleInit:', err);
-      throw err;
+
+      this.startWorker();
+    } catch (error) {
+      console.error('Failed to connect to Temporal:', error);
     }
   }
 
-  async onApplicationBootstrap() {
+  private startWorker() {
     this.runWorker().catch((err) => {
       console.error('Failed to start Temporal worker:', err);
     });
