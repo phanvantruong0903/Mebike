@@ -12,8 +12,8 @@ export class Package {
   @Field(() => String)
   price!: string;
 
-  @Field(() => Int)
-  maxUsages!: number;
+  @Field(() => Int, { nullable: true })
+  maxUsages?: number;
 
   @Field(() => UsageType)
   usageType!: UsageType;

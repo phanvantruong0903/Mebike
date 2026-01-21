@@ -5,6 +5,8 @@ import {
   Max,
   IsNotIn,
   IsPhoneNumber,
+  IsUUID,
+  IsOptional,
 } from 'class-validator';
 import { Role } from '../../../prisma/index';
 
@@ -28,4 +30,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsNotIn([Role.ADMIN], { message: 'Role must not be ADMIN' })
   role!: Role;
+
+  @IsNotEmpty()
+  @IsUUID()
+  @IsOptional()
+  workStationId?: string;
 }

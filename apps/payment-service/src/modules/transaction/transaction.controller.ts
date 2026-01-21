@@ -3,7 +3,6 @@ import { TransactionService } from './transaction.service';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
-  buildSearchFilter,
   CreateWithDrawDto,
   GetAllWithdrawDto,
   GetTransactionDto,
@@ -14,6 +13,8 @@ import {
   TRANSACTION_METHODS,
   TransactionModel,
   UpdateWithDrawStatusDto,
+  GetTransactionDetailDto,
+  GetWithdrawDetailDto,
 } from '@mebike/common';
 
 @Controller()
@@ -33,29 +34,23 @@ export class TransactionController {
   async getAllTransaction(
     data: GetTransactionDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
-    const searchFields = ['id'];
-    let searchFilter = buildSearchFilter(data.search, searchFields);
-
-    searchFilter = {
-      ...searchFilter,
+    const filter = {
       ...(data.accountId && { accountId: data.accountId }),
     };
 
     const result = await this.baseGrpcHandler.getAllLogic(
       data.page,
       data.limit,
-      searchFilter,
+      filter,
     );
     return grpcPaginateResponse(result, PAYMENT_MESSAGES.GET_ALL_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.PAYMENT, TRANSACTION_METHODS.GET_ONE)
-  async getTransactionDetail({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
-    const result = await this.baseGrpcHandler.getOneById(id);
+  async getTransactionDetail(
+    data: GetTransactionDetailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    const result = await this.baseGrpcHandler.getOneById(data.id);
     return grpcResponse<TransactionModel>(
       result as unknown as TransactionModel,
       PAYMENT_MESSAGES.GET_ONE,
@@ -99,8 +94,8 @@ export class TransactionController {
   }
 
   @GrpcMethod(GRPC_SERVICES.PAYMENT, TRANSACTION_METHODS.GET_ONE_WITHDRAW)
-  async getWithdrawDetail({ id }: { id: string }) {
-    const withdraw = await this.transactionService.getWithdrawDetail(id);
+  async getWithdrawDetail(data: GetWithdrawDetailDto) {
+    const withdraw = await this.transactionService.getWithdrawDetail(data.id);
     return grpcResponse(withdraw, PAYMENT_MESSAGES.GET_ONE_WITHDRAW_SUCCESS);
   }
 }

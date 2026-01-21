@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import DataLoader from 'dataloader';
+import { UserService } from './user.service';
 import { UserProfile } from '@mebike/common';
 
 @Injectable({ scope: Scope.REQUEST })

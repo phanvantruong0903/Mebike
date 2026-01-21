@@ -12,13 +12,16 @@ import {
 
 interface SubscriptionServiceClient {
   CreateSubscription(
-    data: CreateSubscriptionInput,
+    data: CreateSubscriptionInput & { accountId: string },
   ): Observable<SubscriptionResponse>;
   GetSubscription(data: { id: string }): Observable<SubscriptionResponse>;
   GetSubscriptionList(
     data: GetSubscriptionListInput,
   ): Observable<SubscriptionListResponse>;
-  ActivateSubscription(data: { id: string }): Observable<SubscriptionResponse>;
+  ActivateSubscription(data: {
+    id: string;
+    accountId: string;
+  }): Observable<SubscriptionResponse>;
   ExpireSubscription(data: { id: string }): Observable<SubscriptionResponse>;
 }
 
@@ -37,15 +40,17 @@ export class SubscriptionService implements OnModuleInit {
       );
   }
 
-  async createSubscription(data: CreateSubscriptionInput) {
+  async createSubscription(
+    data: CreateSubscriptionInput & { accountId: string },
+  ) {
     return await firstValueFrom(
       this.subscriptionService.CreateSubscription(data),
     );
   }
 
-  async activateSubscription(id: string) {
+  async activateSubscription(data: { id: string; accountId: string }) {
     return await firstValueFrom(
-      this.subscriptionService.ActivateSubscription({ id }),
+      this.subscriptionService.ActivateSubscription(data),
     );
   }
 

@@ -33,13 +33,19 @@
 
 The project consists of the following main services:
 
-- **API Gateway (Custom Nestjs)**: A custom-built gateway service using NestJS. It acts as the single entry point for client requests, handling routing, request aggregation, and authentication guards before forwarding traffic to internal microservices.
+- **API Gateway (Custom NestJS)**: A custom-built gateway service using NestJS. It acts as the single entry point for client requests, handling routing, request aggregation, and authentication guards before forwarding traffic to internal microservices.
 - **Auth Service**: Handles user authentication and authorization (JWT, Passport).
 - **User Service**: Manages user profiles and data.
 - **Fleet Service**: Manages inventory (Bike, Station, Supplier).
-- **Rental Service**: Manages rental transactions and bookings.
-- **Consul**: Used for service discovery and configuration.
+- **Rental Service**: Manages rental transactions and bookings (Rent, Reservation).
+- **Membership Service**: Manages user subscriptions and membership packages.
+- **Incident Service**: Handles incident reporting and SOS requests from users.
+- **Notification Service**: Manages email notifications and communication with users.
+- **Payment Service**: Integrates with VNPAY payment gateway and handles wallet transactions.
+- **Consul**: Used for service discovery and configuration management.
 - **Traefik**: Acts as the edge router and load balancer.
+- **Kafka**: Message broker for asynchronous communication between services.
+- **Redis**: Caching layer for improved performance.
 
 ## 🛠 Prerequisites
 
@@ -76,11 +82,21 @@ cp .env.example .env
 
 ### 4. Start Infrastructure (Docker)
 
-Start the databases, Consul, and Traefik using Docker Compose:
+**For Development Environment:**
+
+Start the databases, Consul, Traefik, Kafka, and Redis using Docker Compose:
 
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.dev.yaml up -d --build
 ```
+
+**For Production/Server Environment:**
+
+```bash
+docker-compose -f docker-compose.yaml up -d --build
+```
+
+> **Note:** The development environment (`docker-compose.dev.yaml`) is optimized for local development with exposed ports and debugging capabilities.
 
 ### 5. Run Applications
 
@@ -101,6 +117,18 @@ npx nx serve fleet-service
 
 # Start the Rental Service
 npx nx serve rental-service
+
+# Start the Membership Service
+npx nx serve membership-service
+
+# Start the Incident Service
+npx nx serve incident-service
+
+# Start the Notification Service
+npx nx serve notification-service
+
+# Start the Payment Service
+npx nx serve payment-service
 ```
 
 ## 📦 Build
@@ -112,6 +140,10 @@ npx nx build auth-service
 npx nx build user-service
 npx nx build fleet-service
 npx nx build rental-service
+npx nx build membership-service
+npx nx build incident-service
+npx nx build notification-service
+npx nx build payment-service
 ```
 
 ## 🧪 Testing
@@ -123,23 +155,29 @@ npx nx test auth-service
 npx nx test user-service
 npx nx test fleet-service
 npx nx test rental-service
+npx nx test membership-service
+npx nx test incident-service
+npx nx test payment-service
 ```
 
 ## 📂 Project Structure
 
 ```
 Mebike/
-├── apps/               # Application services
-│   ├── api-gateway/    # API Gateway service
-│   ├── auth-service/   # Authentication service
-│   ├── user-service/   # User management service
-│   ├── fleet-service/  # Inventory (Bike, Station, Supplier)
-│   └── rental-service/ # Rental management service
-management service
-├── common/             # Shared libraries and modules
-├── docker-compose.yaml # Docker infrastructure config
-├── nx.json             # Nx configuration
-└── package.json        # Project dependencies
+├── apps/                     # Application services
+│   ├── api-gateway/          # API Gateway service
+│   ├── auth-service/         # Authentication service
+│   ├── user-service/         # User management service
+│   ├── fleet-service/        # Inventory (Bike, Station, Supplier)
+│   ├── rental-service/       # Rental management service (Rent, Reservation)
+│   ├── membership-service/   # Membership management service (Subscription, Package)
+│   ├── incident-service/     # Incident management service (Sos, Report)
+│   ├── notification-service/ # Notification service (Email)
+│   └── payment-service/      # Payment service (VNPAY Gateway, Mebike payment service)
+├── common/                   # Shared libraries and modules
+├── docker-compose.yaml       # Docker infrastructure config
+├── nx.json                   # Nx configuration
+└── package.json              # Project dependencies
 ```
 
 ## 📄 License

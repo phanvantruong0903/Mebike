@@ -79,7 +79,6 @@ message GetAllWithdrawsResponse {
 message GetTransactionsRequest {
   int32 page = 1;
   int32 limit = 2;
-  optional string search = 3;
   optional string accountId = 4;
 }
 

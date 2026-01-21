@@ -5,12 +5,15 @@ import {
   Role,
   CreateSupplierInput,
   UpdateSupplierInput,
+  UpdateSupplierDto,
   SupplierResponse,
   GRAPHQL_NAME_SUPPLIER,
   SupplierListResponse,
   GetSupplierInput,
-  ChangeSupplierStatusInput,
   SupplierStatsResponse,
+  SupplierSearchResult,
+  SupplierSearchPage,
+  ChangeSupplierStatusDto,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -39,7 +42,7 @@ export class SupplierResolver {
     return this.supplierService.updateSupplier({
       id,
       ...body,
-    });
+    } as unknown as UpdateSupplierDto);
   }
 
   @Query(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ONE })
@@ -60,9 +63,7 @@ export class SupplierResolver {
   ): Promise<SupplierListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
-
-    return this.supplierService.getAllSuppliers({ page, limit, search });
+    return this.supplierService.getAllSuppliers({ page, limit });
   }
 
   @Mutation(() => SupplierResponse, {
@@ -71,9 +72,10 @@ export class SupplierResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async changeSupplierStatus(
-    @Args('body') body: ChangeSupplierStatusInput,
+    @Args('body') body: CreateSupplierInput,
   ): Promise<SupplierResponse> {
-    return this.supplierService.changeSupplierStatus(body);
+    const data = body as unknown as ChangeSupplierStatusDto;
+    return this.supplierService.changeSupplierStatus(data);
   }
 
   @Query(() => SupplierStatsResponse, {
@@ -83,6 +85,36 @@ export class SupplierResolver {
   @Roles(Role.ADMIN)
   async getSupplierStats(): Promise<SupplierStatsResponse> {
     return this.supplierService.getSupplierStats();
+  }
+
+  @Query(() => [SupplierSearchResult], {
+    name: GRAPHQL_NAME_SUPPLIER.AUTO_COMPLETE,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async autoCompleteSupplier(
+    @Args('query', { type: () => String }) query: string,
+  ): Promise<SupplierSearchResult[]> {
+    return this.supplierService.autoComplete(query);
+  }
+
+  @Query(() => SupplierSearchPage, { name: GRAPHQL_NAME_SUPPLIER.SEARCH })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async searchSupplier(
+    @Args('q', { nullable: true }) q: string,
+    @Args('params', {
+      nullable: true,
+      type: () => GetSupplierInput,
+      defaultValue: {},
+    })
+    data: GetSupplierInput,
+  ): Promise<SupplierSearchPage> {
+    const page = data.page ?? 1;
+    const limit = data.limit ?? 10;
+    const search = q ?? '';
+
+    return this.supplierService.searchSupplier(page, limit, search);
   }
 
   @Query(() => String)

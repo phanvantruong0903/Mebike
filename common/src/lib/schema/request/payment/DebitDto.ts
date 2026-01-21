@@ -1,12 +1,4 @@
-import {
-  Min,
-  IsNumber,
-  IsString,
-  IsNotEmpty,
-  Max,
-  IsIn,
-} from 'class-validator';
-import { TransactionType } from '../../../prisma/payment/generated';
+import { IsNumber, IsString, IsNotEmpty, IsPositive } from 'class-validator';
 
 export class DebitDto {
   @IsString()
@@ -15,16 +7,6 @@ export class DebitDto {
 
   @IsNumber()
   @IsNotEmpty()
-  @Min(2000, { message: 'Amount must be at least 2000' })
-  @Max(100000000, { message: 'Amount must be at most 100000000' })
+  @IsPositive()
   amount!: number;
-
-  @IsNotEmpty()
-  @IsIn([
-    TransactionType.REFUND,
-    TransactionType.RENTALFEE,
-    TransactionType.TOPUP,
-    TransactionType.WITHDRAWAL,
-  ])
-  transactionType!: TransactionType;
 }

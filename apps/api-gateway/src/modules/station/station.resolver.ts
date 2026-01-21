@@ -10,10 +10,15 @@ import {
   StationListResponse,
   GetStationInput,
   UpdateStationStatusInput,
+  StationSearchPage,
+  UserProfile,
+  StationSearchResult,
+  StationStatus,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { StationService } from './station.service';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver()
 export class StationResolver {
@@ -39,8 +44,11 @@ export class StationResolver {
   }
 
   @Query(() => StationResponse, { name: GRAPQL_NAME_STATION.GET_ONE })
-  async getStation(@Args('id') id: string): Promise<StationResponse> {
-    return this.stationService.getStation({ id });
+  async getStation(
+    @Args('id') id: string,
+    @CurrentUser() user: UserProfile,
+  ): Promise<StationResponse> {
+    return this.stationService.getStation({ id }, user);
   }
 
   @Query(() => StationListResponse, { name: GRAPQL_NAME_STATION.GET_ALL })
@@ -51,17 +59,22 @@ export class StationResolver {
       defaultValue: {},
     })
     data: GetStationInput,
+    @CurrentUser() user: UserProfile,
   ): Promise<StationListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
-    const { latitude, longitude, search } = data || {};
+    const isAdmin = user?.role === Role.ADMIN;
+    if (!isAdmin) {
+      data.status = StationStatus.Active;
+    }
+    const { latitude, longitude, status } = data || {};
     return this.stationService.getAllStation({
       page,
       limit,
-      latitude,
-      longitude,
-      search,
+      latitude: latitude ? Number(latitude) : undefined,
+      longitude: longitude ? Number(longitude) : undefined,
+      status,
     });
   }
 
@@ -72,6 +85,34 @@ export class StationResolver {
     @Args('body') body: UpdateStationStatusInput,
   ): Promise<StationResponse> {
     return this.stationService.changeStationStatus(body);
+  }
+
+  @Query(() => [StationSearchResult], {
+    name: GRAPQL_NAME_STATION.AUTO_COMPLETE,
+  })
+  async autoCompleteStation(
+    @Args('query', { type: () => String }) query: string,
+    @CurrentUser() user: UserProfile,
+  ): Promise<StationSearchResult[]> {
+    return this.stationService.autoComplete(query, user);
+  }
+
+  @Query(() => StationSearchPage, { name: GRAPQL_NAME_STATION.SEARCH })
+  async searchStation(
+    @Args('q', { nullable: true }) q: string,
+    @Args('params', {
+      nullable: true,
+      type: () => GetStationInput,
+      defaultValue: {},
+    })
+    data: GetStationInput,
+    @CurrentUser() user: UserProfile,
+  ): Promise<StationSearchPage> {
+    const page = data.page ?? 1;
+    const limit = data.limit ?? 10;
+    const search = q ?? '';
+
+    return this.stationService.searchStation(page, limit, search, user);
   }
 
   @Query(() => String)

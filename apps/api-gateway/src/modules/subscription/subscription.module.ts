@@ -11,10 +11,14 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { SubscriptionService } from './subscription.service';
 import { SubscriptionResolver } from './subscription.resolver';
+import { UserModule } from '../user/user.module';
+import { PackageModule } from '../package/package.module';
 
 @Module({
   imports: [
     RedisModule,
+    UserModule,
+    PackageModule,
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {

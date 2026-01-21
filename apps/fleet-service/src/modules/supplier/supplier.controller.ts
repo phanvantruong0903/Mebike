@@ -13,7 +13,9 @@ import {
   SUPPLIER_MESSAGES,
   ChangeSupplierStatusDto,
   SupplierModel,
-  buildSearchFilter,
+  GetSupplierDetailDto,
+  GetSupplierDto,
+  GetSuppliersByIdsDto,
 } from '@mebike/common';
 import { SupplierService } from './supllier.service';
 
@@ -59,13 +61,11 @@ export class SupplierController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_ONE)
-  async getSupplierDetail({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getSupplierDetail(
+    data: GetSupplierDetailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.supplierService.getSupplierDetail(id);
+      const result = await this.supplierService.getSupplierDetail(data.id);
       return grpcResponse<SupplierModel>(
         result,
         SUPPLIER_MESSAGES.GET_DETAIL_SUCCESS,
@@ -99,17 +99,15 @@ export class SupplierController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_ALL)
-  async getAllSuppliers(data: {
-    page: number;
-    limit: number;
-    search?: string;
-  }): Promise<ReturnType<typeof grpcPaginateResponse>> {
+  async getAllSuppliers(
+    data: GetSupplierDto,
+  ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit } = data;
-      const searchFilter = ['name', 'id'];
-      const search = buildSearchFilter(data.search, searchFilter);
+      const { page, limit, status } = data;
+      const filter: any = {};
+      if (status) filter.status = status;
 
-      const result = await this.baseHandler.getAllLogic(page, limit, search);
+      const result = await this.baseHandler.getAllLogic(page, limit, filter);
       return grpcPaginateResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -158,7 +156,7 @@ export class SupplierController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_SUPPLIERS_BY_IDS)
-  async getSupplierByIds(data: { ids: string[] }) {
+  async getSupplierByIds(data: GetSuppliersByIdsDto) {
     const result = await this.supplierService.getSuppliersByIds(data.ids);
     return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
   }

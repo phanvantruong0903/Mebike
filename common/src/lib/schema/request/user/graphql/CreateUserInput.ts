@@ -3,18 +3,21 @@ import { Role } from '../../../../prisma/index';
 
 @InputType()
 export class CreateUserInput {
-  @Field()
-  email!: string;
+  @Field({ nullable: true })
+  email?: string;
 
-  @Field()
-  name!: string;
+  @Field({ nullable: true })
+  name?: string;
 
-  @Field(() => Int)
-  YOB!: number;
+  @Field(() => Int, { nullable: true })
+  YOB?: number;
 
-  @Field(() => String)
-  phone!: string;
+  @Field(() => String, { nullable: true })
+  phone?: string;
 
-  @Field(() => Role)
-  role!: Role;
+  @Field(() => Role, { nullable: true })
+  role?: Role;
+
+  @Field(() => String, { nullable: true })
+  workStationId?: string;
 }

@@ -3,9 +3,9 @@ import { BikeStatus } from '../../../../prisma/index';
 
 @InputType()
 export class ChangeBikeStatusInput {
-  @Field()
-  id!: string;
+  @Field({ nullable: true })
+  id?: string;
 
-  @Field(() => BikeStatus)
-  status!: BikeStatus;
+  @Field(() => BikeStatus, { nullable: true })
+  status?: BikeStatus;
 }

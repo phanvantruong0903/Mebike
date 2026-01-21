@@ -3,9 +3,9 @@ import { SupplierStatus } from '../../../../prisma/index';
 
 @InputType()
 export class ChangeSupplierStatusInput {
-  @Field()
-  id!: string;
+  @Field({ nullable: true })
+  id?: string;
 
-  @Field(() => SupplierStatus)
-  status!: SupplierStatus;
+  @Field(() => SupplierStatus, { nullable: true })
+  status?: SupplierStatus;
 }

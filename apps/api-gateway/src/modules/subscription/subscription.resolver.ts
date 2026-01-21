@@ -1,4 +1,11 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
@@ -10,15 +17,23 @@ import {
   GetSubscriptionListInput,
   Subscription,
   UserProfile,
+  Package,
 } from '@mebike/common';
+import type { SubscriptionModel } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { SubscriptionService } from './subscription.service';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { UserProfileDataLoader } from '../user/user-profile.dataloader';
+import { PackageDataloader } from '../package/package.dataloader';
 
 @Resolver(() => Subscription)
 export class SubscriptionResolver {
-  constructor(private readonly subscriptionService: SubscriptionService) {}
+  constructor(
+    private readonly subscriptionService: SubscriptionService,
+    private readonly userProfileDataloader: UserProfileDataLoader,
+    private readonly packageDataloader: PackageDataloader,
+  ) {}
 
   @Mutation(() => SubscriptionResponse, {
     name: GRAPHQL_NAME_SUBSCRIPTION.CREATE,
@@ -41,9 +56,13 @@ export class SubscriptionResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.USER)
   async activateSubscription(
+    @CurrentUser() user: UserProfile,
     @Args('id') id: string,
   ): Promise<SubscriptionResponse> {
-    return this.subscriptionService.activateSubscription(id);
+    return this.subscriptionService.activateSubscription({
+      id,
+      accountId: user.accountId,
+    });
   }
 
   @Mutation(() => SubscriptionResponse, {
@@ -83,6 +102,18 @@ export class SubscriptionResolver {
       limit,
       search: data.search,
     });
+  }
+
+  @ResolveField(() => UserProfile)
+  async user(@Parent() subscription: SubscriptionModel): Promise<UserProfile> {
+    return this.userProfileDataloader.batchUserProfiles.load(
+      subscription.accountId,
+    );
+  }
+
+  @ResolveField(() => Package)
+  async package(@Parent() subscription: SubscriptionModel): Promise<Package> {
+    return this.packageDataloader.batchPackages.load(subscription.packageId);
   }
 
   @Query(() => String)

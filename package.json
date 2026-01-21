@@ -24,6 +24,7 @@
     "@nestjs/microservices": "^11.1.6",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.2.5",
     "@prisma/client": "^5.22.0",
     "@temporalio/activity": "^1.14.0",
     "@temporalio/client": "^1.14.0",
@@ -39,14 +40,18 @@
     "decimal.js": "^10.6.0",
     "dotenv": "^16.4.7",
     "graphql": "^16.11.0",
+    "handlebars": "^4.7.8",
     "ioredis": "^5.8.2",
     "kafkajs": "^2.2.4",
+    "meilisearch": "^0.55.0",
     "moment": "^2.30.1",
     "nodemailer": "^7.0.11",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
+    "resend": "^6.7.0",
     "rxjs": "^7.8.0",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
@@ -99,8 +104,6 @@
   },
   "workspaces": [
     "apps/*",
-    "common",
-    "rental-service",
-    "rental-service-e2e"
+    "common"
   ]
 }

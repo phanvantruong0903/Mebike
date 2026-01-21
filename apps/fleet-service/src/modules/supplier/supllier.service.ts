@@ -23,19 +23,14 @@ export class SupplierService extends BaseService<
 
   async getSupplierStat() {
     const [stats, bikeStats] = await Promise.all([
-      prismaFleet.supplier.groupBy({
+      (prismaFleet.supplier.groupBy as any)({
         by: ['status'],
         _count: {
           id: true,
         },
       }),
-      prismaFleet.bike.groupBy({
+      (prismaFleet.bike.groupBy as any)({
         by: ['status'],
-        where: {
-          supplierId: {
-            not: undefined,
-          },
-        },
         _count: {
           id: true,
         },

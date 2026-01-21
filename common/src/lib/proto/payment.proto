@@ -8,6 +8,7 @@ service PaymentService {
   rpc CreatePaymentUrl (CreatePaymentUrlRequest) returns (CreatePaymentUrlResponse);
   rpc PaymentCallback (PaymentCallbackRequest) returns (Empty);
   rpc DebitRental (DebitRentalRequest) returns (DebitRentalResponse);
+  rpc DebitSubscription (DebitSubscriptionRequest) returns (DebitSubscriptionResponse);
 }
 
 message DebitRentalRequest {
@@ -18,6 +19,22 @@ message DebitRentalRequest {
 }
 
 message DebitRentalResponse {
+  bool success = 1;
+  string message = 2;
+  Empty data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+  google.protobuf.Timestamp createdAt = 6; 
+  google.protobuf.Timestamp updatedAt = 7;
+}
+
+message DebitSubscriptionRequest {
+  string accountId = 1;
+  int32 amount = 2;
+  string subscriptionId = 3;
+}
+
+message DebitSubscriptionResponse {
   bool success = 1;
   string message = 2;
   Empty data = 3;

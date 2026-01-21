@@ -14,9 +14,5 @@ export class GetAllWithdrawDto {
 
   @IsOptional()
   @IsString()
-  search?: string;
-
-  @IsOptional()
-  @IsString()
   accountId?: string;
 }

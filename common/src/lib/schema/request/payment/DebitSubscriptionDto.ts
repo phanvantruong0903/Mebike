@@ -1,8 +1,8 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 import { DebitDto } from './DebitDto';
 
-export class DebitRentalDto extends DebitDto {
+export class DebitSubscriptionDto extends DebitDto {
   @IsString()
   @IsNotEmpty()
-  rentalId!: string;
+  subscriptionId!: string;
 }

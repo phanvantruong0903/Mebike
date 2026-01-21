@@ -195,8 +195,6 @@ export class AuthService
         }),
       ]);
 
-      console.log('REFRESH TOKEN', { accessToken, newRefreshToken });
-
       await Promise.all([
         this.redisClient.del(
           `${REDIS_KEY_PREFIX.REFRESH_TOKEN}:${refreshToken}`,

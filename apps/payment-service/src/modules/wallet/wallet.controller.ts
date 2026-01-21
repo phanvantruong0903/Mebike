@@ -2,7 +2,6 @@ import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
-  buildSearchFilter,
   ChangeWalletStatusDto,
   GetAllWalletsDto,
   GRPC_SERVICES,
@@ -11,6 +10,8 @@ import {
   PAYMENT_MESSAGES,
   PAYMENT_METHODS,
   WalletModel,
+  CreateWalletDto,
+  GetWalletDto,
 } from '@mebike/common';
 import { WalletService } from './wallet.service';
 
@@ -31,17 +32,17 @@ export class WalletController {
   }
 
   @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.CREATE_WALLET)
-  async createWalletGrpc(data: {
-    accountId: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async createWalletGrpc(
+    data: CreateWalletDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const response = await this.walletService.createWallet(data.accountId);
     return grpcResponse(response, PAYMENT_MESSAGES.CREATE_WALLET_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.PAYMENT, PAYMENT_METHODS.GET_WALLET)
-  async getWallet(data: {
-    accountId: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getWallet(
+    data: GetWalletDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     const response = await this.walletService.getWallet(data.accountId);
     return grpcResponse(response, PAYMENT_MESSAGES.GET_WALLET_SUCCESS);
   }
@@ -50,13 +51,9 @@ export class WalletController {
   async getAllWallets(
     data: GetAllWalletsDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
-    const searchFields = ['id', 'accountId'];
-    const searchFilter = buildSearchFilter(data.search, searchFields);
-
     const response = await this.baseGrpcHandler.getAllLogic(
       data.page,
       data.limit,
-      searchFilter,
     );
     return grpcPaginateResponse(
       response,

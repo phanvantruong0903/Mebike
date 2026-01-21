@@ -9,7 +9,6 @@ import {
   BikeStatus,
   throwGrpcError,
   STATION_MESSAGES,
-  buildSearchFilter,
   GetStationDto,
   REDIS_CONSTANTS,
   REDIS_KEY_PREFIX,
@@ -132,18 +131,20 @@ export class StationService extends BaseService<
   }
 
   async getAllStations(data: GetStationDto) {
-    const { page, limit, longitude, latitude, search } = data;
-    const searchFields = ['name', 'address', 'id'];
-    const searchFilter = buildSearchFilter(search, searchFields);
+    const { page, limit, longitude, latitude, status } = data;
+    const filter: any = {};
+    if (status) {
+      filter.status = status;
+    }
 
     const stats = await this.getStationStats();
 
     if (!longitude || !latitude) {
       const [stations, total] = await Promise.all([
         prismaFleet.station.findMany({
-          where: searchFilter,
-          skip: (page - 1) * limit,
-          take: limit,
+          where: filter,
+          skip: ((page ?? 1) - 1) * (limit ?? 10),
+          take: limit ?? 10,
           include: {
             _count: {
               select: {
@@ -152,7 +153,7 @@ export class StationService extends BaseService<
             },
           },
         }),
-        prismaFleet.station.count({ where: searchFilter }),
+        prismaFleet.station.count({ where: filter }),
       ]);
 
       const stationsWithCount = await Promise.all(
@@ -222,7 +223,7 @@ export class StationService extends BaseService<
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / (limit ?? 10)),
         stats,
       };
     }
@@ -253,6 +254,7 @@ export class StationService extends BaseService<
     const stations = await prismaFleet.station.findMany({
       where: {
         id: { in: stationIds },
+        ...filter,
       },
       include: {
         _count: {
@@ -263,7 +265,7 @@ export class StationService extends BaseService<
       },
     });
 
-    let stationsWithCount = await Promise.all(
+    const stationsWithCount = await Promise.all(
       stations.map(async (station) => {
         const [
           availableBike,
@@ -325,27 +327,6 @@ export class StationService extends BaseService<
       }),
     );
 
-    if (data.search) {
-      const keyword = data.search.toLowerCase();
-      stationsWithCount = stationsWithCount.filter((s: any) => {
-        return (
-          s.name.toLowerCase().includes(keyword) ||
-          s.address.toLowerCase().includes(keyword)
-        );
-      });
-
-      if (!stationsWithCount.length) {
-        return {
-          data: [],
-          limit: limit,
-          page: page,
-          total: 0,
-          totalPages: 0,
-          stats,
-        };
-      }
-    }
-
     const stationMap = new Map(
       stationsWithCount.map((station: any) => [station.id, station]),
     );
@@ -369,14 +350,17 @@ export class StationService extends BaseService<
       .filter((item) => item !== null);
 
     const total = result.length;
-    const paginatedResult = result.slice((page - 1) * limit, page * limit);
+    const paginatedResult = result.slice(
+      ((page ?? 1) - 1) * (limit ?? 10),
+      (page ?? 1) * (limit ?? 10),
+    );
 
     return {
       data: paginatedResult,
       limit: limit,
       page: page,
       total: total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / (limit ?? 10)),
       stats,
     };
   }
@@ -394,5 +378,13 @@ export class StationService extends BaseService<
       where: { id: { in: ids } },
     });
     return stations;
+  }
+
+  async checkStationExist(id: string) {
+    const station = await prismaFleet.station.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    return !!station;
   }
 }

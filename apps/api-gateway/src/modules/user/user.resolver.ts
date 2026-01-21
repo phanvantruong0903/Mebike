@@ -48,9 +48,8 @@ export class UserResolver {
   ): Promise<UserListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
-
-    return this.userService.getAllUser({ page, limit, search });
+    const status = data?.status;
+    return this.userService.getAllUser({ page, limit, status });
   }
 
   @Query(() => UserResponse, { name: GRAPHQL_NAME_USER.GET_ONE })
@@ -85,7 +84,10 @@ export class UserResolver {
   async changeStatus(
     @Args('data') data: ChangeUserStatusInput,
   ): Promise<UserResponse> {
-    return this.userService.changeStatus(data);
+    return this.userService.changeStatus({
+      accountId: data.accountId!,
+      status: data.status!,
+    });
   }
 
   @ResolveField(() => Account)

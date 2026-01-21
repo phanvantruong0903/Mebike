@@ -63,9 +63,8 @@ export class WalletResolver {
   ): Promise<WalletListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
-
-    return this.walletService.getAllWallet({ page, limit, search });
+    const status = data?.status;
+    return this.walletService.getAllWallet({ page, limit, status });
   }
 
   @Query(() => String)

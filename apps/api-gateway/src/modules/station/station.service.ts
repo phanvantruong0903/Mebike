@@ -5,20 +5,28 @@ import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
   CreateStationInput,
-  GetStationInput,
   StationResponse,
   StationListResponse,
   Station,
   UpdateStationInput,
   UpdateStationStatusInput,
+  meiliClient,
+  StationSearchPage,
+  UserProfile,
+  Role,
+  StationSearchResult,
+  StationStatus,
+  GetStationDto,
+  STATION_MESSAGES,
 } from '@mebike/common';
+import { GraphQLError } from 'graphql/error';
 
 interface StationServiceClient {
   GetStation(data: { id: string }): Observable<StationResponse>;
   UpdateStation(
     data: UpdateStationInput & { id: string },
   ): Observable<StationResponse>;
-  GetAllStations(data: GetStationInput): Observable<StationListResponse>;
+  GetAllStations(data: GetStationDto): Observable<StationListResponse>;
   CreateStation(data: CreateStationInput): Observable<StationResponse>;
   GetStationsByIds(data: { ids: string[] }): Observable<{ data: Station[] }>;
   UpdateStationStatus(
@@ -34,10 +42,23 @@ export class StationService implements OnModuleInit {
     @Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     this.fleetService = this.client.getService<StationServiceClient>(
       GRPC_SERVICES.FLEET,
     );
+    await this.createStationIndex();
+    await meiliClient.index('Station').updateSettings({
+      searchableAttributes: ['name', 'address', 'id'],
+      filterableAttributes: ['status'],
+    });
+  }
+
+  async createStationIndex() {
+    try {
+      await meiliClient.getIndex('Station');
+    } catch {
+      await meiliClient.createIndex('Station', { primaryKey: 'id' });
+    }
   }
 
   async createStation(data: CreateStationInput) {
@@ -54,7 +75,7 @@ export class StationService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.UpdateStationStatus(data));
   }
 
-  async getAllStation(data: GetStationInput) {
+  async getAllStation(data: GetStationDto) {
     const response = await firstValueFrom(
       this.fleetService.GetAllStations(data),
     );
@@ -72,9 +93,17 @@ export class StationService implements OnModuleInit {
     };
   }
 
-  async getStation(data: { id: string }) {
+  async getStation(data: { id: string }, user?: UserProfile) {
     const response = await firstValueFrom(this.fleetService.GetStation(data));
     const station = response.data as Station;
+
+    if (user?.role !== Role.ADMIN && station.status !== StationStatus.Active) {
+      throw new GraphQLError(STATION_MESSAGES.NOT_FOUND, {
+        extensions: {
+          statusCode: 404,
+        },
+      });
+    }
     return {
       ...response,
       data: station
@@ -91,5 +120,50 @@ export class StationService implements OnModuleInit {
       this.fleetService.GetStationsByIds({ ids }),
     );
     return response.data || [];
+  }
+
+  async autoComplete(
+    query: string,
+    user: UserProfile,
+  ): Promise<StationSearchResult[]> {
+    let filter;
+    if (user?.role === Role.ADMIN) {
+      filter = undefined;
+    } else {
+      filter = `status = '${StationStatus.Active}'`;
+    }
+    const result = await meiliClient.index('Station').search(query, {
+      limit: 10,
+      filter,
+    });
+    return result.hits as StationSearchResult[];
+  }
+
+  async searchStation(
+    page: number,
+    limit: number,
+    search: string,
+    user: UserProfile,
+  ): Promise<StationSearchPage> {
+    let filter;
+    if (user?.role === Role.ADMIN) {
+      filter = undefined;
+    } else {
+      filter = `status = '${StationStatus.Active}'`;
+    }
+    const result = await meiliClient.index('Station').search(search, {
+      limit,
+      offset: (page - 1) * limit,
+      filter,
+    });
+    return {
+      data: result.hits as Station[],
+      pagination: {
+        total: result.estimatedTotalHits || 0,
+        page,
+        limit,
+        totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      },
+    };
   }
 }

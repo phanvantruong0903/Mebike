@@ -4,13 +4,13 @@ import { StationStatus } from '../../../../prisma/index';
 
 @InputType()
 export class UpdateStationStatusInput {
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsNotEmpty()
-  id!: string;
+  id?: string;
 
-  @Field(() => StationStatus)
+  @Field(() => StationStatus, { nullable: true })
   @IsString()
   @IsNotEmpty()
-  status!: StationStatus;
+  status?: StationStatus;
 }
