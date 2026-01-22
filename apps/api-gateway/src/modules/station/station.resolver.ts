@@ -110,7 +110,7 @@ export class StationResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
 
-      const isAdmin = user?.role === Role.ADMIN && user?.role;
+      const isAdmin = user?.role === Role.ADMIN;
       const { latitude, longitude } = data || {};
       return await this.stationService.getAllStation({
         page,

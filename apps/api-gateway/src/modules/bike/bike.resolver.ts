@@ -201,6 +201,8 @@ export class BikeResolver {
     try {
       return await this.bikeService.autoComplete(query);
     } catch (error) {
+      console.error(error);
+
       return {
         data: [],
       };
@@ -218,8 +220,8 @@ export class BikeResolver {
     data: GetBikeInput,
   ): Promise<BikeSearchPage> {
     try {
-      const page = data.page ?? 1;
-      const limit = data.limit ?? 10;
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
       const search = q ?? '';
 
       return await this.bikeService.searchBike(page, limit, search);

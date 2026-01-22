@@ -57,7 +57,8 @@ export class SosResolver {
       } as unknown as CreateSosDto);
     } catch (error) {
       const err = error as any;
-      const statusCode = err?.status || 500;
+      const statusCode =
+        err?.status ?? err?.statusCode ?? err?.extensions?.statusCode ?? 500;
       const message = err?.message || 'An error occurred';
 
       return {
@@ -85,7 +86,8 @@ export class SosResolver {
       } as unknown as UpdateSosDto);
     } catch (error) {
       const err = error as any;
-      const statusCode = err?.status || 500;
+      const statusCode =
+        err?.status ?? err?.statusCode ?? err?.extensions?.statusCode ?? 500;
       const message = err?.message || 'An error occurred';
 
       return {
@@ -126,7 +128,8 @@ export class SosResolver {
       );
     } catch (error) {
       const err = error as any;
-      const statusCode = err?.status || 500;
+      const statusCode =
+        err?.status ?? err?.statusCode ?? err?.extensions?.statusCode ?? 500;
       const message = err?.message || 'An error occurred';
 
       return {
@@ -156,7 +159,8 @@ export class SosResolver {
       return await this.sosService.getSos({ id }, user);
     } catch (error) {
       const err = error as any;
-      const statusCode = err?.status || 500;
+      const statusCode =
+        err?.status ?? err?.statusCode ?? err?.extensions?.statusCode ?? 500;
       const message = err?.message || 'An error occurred';
 
       return {

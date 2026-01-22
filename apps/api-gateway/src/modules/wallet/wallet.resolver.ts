@@ -34,6 +34,8 @@ export class WalletResolver {
       const statusCode = err?.status || 500;
       const message = err?.message || 'An error occurred';
 
+      console.error(error);
+
       return {
         success: false,
         message: message,

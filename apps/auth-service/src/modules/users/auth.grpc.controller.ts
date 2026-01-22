@@ -261,7 +261,10 @@ export class AuthGrpcController {
         name: data.name,
         phone: data.phone,
         YOB: data.YOB,
-        workStationId: 'workStationId' in data ? data.workStationId : undefined,
+        workStationId:
+          'workStationId' in data && data.workStationId
+            ? data.workStationId
+            : undefined,
       });
 
       if (shouldGenerateToken) {
@@ -271,7 +274,9 @@ export class AuthGrpcController {
             role: role,
             verify: UserVerifyStatus.Unverified,
             workStationId:
-              'workStationId' in data ? data.workStationId : undefined,
+              'workStationId' in data && data.workStationId
+                ? data.workStationId
+                : undefined,
           });
 
         return grpcResponse(

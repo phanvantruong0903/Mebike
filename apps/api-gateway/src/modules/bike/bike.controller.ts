@@ -37,8 +37,6 @@ export class BikeController {
       supplierId: query.supplierId,
     };
 
-    console.log(data);
-
     return this.bikeService.getAllBike(data);
   }
 
