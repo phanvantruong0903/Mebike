@@ -174,9 +174,6 @@ export class StationResolver {
     try {
       return await this.stationService.autoComplete(query, user);
     } catch (error: any) {
-      const statusCode = error?.status || 500;
-      const message = error?.message || 'An error occurred';
-
       return [];
     }
   }
@@ -200,10 +197,6 @@ export class StationResolver {
 
       return await this.stationService.searchStation(page, limit, search, user);
     } catch (error) {
-      const err = error as any;
-      const statusCode = err?.status || 500;
-      const message = err?.message || 'An error occurred';
-
       return {
         data: [],
         pagination: {

@@ -201,10 +201,6 @@ export class BikeResolver {
     try {
       return await this.bikeService.autoComplete(query);
     } catch (error) {
-      const err = error as any;
-      const statusCode = err?.status || 500;
-      const message = err?.message || 'An error occurred';
-
       return {
         data: [],
       };

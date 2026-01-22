@@ -77,7 +77,7 @@ export class AuthGrpcController {
   async createUser(
     data: CreateUserDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    if (data.role !== Role.SUPPLIER) {
+    if (data.role !== Role.USER) {
       if (!data.workStationId) {
         throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
           STATION_MESSAGES.NOT_FOUND,

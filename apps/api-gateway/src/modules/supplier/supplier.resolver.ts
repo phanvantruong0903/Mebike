@@ -188,10 +188,6 @@ export class SupplierResolver {
     try {
       return await this.supplierService.autoComplete(query);
     } catch (error) {
-      const err = error as any;
-      const statusCode = err?.status || 500;
-      const message = err?.message || 'An error occurred';
-
       return [];
     }
   }
@@ -215,10 +211,6 @@ export class SupplierResolver {
 
       return await this.supplierService.searchSupplier(page, limit, search);
     } catch (error) {
-      const err = error as any;
-      const statusCode = err?.status || 500;
-      const message = err?.message || 'An error occurred';
-
       return {
         data: [],
         pagination: {
