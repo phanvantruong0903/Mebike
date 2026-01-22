@@ -8,6 +8,7 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import {
   Role,
   BikeResponse,
@@ -24,12 +25,14 @@ import {
   BikeSearchResult,
   BikeSearchPage,
   BikeResult,
+  UserProfile,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { BikeService } from './bike.service';
 import { StationDataloader } from './station.dataloader';
 import { SupplierDataloader } from './supplier.dataloader';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Resolver(() => Bike)
 export class BikeResolver {
@@ -65,6 +68,7 @@ export class BikeResolver {
   }
 
   @Query(() => BikeListResponse, { name: GRAPHQL_NAME_BIKE.GET_ALL })
+  @UseGuards(OptionalJwtAuthGuard)
   async getAllBike(
     @Args('params', {
       nullable: true,
@@ -72,12 +76,17 @@ export class BikeResolver {
       defaultValue: {},
     })
     data: GetBikeInput,
+    @CurrentUser() user?: UserProfile,
   ): Promise<BikeListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
 
     const status = data?.status;
-    const stationId = data?.stationId;
+    let stationId = data?.stationId;
+
+    if (user?.role === Role.STAFF && user?.workStationId) {
+      stationId = user.workStationId;
+    }
 
     return this.bikeService.getAllBike({
       page,

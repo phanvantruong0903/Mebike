@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { StationService } from './station.service';
 import {
   GetStationDto,
@@ -14,6 +14,7 @@ import {
   ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 
 @ApiTags('station')
 @Controller('/api/station')
@@ -21,6 +22,7 @@ export class StationController {
   constructor(private readonly stationService: StationService) {}
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
     summary: 'Get all stations',
     description:
@@ -32,7 +34,7 @@ export class StationController {
     @Query() query: GetStationDto,
     @CurrentUser() user?: UserProfile,
   ) {
-    const isAdmin = user?.role === Role.ADMIN;
+    const isAdmin = user?.role === Role.ADMIN && user?.role;
 
     const data: GetStationDto = {
       page: query.page ? Number(query.page) : 1,
@@ -46,6 +48,7 @@ export class StationController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
     summary: 'Get station by ID',
     description: 'Retrieve detailed information about a specific station',

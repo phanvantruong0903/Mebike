@@ -40,6 +40,9 @@ export class UserProfile {
   @Field(() => String, { nullable: true })
   nfcCardUid?: string;
 
+  @Field(() => String, { nullable: true })
+  workStationId?: string;
+
   @Field()
   createdAt!: string;
 

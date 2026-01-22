@@ -85,8 +85,8 @@ export class UserResolver {
     @Args('data') data: ChangeUserStatusInput,
   ): Promise<UserResponse> {
     return this.userService.changeStatus({
-      accountId: data.accountId!,
-      status: data.status!,
+      accountId: data.accountId,
+      status: data.status,
     });
   }
 

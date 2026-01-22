@@ -97,7 +97,12 @@ export class StationService implements OnModuleInit {
     const response = await firstValueFrom(this.fleetService.GetStation(data));
     const station = response.data as Station;
 
-    if (user?.role !== Role.ADMIN && station.status !== StationStatus.Active) {
+    if (
+      !user?.role &&
+      user?.role !== Role.ADMIN &&
+      station?.status !== StationStatus.Active &&
+      station
+    ) {
       throw new GraphQLError(STATION_MESSAGES.NOT_FOUND, {
         extensions: {
           statusCode: 404,
@@ -124,7 +129,7 @@ export class StationService implements OnModuleInit {
 
   async autoComplete(
     query: string,
-    user: UserProfile,
+    user?: UserProfile,
   ): Promise<StationSearchResult[]> {
     let filter;
     if (user?.role === Role.ADMIN) {
@@ -143,7 +148,7 @@ export class StationService implements OnModuleInit {
     page: number,
     limit: number,
     search: string,
-    user: UserProfile,
+    user?: UserProfile,
   ): Promise<StationSearchPage> {
     let filter;
     if (user?.role === Role.ADMIN) {

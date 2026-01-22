@@ -270,6 +270,8 @@ export class AuthGrpcController {
             user_id: user.id,
             role: role,
             verify: UserVerifyStatus.Unverified,
+            workStationId:
+              'workStationId' in data ? data.workStationId : undefined,
           });
 
         return grpcResponse(

@@ -19,6 +19,7 @@ import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { StationService } from './station.service';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 
 @Resolver()
 export class StationResolver {
@@ -44,14 +45,16 @@ export class StationResolver {
   }
 
   @Query(() => StationResponse, { name: GRAPQL_NAME_STATION.GET_ONE })
+  @UseGuards(OptionalJwtAuthGuard)
   async getStation(
     @Args('id') id: string,
-    @CurrentUser() user: UserProfile,
+    @CurrentUser() user?: UserProfile,
   ): Promise<StationResponse> {
     return this.stationService.getStation({ id }, user);
   }
 
   @Query(() => StationListResponse, { name: GRAPQL_NAME_STATION.GET_ALL })
+  @UseGuards(OptionalJwtAuthGuard)
   async getAllStation(
     @Args('params', {
       nullable: true,
@@ -59,7 +62,7 @@ export class StationResolver {
       defaultValue: {},
     })
     data: GetStationInput,
-    @CurrentUser() user: UserProfile,
+    @CurrentUser() user?: UserProfile,
   ): Promise<StationListResponse> {
     const page = data?.page ?? 1;
     const limit = data?.limit ?? 10;
@@ -90,14 +93,16 @@ export class StationResolver {
   @Query(() => [StationSearchResult], {
     name: GRAPQL_NAME_STATION.AUTO_COMPLETE,
   })
+  @UseGuards(OptionalJwtAuthGuard)
   async autoCompleteStation(
     @Args('query', { type: () => String }) query: string,
-    @CurrentUser() user: UserProfile,
+    @CurrentUser() user?: UserProfile,
   ): Promise<StationSearchResult[]> {
     return this.stationService.autoComplete(query, user);
   }
 
   @Query(() => StationSearchPage, { name: GRAPQL_NAME_STATION.SEARCH })
+  @UseGuards(OptionalJwtAuthGuard)
   async searchStation(
     @Args('q', { nullable: true }) q: string,
     @Args('params', {
@@ -106,7 +111,7 @@ export class StationResolver {
       defaultValue: {},
     })
     data: GetStationInput,
-    @CurrentUser() user: UserProfile,
+    @CurrentUser() user?: UserProfile,
   ): Promise<StationSearchPage> {
     const page = data.page ?? 1;
     const limit = data.limit ?? 10;
