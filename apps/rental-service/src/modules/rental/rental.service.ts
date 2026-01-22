@@ -10,7 +10,8 @@ import {
   throwGrpcError,
   TrendValue,
 } from '@mebike/common';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { TemporalService } from '../../saga/temporal-service';
 
 @Injectable()
@@ -18,15 +19,30 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
   constructor(private readonly temporalService: TemporalService) {
     super(prismaRental.rental);
   }
+  private readonly logger = new Logger(RentalService.name);
 
   override async create(data: CreateRentalDto): Promise<RentalModel> {
     const minimumRent = Number(process.env.RE_MINIMUM_RENT_AMOUNT || '2000');
     try {
-      return await this.temporalService.startRentalCreation({
+      const result = await this.temporalService.startRentalCreation({
         ...data,
         minimumRent,
       });
+
+      if (!result.success) {
+        this.logger.error('error:', result);
+        throwGrpcError(
+          result.statusCode || 500,
+          result.message || SERVER_MESSAGE.INTERNAL_SERVER,
+          result.errors,
+        );
+      }
+
+      return result.data;
     } catch (error: unknown) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
       const msg =
         error instanceof Error ? error.message : 'Rental creation failed';
       throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [msg]);
@@ -35,10 +51,24 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
 
   async end(data: EndRentalDto): Promise<RentalModel> {
     try {
-      return await this.temporalService.startRentalEnding({
+      const result = await this.temporalService.startRentalEnding({
         rentalId: data.id,
+        endStationId: data.endStationId,
       });
+
+      if (!result.success) {
+        throwGrpcError(
+          result.statusCode || 500,
+          result.message || SERVER_MESSAGE.INTERNAL_SERVER,
+          result.errors,
+        );
+      }
+
+      return result.data;
     } catch (error: unknown) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
       const msg =
         error instanceof Error ? error.message : 'Rental ending failed';
       throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [msg]);

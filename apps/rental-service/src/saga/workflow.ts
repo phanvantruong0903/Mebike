@@ -1,50 +1,120 @@
-import {
-  CreateRentalDto,
-  RentalModel,
-  BikeStatus,
-  RENTAL_MESSAGES,
-} from '@mebike/common';
 import { proxyActivities } from '@temporalio/workflow';
 import type { RentalActivities } from './activities';
 
 const {
-  rentBike,
-  releaseBike,
+  validateAvailableBike,
+  updateBikeStatus,
+  lockBike,
+  unlockBike,
   verifyUserBalance,
   createRentalRecord,
+  voidRentalRecord,
   getRental,
   calculateFees,
-  updateBikeStatus,
   completeRentalRecord,
+  revertRentalRecord,
   processPayment,
 } = proxyActivities<RentalActivities>({
   startToCloseTimeout: '1 minute',
   retry: {
-    maximumAttempts: 3,
+    maximumAttempts: 1,
   },
 });
 
+export interface RentalCreationWorkflow {
+  accountId: string;
+  bikeId: string;
+  subscriptionId?: string;
+  minimumRent: number;
+}
+
 export async function rentalCreationWorkflow(
-  data: CreateRentalDto & { minimumRent: number },
-): Promise<RentalModel> {
-  await verifyUserBalance(data.accountId, data.minimumRent);
-
-  await rentBike(data.bikeId);
-
-  let rental: RentalModel;
+  data: RentalCreationWorkflow,
+): Promise<any> {
+  let bikeLocked = false;
+  let rentalId: string | undefined;
   try {
-    rental = await createRentalRecord(data);
-  } catch (error) {
-    await releaseBike(data.bikeId);
-    throw error;
-  }
+    await verifyUserBalance(data.accountId, data.minimumRent);
+    const { bikeId, stationId } = await validateAvailableBike(data.bikeId);
 
-  return rental;
+    await updateBikeStatus({
+      id: bikeId,
+      status: 'Booked',
+    });
+    bikeLocked = true;
+
+    const rental = await createRentalRecord(data, stationId);
+    rentalId = rental.id;
+
+    return {
+      success: true,
+      data: rental,
+    };
+  } catch (error: any) {
+    if (rentalId) {
+      await voidRentalRecord(rentalId);
+    }
+    if (bikeLocked) {
+      await unlockBike(data.bikeId);
+    }
+    let errorMessage = 'Unknown error';
+    let statusCode = 500;
+    let errorList: string[] | undefined;
+
+    if (error && typeof error === 'object') {
+      let rawMessage = '';
+
+      if ('cause' in error && error.cause && typeof error.cause === 'object') {
+        if (
+          'failure' in error.cause &&
+          error.cause.failure &&
+          typeof error.cause.failure === 'object' &&
+          'message' in error.cause.failure
+        ) {
+          rawMessage = String(error.cause.failure.message);
+        }
+      } else if (
+        'failure' in error &&
+        error.failure &&
+        typeof error.failure === 'object'
+      ) {
+        if (
+          'cause' in error.failure &&
+          error.failure.cause &&
+          typeof error.failure.cause === 'object' &&
+          'message' in error.failure.cause
+        ) {
+          rawMessage = String(error.failure.cause.message);
+        }
+      } else if ('message' in error) {
+        rawMessage = String(error.message);
+      }
+
+      if (rawMessage) {
+        try {
+          const parsed = JSON.parse(rawMessage);
+          errorMessage = parsed.message || rawMessage;
+          statusCode = parsed.statusCode;
+          errorList = parsed.errors;
+        } catch {
+          errorMessage = rawMessage;
+        }
+      }
+    }
+
+    return {
+      success: false,
+      message: errorMessage,
+      errors: errorList || [errorMessage],
+      statusCode,
+    };
+  }
 }
 
 export async function rentalEndingWorkflow(data: {
   rentalId: string;
-}): Promise<RentalModel> {
+  endStationId: string;
+}): Promise<any> {
   const rental = await getRental(data.rentalId);
   const now = new Date();
   const { duration, total } = await calculateFees({
@@ -52,16 +122,12 @@ export async function rentalEndingWorkflow(data: {
     end: now,
   });
 
-  if (!rental.bikeId) {
-    throw new Error(RENTAL_MESSAGES.BIKE_NOT_ASSIGNED);
-  }
+  await verifyUserBalance(rental.accountId, total);
 
-  await updateBikeStatus({
-    id: rental.bikeId,
-    status: BikeStatus.Available,
-  });
+  const bikeId = rental.bikeId as string;
+  await unlockBike(bikeId);
 
-  let updatedRental: RentalModel;
+  let updatedRental: any;
   try {
     updatedRental = await completeRentalRecord({
       rentalId: rental.id,
@@ -70,16 +136,79 @@ export async function rentalEndingWorkflow(data: {
       duration,
       totalPrice: total,
     });
+
+    try {
+      await processPayment({
+        accountId: rental.accountId,
+        amount: total,
+        rentalId: rental.id,
+      });
+    } catch (paymentError) {
+      console.error('Payment failed, rolling back rental completion...');
+
+      await revertRentalRecord(rental.id);
+
+      await lockBike(bikeId);
+
+      throw paymentError;
+    }
   } catch (error) {
-    await updateBikeStatus({ id: rental.bikeId, status: BikeStatus.Booked });
-    throw error;
+    await lockBike(bikeId);
+    let errorMessage = 'Unknown error';
+    let statusCode = 500;
+    let errorList: string[] | undefined;
+
+    if (error && typeof error === 'object') {
+      let rawMessage = '';
+
+      if ('cause' in error && error.cause && typeof error.cause === 'object') {
+        if (
+          'failure' in error.cause &&
+          error.cause.failure &&
+          typeof error.cause.failure === 'object' &&
+          'message' in error.cause.failure
+        ) {
+          rawMessage = String(error.cause.failure.message);
+        }
+      } else if (
+        'failure' in error &&
+        error.failure &&
+        typeof error.failure === 'object'
+      ) {
+        if (
+          'cause' in error.failure &&
+          error.failure.cause &&
+          typeof error.failure.cause === 'object' &&
+          'message' in error.failure.cause
+        ) {
+          rawMessage = String(error.failure.cause.message);
+        }
+      } else if ('message' in error) {
+        rawMessage = String(error.message);
+      }
+
+      if (rawMessage) {
+        try {
+          const parsed = JSON.parse(rawMessage);
+          errorMessage = parsed.message || rawMessage;
+          statusCode = parsed.statusCode;
+          errorList = parsed.errors;
+        } catch {
+          errorMessage = rawMessage;
+        }
+      }
+    }
+
+    return {
+      success: false,
+      message: errorMessage,
+      errors: errorList || [errorMessage],
+      statusCode,
+    };
   }
 
-  await processPayment({
-    accountId: rental.accountId,
-    amount: total,
-    rentalId: rental.id,
-  });
-
-  return updatedRental;
+  return {
+    success: true,
+    data: updatedRental,
+  };
 }

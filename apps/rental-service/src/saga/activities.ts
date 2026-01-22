@@ -17,8 +17,8 @@ import {
   Wallet,
   WalletResponse,
 } from '@mebike/common';
-import { Inject, Injectable } from '@nestjs/common';
-import type { ClientGrpc } from '@nestjs/microservices';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
 
 interface FleetServiceClient {
@@ -38,6 +38,7 @@ interface PaymentServiceClient {
 export class RentalActivities {
   private fleetService!: FleetServiceClient;
   private paymentService!: PaymentServiceClient;
+  private readonly logger = new Logger(RentalActivities.name);
 
   constructor(
     @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
@@ -51,31 +52,38 @@ export class RentalActivities {
     );
   }
 
+  async validateAvailableBike(
+    bikeId: string,
+  ): Promise<{ bikeId: string; stationId: string }> {
+    const bikeResponse = await firstValueFrom(
+      this.fleetService.GetBike({ id: bikeId }),
+    );
+    const bike = bikeResponse.data as Bike;
+
+    if (!bike) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
+    }
+    if (bike.status !== BikeStatus.Available) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        BIKE_MESSAGES.NOT_AVAILABLE,
+      ]);
+    }
+    if (!bike.station?.id) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        BIKE_MESSAGES.NOT_ASSIGNED_STATION,
+      ]);
+    }
+    return {
+      bikeId: bike.id,
+      stationId: bike.station.id,
+    };
+  }
+
   // Create Rental Activities
 
-  async rentBike(bikeId: string): Promise<void> {
+  async lockBike(bikeId: string): Promise<void> {
+    console.log('[COMPENSATION] Locking bike:', bikeId);
     try {
-      const bikeResponse = await firstValueFrom(
-        this.fleetService.GetBike({ id: bikeId }),
-      );
-      const bike = bikeResponse.data as Bike;
-
-      if (!bike) {
-        throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-          BIKE_MESSAGES.NOT_FOUND,
-        ]);
-      }
-      if (bike.status !== BikeStatus.Available) {
-        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-          BIKE_MESSAGES.NOT_AVAILABLE,
-        ]);
-      }
-      if (!bike.station?.id) {
-        throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-          BIKE_MESSAGES.NOT_ASSIGNED_STATION,
-        ]);
-      }
-
       await firstValueFrom(
         this.fleetService.ChangeBikeStatus({
           id: bikeId,
@@ -84,12 +92,12 @@ export class RentalActivities {
       );
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [msg]);
+      console.error('[COMPENSATION] Failed to lock bike:', msg);
     }
   }
 
-  async releaseBike(bikeId: string): Promise<void> {
-    console.log('[COMPENSATION] Releasing bike:', bikeId);
+  async unlockBike(bikeId: string): Promise<void> {
+    console.log('[COMPENSATION] Unlocking bike:', bikeId);
     try {
       await firstValueFrom(
         this.fleetService.ChangeBikeStatus({
@@ -99,14 +107,11 @@ export class RentalActivities {
       );
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
-      console.error('[COMPENSATION] Failed to release bike:', msg);
+      console.error('[COMPENSATION] Failed to unlock bike:', msg);
     }
   }
 
-  async verifyUserBalance(
-    accountId: string,
-    minimumAmount: number,
-  ): Promise<void> {
+  async verifyUserBalance(accountId: string, amount: number): Promise<void> {
     try {
       const walletResponse = await firstValueFrom(
         this.paymentService.GetWallet({ accountId }),
@@ -117,57 +122,44 @@ export class RentalActivities {
           PAYMENT_MESSAGES.WALLET_NOT_FOUND,
         ]);
       }
-      if (wallet.balance < minimumAmount) {
+      if (wallet.balance < amount) {
         throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
           PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
         ]);
       }
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [msg]);
+    } catch (error: any) {
+      this.logger.debug(error);
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
     }
   }
 
-  async createRentalRecord(data: CreateRentalDto): Promise<RentalModel> {
-    const bikeResponse = await firstValueFrom(
-      this.fleetService.GetBike({ id: data.bikeId }),
-    );
-    const bike = bikeResponse.data as Bike;
-    if (!bike) {
-      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
-    }
-
-    if (bike.status !== BikeStatus.Available) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        BIKE_MESSAGES.NOT_AVAILABLE,
-      ]);
-    }
-
-    if (!bike.station?.id) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        BIKE_MESSAGES.NOT_ASSIGNED_STATION,
-      ]);
-    }
-
+  async createRentalRecord(
+    data: CreateRentalDto,
+    stationId: string,
+  ): Promise<RentalModel> {
     try {
       return await prismaRental.rental.create({
         data: {
           ...data,
-          startStationId: bike.station.id,
+          startStationId: stationId,
         },
       });
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        'Failed to create rental record: ' + msg,
-      ]);
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
     }
   }
 
   async voidRentalRecord(rentalId: string): Promise<void> {
     console.log('[COMPENSATION] Voiding rental:', rentalId);
     try {
-      await prismaRental.rental.delete({ where: { id: rentalId } });
+      const res = await prismaRental.rental.delete({ where: { id: rentalId } });
+      if (!res) {
+        console.warn('[COMPENSATION] Voided rental failed:', rentalId);
+      } else {
+        console.log('[COMPENSATION] Voided rental success:', rentalId);
+      }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
       console.error('[COMPENSATION] Failed to void rental:', msg);
@@ -180,10 +172,7 @@ export class RentalActivities {
     const rental = await prismaRental.rental.findUnique({
       where: { id: rentalId },
     });
-    if (!rental)
-      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
-        RENTAL_MESSAGES.NOT_FOUND,
-      ]);
+    if (!rental) throw new Error(RENTAL_MESSAGES.NOT_FOUND);
     return rental;
   }
 
@@ -220,18 +209,16 @@ export class RentalActivities {
           status: RentalStatus.Completed,
         },
       });
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        'Failed to complete rental record: ' + msg,
-      ]);
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
     }
   }
 
   async revertRentalRecord(rentalId: string): Promise<void> {
     console.log('[COMPENSATION] Reverting rental record to Rented:', rentalId);
     try {
-      await prismaRental.rental.update({
+      const res = await prismaRental.rental.update({
         where: { id: rentalId },
         data: {
           status: RentalStatus.Rented,
@@ -240,6 +227,11 @@ export class RentalActivities {
           duration: null as any,
         },
       });
+      if (!res) {
+        console.warn('[COMPENSATION] Reverted rental record failed:', rentalId);
+      } else {
+        console.log('[COMPENSATION] Reverted rental record success:', rentalId);
+      }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
       console.error('[COMPENSATION] Failed to revert rental record:', msg);
@@ -257,11 +249,9 @@ export class RentalActivities {
           status: data.status,
         }),
       );
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        'Failed to update bike status: ' + msg,
-      ]);
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
     }
   }
 
@@ -282,11 +272,9 @@ export class RentalActivities {
         if (response.success === false)
           throw new Error(response.message || 'Payment Failed');
       }
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        'Payment processing failed: ' + msg,
-      ]);
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
     }
   }
 }

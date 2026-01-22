@@ -10,8 +10,10 @@ async function run() {
   const worker = await Worker.create({
     workflowsPath: require.resolve('./workflow'),
     activities: {
-      rentBike: activitiesInstance.rentBike.bind(activitiesInstance),
-      releaseBike: activitiesInstance.releaseBike.bind(activitiesInstance),
+      validateAvailableBike:
+        activitiesInstance.validateAvailableBike.bind(activitiesInstance),
+      lockBike: activitiesInstance.lockBike.bind(activitiesInstance),
+      unlockBike: activitiesInstance.unlockBike.bind(activitiesInstance),
       verifyUserBalance:
         activitiesInstance.verifyUserBalance.bind(activitiesInstance),
       createRentalRecord:

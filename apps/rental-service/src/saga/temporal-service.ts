@@ -1,11 +1,14 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Client, Connection } from '@temporalio/client';
 import { Worker } from '@temporalio/worker';
-import { rentalCreationWorkflow, rentalEndingWorkflow } from './workflow';
+import {
+  RentalCreationWorkflow,
+  rentalCreationWorkflow,
+  rentalEndingWorkflow,
+} from './workflow';
 import { RentalActivities } from './activities';
 import { ModuleRef } from '@nestjs/core';
 import { join } from 'node:path';
-import { CreateRentalDto, RentalModel } from '@mebike/common';
 
 @Injectable()
 export class TemporalService implements OnModuleDestroy {
@@ -58,8 +61,10 @@ export class TemporalService implements OnModuleDestroy {
         connection: workerConnection,
         workflowsPath,
         activities: {
-          rentBike: activitiesInstance.rentBike.bind(activitiesInstance),
-          releaseBike: activitiesInstance.releaseBike.bind(activitiesInstance),
+          validateAvailableBike:
+            activitiesInstance.validateAvailableBike.bind(activitiesInstance),
+          lockBike: activitiesInstance.lockBike.bind(activitiesInstance),
+          unlockBike: activitiesInstance.unlockBike.bind(activitiesInstance),
           verifyUserBalance:
             activitiesInstance.verifyUserBalance.bind(activitiesInstance),
           createRentalRecord:
@@ -99,9 +104,7 @@ export class TemporalService implements OnModuleDestroy {
     return this.client;
   }
 
-  async startRentalCreation(
-    data: CreateRentalDto & { minimumRent: number },
-  ): Promise<RentalModel> {
+  async startRentalCreation(data: RentalCreationWorkflow): Promise<any> {
     const client = this.getClient();
     const handle = await client.workflow.start(rentalCreationWorkflow, {
       taskQueue: 'rental-queue',
@@ -112,7 +115,10 @@ export class TemporalService implements OnModuleDestroy {
     return await handle.result();
   }
 
-  async startRentalEnding(data: { rentalId: string }): Promise<RentalModel> {
+  async startRentalEnding(data: {
+    rentalId: string;
+    endStationId: string;
+  }): Promise<any> {
     const client = this.getClient();
     const handle = await client.workflow.start(rentalEndingWorkflow, {
       taskQueue: 'rental-queue',

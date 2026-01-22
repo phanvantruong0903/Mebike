@@ -8,4 +8,8 @@ export class EndRentalDto {
   @IsString()
   @IsNotEmpty()
   id!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  endStationId!: string;
 }
