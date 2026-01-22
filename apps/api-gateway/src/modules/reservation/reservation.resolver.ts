@@ -48,10 +48,24 @@ export class ReservationResolver {
     @CurrentUser() user: UserProfile,
     @Args('body') body: CreateReservationInput,
   ): Promise<ReservationResponse> {
-    return this.reservationService.createReservation({
-      ...body,
-      accountId: user.accountId,
-    });
+    try {
+      return await this.reservationService.createReservation({
+        ...body,
+        accountId: user.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => ReservationResponse, {
@@ -63,15 +77,43 @@ export class ReservationResolver {
     @CurrentUser() user: UserProfile,
     @Args('body') body: ActivateReservationInput,
   ): Promise<ReservationResponse> {
-    return this.reservationService.activateReservation({
-      ...body,
-      accountId: user.accountId,
-    });
+    try {
+      return await this.reservationService.activateReservation({
+        ...body,
+        accountId: user.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => ReservationResponse, { name: GRAPHQL_NAME_RESERVATION.GET_ONE })
   async getReservation(@Args('id') id: string): Promise<ReservationResponse> {
-    return this.reservationService.getReservation({ id });
+    try {
+      return await this.reservationService.getReservation({ id });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => ReservationListResponse, {
@@ -85,14 +127,34 @@ export class ReservationResolver {
     })
     data: GetReservationListInput,
   ): Promise<ReservationListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
 
-    return this.reservationService.getReservationList({
-      page,
-      limit,
-      search: data.search,
-    });
+      return await this.reservationService.getReservationList({
+        page,
+        limit,
+        search: data.search,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      } as ReservationListResponse;
+    }
   }
 
   @ResolveField(() => UserProfile, { nullable: true })

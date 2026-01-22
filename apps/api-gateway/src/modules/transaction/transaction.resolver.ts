@@ -31,7 +31,21 @@ export class TransactionResolver {
   async updateWithdrawStatus(
     @Args('body') body: UpdateWithDrawStatusInput,
   ): Promise<WithdrawResponse> {
-    return this.transactionService.updateWithdrawStatus(body);
+    try {
+      return await this.transactionService.updateWithdrawStatus(body);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => TransactionResponse, { name: GRAPHQL_NAME_TRANSACTION.GET_ONE })
@@ -41,7 +55,21 @@ export class TransactionResolver {
     @Args('id') id: string,
     @CurrentUser() user: UserProfile,
   ): Promise<TransactionResponse> {
-    return this.transactionService.getTransactionDetail({ id }, user);
+    try {
+      return await this.transactionService.getTransactionDetail({ id }, user);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => TransactionListResponse, {
@@ -58,17 +86,37 @@ export class TransactionResolver {
     data: GetTransactionInput,
     @CurrentUser() user: UserProfile,
   ): Promise<TransactionListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
-    if (user.role === Role.USER) {
-      data.accountId = user.accountId;
-    }
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
+      if (user.role === Role.USER) {
+        data.accountId = user.accountId;
+      }
 
-    return this.transactionService.getAllTransaction({
-      page,
-      limit,
-      accountId: data.accountId,
-    });
+      return await this.transactionService.getAllTransaction({
+        page,
+        limit,
+        accountId: data.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      } as TransactionListResponse;
+    }
   }
 
   @Mutation(() => WithdrawResponse, {
@@ -80,10 +128,24 @@ export class TransactionResolver {
     @Args('body') body: CreateWithDrawInput,
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawResponse> {
-    return this.transactionService.createWithdraw({
-      ...body,
-      accountId: user.accountId,
-    } as unknown as CreateWithDrawDto);
+    try {
+      return await this.transactionService.createWithdraw({
+        ...body,
+        accountId: user.accountId,
+      } as unknown as CreateWithDrawDto);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => WithdrawListResponse, {
@@ -100,17 +162,37 @@ export class TransactionResolver {
     data: GetTransactionInput,
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
-    if (user.role === Role.USER) {
-      data.accountId = user.accountId;
-    }
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
+      if (user.role === Role.USER) {
+        data.accountId = user.accountId;
+      }
 
-    return this.transactionService.getAllWithdraw({
-      page,
-      limit,
-      accountId: data.accountId,
-    });
+      return await this.transactionService.getAllWithdraw({
+        page,
+        limit,
+        accountId: data.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      } as WithdrawListResponse;
+    }
   }
 
   @Query(() => WithdrawResponse, {
@@ -122,7 +204,21 @@ export class TransactionResolver {
     @Args('id') id: string,
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawResponse> {
-    return this.transactionService.getWithdrawDetail(id, user);
+    try {
+      return await this.transactionService.getWithdrawDetail(id, user);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => String)

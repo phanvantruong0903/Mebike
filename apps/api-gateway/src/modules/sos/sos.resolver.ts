@@ -50,10 +50,24 @@ export class SosResolver {
     @Args('body') body: CreateSosInput,
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
-    return this.sosService.createSos({
-      ...body,
-      requesterId: user.accountId,
-    } as unknown as CreateSosDto);
+    try {
+      return await this.sosService.createSos({
+        ...body,
+        requesterId: user.accountId,
+      } as unknown as CreateSosDto);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => SosResponse, { name: GRAPHQL_NAME_SOS.UPDATE_STATUS })
@@ -63,11 +77,25 @@ export class SosResolver {
     @Args('body') body: UpdateSosInput,
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
-    return this.sosService.updateSosStatus({
-      ...body,
-      accountId: user.accountId,
-      role: user.role,
-    } as unknown as UpdateSosDto);
+    try {
+      return await this.sosService.updateSosStatus({
+        ...body,
+        accountId: user.accountId,
+        role: user.role,
+      } as unknown as UpdateSosDto);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SosListResponse, { name: GRAPHQL_NAME_SOS.GET_ALL })
@@ -82,19 +110,39 @@ export class SosResolver {
     data: GetSosInput,
     @CurrentUser() user: UserProfile,
   ): Promise<SosListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
 
-    const status = data?.status;
+      const status = data?.status;
 
-    return this.sosService.getAllSos(
-      {
-        page,
-        limit,
-        status,
-      },
-      user,
-    );
+      return await this.sosService.getAllSos(
+        {
+          page,
+          limit,
+          status,
+        },
+        user,
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      } as SosListResponse;
+    }
   }
 
   @Query(() => SosResponse, { name: GRAPHQL_NAME_SOS.GET_ONE })
@@ -104,7 +152,21 @@ export class SosResolver {
     @Args('id') id: string,
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
-    return this.sosService.getSos({ id }, user);
+    try {
+      return await this.sosService.getSos({ id }, user);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @ResolveField(() => UserProfile)

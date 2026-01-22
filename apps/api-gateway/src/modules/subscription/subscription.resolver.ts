@@ -44,10 +44,24 @@ export class SubscriptionResolver {
     @CurrentUser() user: UserProfile,
     @Args('body') body: CreateSubscriptionInput,
   ): Promise<SubscriptionResponse> {
-    return this.subscriptionService.createSubscription({
-      ...body,
-      accountId: user.accountId,
-    });
+    try {
+      return await this.subscriptionService.createSubscription({
+        ...body,
+        accountId: user.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => SubscriptionResponse, {
@@ -59,10 +73,24 @@ export class SubscriptionResolver {
     @CurrentUser() user: UserProfile,
     @Args('id') id: string,
   ): Promise<SubscriptionResponse> {
-    return this.subscriptionService.activateSubscription({
-      id,
-      accountId: user.accountId,
-    });
+    try {
+      return await this.subscriptionService.activateSubscription({
+        id,
+        accountId: user.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => SubscriptionResponse, {
@@ -73,14 +101,42 @@ export class SubscriptionResolver {
   async expireSubscription(
     @Args('id') id: string,
   ): Promise<SubscriptionResponse> {
-    return this.subscriptionService.expireSubscription(id);
+    try {
+      return await this.subscriptionService.expireSubscription(id);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SubscriptionResponse, {
     name: GRAPHQL_NAME_SUBSCRIPTION.GET_ONE,
   })
   async getSubscription(@Args('id') id: string): Promise<SubscriptionResponse> {
-    return this.subscriptionService.getSubscription(id);
+    try {
+      return await this.subscriptionService.getSubscription(id);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SubscriptionListResponse, {
@@ -94,14 +150,34 @@ export class SubscriptionResolver {
     })
     data: GetSubscriptionListInput,
   ): Promise<SubscriptionListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
 
-    return this.subscriptionService.getSubscriptionList({
-      page,
-      limit,
-      search: data.search,
-    });
+      return await this.subscriptionService.getSubscriptionList({
+        page,
+        limit,
+        search: data.search,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      } as SubscriptionListResponse;
+    }
   }
 
   @ResolveField(() => UserProfile)

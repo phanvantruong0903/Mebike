@@ -58,6 +58,20 @@ export class StationController {
   @ApiResponse({ status: 404, description: 'Station not found' })
   @ApiBearerAuth()
   async getStation(@Param('id') id: string, @CurrentUser() user?: UserProfile) {
-    return this.stationService.getStation({ id }, user);
+    try {
+      return await this.stationService.getStation({ id }, user);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 }

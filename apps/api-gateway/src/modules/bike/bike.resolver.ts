@@ -46,7 +46,21 @@ export class BikeResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async createBike(@Args('body') body: CreateBikeInput): Promise<BikeResponse> {
-    return this.bikeService.createBike(body);
+    try {
+      return await this.bikeService.createBike(body);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => BikeResponse, { name: GRAPHQL_NAME_BIKE.UPDATE })
@@ -56,15 +70,43 @@ export class BikeResolver {
     @Args('body') body: UpdateBikeInput,
     @Args('id') id: string,
   ): Promise<BikeResponse> {
-    return this.bikeService.updateBike({
-      id,
-      ...body,
-    } as unknown as UpdateBikeDto);
+    try {
+      return await this.bikeService.updateBike({
+        id,
+        ...body,
+      } as unknown as UpdateBikeDto);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => BikeResponse, { name: GRAPHQL_NAME_BIKE.GET_ONE })
   async getBike(@Args('id') id: string): Promise<BikeResponse> {
-    return this.bikeService.getBike({ id });
+    try {
+      return await this.bikeService.getBike({ id });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => BikeListResponse, { name: GRAPHQL_NAME_BIKE.GET_ALL })
@@ -78,22 +120,42 @@ export class BikeResolver {
     data: GetBikeInput,
     @CurrentUser() user?: UserProfile,
   ): Promise<BikeListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
 
-    const status = data?.status;
-    let stationId = data?.stationId;
+      const status = data?.status;
+      let stationId = data?.stationId;
 
-    if (user?.role === Role.STAFF && user?.workStationId) {
-      stationId = user.workStationId;
+      if (user?.role === Role.STAFF && user?.workStationId) {
+        stationId = user.workStationId;
+      }
+
+      return await this.bikeService.getAllBike({
+        page,
+        limit,
+        status,
+        stationId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      } as BikeListResponse;
     }
-
-    return this.bikeService.getAllBike({
-      page,
-      limit,
-      status,
-      stationId,
-    });
   }
 
   @Mutation(() => BikeResponse, { name: GRAPHQL_NAME_BIKE.CHANGE_STATUS })
@@ -103,7 +165,21 @@ export class BikeResolver {
     @Args('id') id: string,
     @Args('status', { type: () => BikeStatus }) status: BikeStatus,
   ): Promise<BikeResponse> {
-    return this.bikeService.changeBikeStatus({ id, status });
+    try {
+      return await this.bikeService.changeBikeStatus({ id, status });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @ResolveField(() => Station, { nullable: true })
@@ -122,7 +198,17 @@ export class BikeResolver {
   async autoCompleteBike(
     @Args('query', { type: () => String }) query: string,
   ): Promise<BikeSearchResult> {
-    return this.bikeService.autoComplete(query);
+    try {
+      return await this.bikeService.autoComplete(query);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        data: [],
+      };
+    }
   }
 
   @Query(() => BikeSearchPage, { name: GRAPHQL_NAME_BIKE.SEARCH })
@@ -135,11 +221,23 @@ export class BikeResolver {
     })
     data: GetBikeInput,
   ): Promise<BikeSearchPage> {
-    const page = data.page ?? 1;
-    const limit = data.limit ?? 10;
-    const search = q ?? '';
+    try {
+      const page = data.page ?? 1;
+      const limit = data.limit ?? 10;
+      const search = q ?? '';
 
-    return this.bikeService.searchBike(page, limit, search);
+      return await this.bikeService.searchBike(page, limit, search);
+    } catch (error) {
+      return {
+        data: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      };
+    }
   }
 
   @Query(() => String)

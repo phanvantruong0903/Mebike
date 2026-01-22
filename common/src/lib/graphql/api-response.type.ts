@@ -36,7 +36,7 @@ export function ApiResponseType<TItem>(
     message!: string;
 
     @Field(() => (isArray ? [TItemClass] : TItemClass), { nullable: true })
-    data?: TItem | TItem[];
+    data?: TItem | TItem[] | null;
 
     @Field(() => [String], { nullable: true })
     errors?: string[];

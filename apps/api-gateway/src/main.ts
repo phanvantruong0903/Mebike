@@ -4,7 +4,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import { RpcExceptionsFilter } from './filters/rpc-exception.filter';
 
 import './modules/user/graphql/enum';
 import './modules/supplier/graphql/enum';
@@ -35,8 +34,6 @@ async function bootstrap() {
     ].filter((origin) => !!origin),
     credentials: true,
   });
-
-  app.useGlobalFilters(new RpcExceptionsFilter());
 
   const config = new DocumentBuilder()
     .setTitle('MeBike API')

@@ -1,4 +1,8 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
@@ -15,10 +19,23 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
     return context.switchToHttp().getRequest();
   }
 
-  override handleRequest(err: any, user: any) {
-    if (err || !user) {
+  override handleRequest(
+    err: any,
+    user: any,
+    info: any,
+    context: ExecutionContext,
+  ) {
+    const request = this.getRequest(context);
+    const token = request?.headers?.authorization;
+
+    if (token && (err || !user)) {
+      throw new UnauthorizedException('Token expired or invalid');
+    }
+
+    if (!token) {
       return undefined;
     }
+
     return user;
   }
 }

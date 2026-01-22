@@ -47,12 +47,6 @@ export class JwtStrategy
   }
 
   async validate(req: any, payload: TokenPayload) {
-    if (!this.userServiceCLient) {
-      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
-        'User service is not available',
-      ]);
-    }
-
     const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     const isValid = await this.redisClient.get(
       `${REDIS_KEY_PREFIX.ACCESS_TOKEN}:${token}`,
