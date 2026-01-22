@@ -127,8 +127,8 @@ export class PackageResolver {
         statusCode: statusCode,
         pagination: {
           total: 0,
-          page: 1,
-          limit: 10,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
           totalPages: 0,
         },
       } as PackageListResponse;
