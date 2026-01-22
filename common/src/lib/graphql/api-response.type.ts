@@ -21,6 +21,13 @@ export class PaginationMeta {
   totalPages?: number;
 }
 
+/**
+ * Builds an abstract GraphQL response ObjectType class for the provided item type.
+ *
+ * @param TItemClass - The class constructor used as the GraphQL type for the `data` field.
+ * @param options - Optional settings; when `options.isArray` is `true`, the `data` field is an array of `TItemClass` and the returned class includes a `pagination` field.
+ * @returns The generated abstract GraphQL ObjectType class representing the API response; returns a paginated response class when `options.isArray` is `true`, otherwise a standard response class.
+ */
 export function ApiResponseType<TItem>(
   TItemClass: ClassType<TItem>,
   options: ApiResponseOptions = {},
