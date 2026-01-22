@@ -1,10 +1,9 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { GrpcMethod } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
   GRPC_SERVICES,
   grpcResponse,
-  throwGrpcError,
   grpcPaginateResponse,
   BIKE_METHODS,
   BIKE_MESSAGES,
@@ -39,113 +38,64 @@ export class BikeController {
   async updateBike(
     data: UpdateBikeDto & { id: string },
   ): Promise<ReturnType<typeof grpcResponse>> {
-    try {
-      const result = await this.baseHandler.updateLogic(data.id, data);
-      return grpcResponse<BikeModel>(result, BIKE_MESSAGES.UPDATE_SUCCESS);
-    } catch (error) {
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      const err = error as Error;
-      throw new RpcException(err?.message || BIKE_MESSAGES.UPDATE_FAIL);
-    }
+    const result = await this.baseHandler.updateLogic(data.id, data);
+    return grpcResponse<BikeModel>(result, BIKE_MESSAGES.UPDATE_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_ONE)
   async getBikeDetail(
     data: GetBikeDetailDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    try {
-      const result = await this.bikeService.getBikeDetail(data.id);
-      return grpcResponse<BikeModel>(result, BIKE_MESSAGES.GET_DETAIL_SUCCESS);
-    } catch (error) {
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      const err = error as Error;
-      throw new RpcException(err?.message || BIKE_MESSAGES.UPDATE_FAIL);
-    }
+    const result = await this.bikeService.getBikeDetail(data.id);
+    return grpcResponse<BikeModel>(result, BIKE_MESSAGES.GET_DETAIL_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.CREATE)
   async createBike(
     data: CreateBikeDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    try {
-      const result = await this.bikeService.createBike(data);
-      return grpcResponse<BikeModel>(result, BIKE_MESSAGES.CREATE_SUCCESS);
-    } catch (error) {
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      const err = error as Error;
-      throw new RpcException(err?.message || BIKE_MESSAGES.CREATE_FAILED);
-    }
+    const result = await this.bikeService.createBike(data);
+    return grpcResponse<BikeModel>(result, BIKE_MESSAGES.CREATE_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_ALL)
   async getAllBike(
     data: GetBikeDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
-    try {
-      const filter: any = {};
-      if (data.stationId) {
-        filter.stationId = data.stationId;
-      }
-      if (data.status) {
-        filter.status = data.status;
-      }
-      if (data.supplierId) {
-        filter.supplierId = data.supplierId;
-      }
-
-      const result = await this.baseHandler.getAllLogic(
-        data.page,
-        data.limit,
-        filter,
-        undefined,
-        {
-          station: true,
-          supplier: true,
-        },
-      );
-      return grpcPaginateResponse(result, BIKE_MESSAGES.GET_ALL_SUCCESS);
-    } catch (error) {
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      const err = error as Error;
-      throw new RpcException(err?.message || BIKE_MESSAGES.GET_ALL_FAIL);
+    const filter: any = {};
+    if (data.stationId) {
+      filter.stationId = data.stationId;
     }
+    if (data.status) {
+      filter.status = data.status;
+    }
+    if (data.supplierId) {
+      filter.supplierId = data.supplierId;
+    }
+
+    const result = await this.baseHandler.getAllLogic(
+      data.page,
+      data.limit,
+      filter,
+      undefined,
+      {
+        station: true,
+        supplier: true,
+      },
+    );
+    return grpcPaginateResponse(result, BIKE_MESSAGES.GET_ALL_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.CHANGE_STATUS)
   async changeStatus(
     data: ChangeBikeStatusDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    try {
-      const { id, ...updatedData } = data;
-      const profile = await this.bikeService.changeBikeStatus(
-        id,
-        updatedData.status,
-      );
-      return grpcResponse(profile, BIKE_MESSAGES.UPDATE_SUCCESS);
-    } catch (error: unknown) {
-      if (error instanceof RpcException) {
-        throw error;
-      }
-
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'code' in error &&
-        error.code === 'P2025'
-      ) {
-        throwGrpcError(404, BIKE_MESSAGES.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
-      }
-      const err = error as Error;
-      throw new RpcException(err?.message);
-    }
+    const { id, ...updatedData } = data;
+    const profile = await this.bikeService.changeBikeStatus(
+      id,
+      updatedData.status,
+    );
+    return grpcResponse(profile, BIKE_MESSAGES.UPDATE_SUCCESS);
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_BIKES_BY_IDS)

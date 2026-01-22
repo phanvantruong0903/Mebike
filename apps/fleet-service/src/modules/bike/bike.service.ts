@@ -9,6 +9,8 @@ import {
   BIKE_MESSAGES,
   STATION_MESSAGES,
   BikeStatus,
+  addDocument,
+  updateDocument,
 } from '@mebike/common';
 
 @Injectable()
@@ -59,16 +61,49 @@ export class BikeService extends BaseService<
       ]);
     }
 
-    const result = await this.create(data);
-    return result;
+    const result = await prismaFleet.bike.create({
+      data,
+      include: {
+        station: true,
+        supplier: true,
+      },
+    });
+
+    await addDocument('Bike', result);
+    return result as unknown as BikeModel;
+  }
+
+  async update(id: string, data: UpdateBikeDto): Promise<BikeModel> {
+    const result = await prismaFleet.bike.update({
+      where: { id },
+      data,
+      include: {
+        station: true,
+        supplier: true,
+      },
+    });
+    await updateDocument('Bike', result);
+    return result as unknown as BikeModel;
   }
 
   async changeBikeStatus(id: string, status: BikeStatus) {
-    const profile = await prismaFleet.bike.update({
-      where: { id },
-      data: { status },
-    });
-    return profile;
+    try {
+      const profile = await prismaFleet.bike.update({
+        where: { id },
+        data: { status },
+        include: {
+          station: true,
+          supplier: true,
+        },
+      });
+      await updateDocument('Bike', profile);
+      return profile;
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throwGrpcError(404, BIKE_MESSAGES.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
+      }
+      throw error;
+    }
   }
 
   async getBikesByIds(ids: string[]) {

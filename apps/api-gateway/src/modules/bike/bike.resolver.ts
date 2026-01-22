@@ -99,14 +99,22 @@ export class BikeResolver {
 
   @ResolveField(() => Station, { nullable: true })
   async station(@Parent() bike: Bike): Promise<Station | null> {
-    if (!bike.station?.id) return null;
-    return this.stationDataloader.batchStations.load(bike.station.id);
+    if (bike.station && Object.keys(bike.station).length > 1) {
+      return bike.station;
+    }
+    const stationId = bike.stationId || bike.station?.id;
+    if (!stationId) return null;
+    return this.stationDataloader.batchStations.load(stationId);
   }
 
   @ResolveField(() => Supplier, { nullable: true })
   async supplier(@Parent() bike: Bike): Promise<Supplier | null> {
-    if (!bike.supplier?.id) return null;
-    return this.supplierDataloader.batchSupplier.load(bike.supplier.id);
+    if (bike.supplier && Object.keys(bike.supplier).length > 1) {
+      return bike.supplier;
+    }
+    const supplierId = bike.supplierId || bike.supplier?.id;
+    if (!supplierId) return null;
+    return this.supplierDataloader.batchSupplier.load(supplierId);
   }
 
   @Query(() => BikeSearchResult, { name: GRAPHQL_NAME_BIKE.AUTO_COMPLETE })
@@ -148,13 +156,17 @@ export class BikeResultResolver {
 
   @ResolveField(() => Station, { nullable: true })
   async station(@Parent() bike: BikeResult): Promise<Station | null> {
-    if (!bike.stationId) return null;
-    return this.stationDataloader.batchStations.load(bike.stationId);
+    if (bike.stationId) {
+      return this.stationDataloader.batchStations.load(bike.stationId);
+    }
+    return null;
   }
 
   @ResolveField(() => Supplier, { nullable: true })
   async supplier(@Parent() bike: BikeResult): Promise<Supplier | null> {
-    if (!bike.supplierId) return null;
-    return this.supplierDataloader.batchSupplier.load(bike.supplierId);
+    if (bike.supplierId) {
+      return this.supplierDataloader.batchSupplier.load(bike.supplierId);
+    }
+    return null;
   }
 }
