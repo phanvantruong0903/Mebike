@@ -38,7 +38,6 @@ interface PaymentServiceClient {
 export class RentalActivities {
   private fleetService!: FleetServiceClient;
   private paymentService!: PaymentServiceClient;
-  private readonly logger = new Logger(RentalActivities.name);
 
   constructor(
     @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
@@ -128,7 +127,6 @@ export class RentalActivities {
         ]);
       }
     } catch (error: any) {
-      this.logger.debug(error);
       const errorObj = error?.error || error;
       throw new Error(JSON.stringify(errorObj));
     }
@@ -172,7 +170,10 @@ export class RentalActivities {
     const rental = await prismaRental.rental.findUnique({
       where: { id: rentalId },
     });
-    if (!rental) throw new Error(RENTAL_MESSAGES.NOT_FOUND);
+    if (!rental)
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        RENTAL_MESSAGES.NOT_FOUND,
+      ]);
     return rental;
   }
 
