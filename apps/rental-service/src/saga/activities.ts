@@ -1,4 +1,5 @@
 import {
+  ApiResponse,
   Bike,
   BIKE_MESSAGES,
   BikeResponse,
@@ -17,11 +18,11 @@ import {
   Wallet,
   WalletResponse,
 } from '@mebike/common';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
 
-interface FleetServiceClient {
+interface BikeServiceClient {
   GetBike(data: { id: string }): Observable<BikeResponse>;
   ChangeBikeStatus(data: {
     id: string;
@@ -30,23 +31,31 @@ interface FleetServiceClient {
 }
 
 interface PaymentServiceClient {
+  DebitRental(data: DebitRentalDto): Observable<ApiResponse>;
+}
+
+interface WalletServiceClient {
   GetWallet(data: { accountId: string }): Observable<WalletResponse>;
-  DebitRental(data: DebitRentalDto): Observable<WalletResponse>;
 }
 
 @Injectable()
 export class RentalActivities {
-  private fleetService!: FleetServiceClient;
+  private bikeService!: BikeServiceClient;
   private paymentService!: PaymentServiceClient;
+  private walletService!: WalletServiceClient;
 
   constructor(
-    @Inject(GRPC_PACKAGE.FLEET) private readonly fleetClient: ClientGrpc,
+    @Inject(GRPC_PACKAGE.BIKE) private readonly fleetClient: ClientGrpc,
     @Inject(GRPC_PACKAGE.PAYMENT) private readonly paymentClient: ClientGrpc,
+    @Inject(GRPC_PACKAGE.WALLET) private readonly walletClient: ClientGrpc,
   ) {
-    this.fleetService = this.fleetClient.getService<FleetServiceClient>(
+    this.bikeService = this.fleetClient.getService<BikeServiceClient>(
       GRPC_SERVICES.FLEET,
     );
     this.paymentService = this.paymentClient.getService<PaymentServiceClient>(
+      GRPC_SERVICES.PAYMENT,
+    );
+    this.walletService = this.walletClient.getService<WalletServiceClient>(
       GRPC_SERVICES.PAYMENT,
     );
   }
@@ -55,7 +64,7 @@ export class RentalActivities {
     bikeId: string,
   ): Promise<{ bikeId: string; stationId: string }> {
     const bikeResponse = await firstValueFrom(
-      this.fleetService.GetBike({ id: bikeId }),
+      this.bikeService.GetBike({ id: bikeId }),
     );
     const bike = bikeResponse.data as Bike;
 
@@ -84,7 +93,7 @@ export class RentalActivities {
     console.log('[COMPENSATION] Locking bike:', bikeId);
     try {
       await firstValueFrom(
-        this.fleetService.ChangeBikeStatus({
+        this.bikeService.ChangeBikeStatus({
           id: bikeId,
           status: BikeStatus.Booked,
         }),
@@ -99,7 +108,7 @@ export class RentalActivities {
     console.log('[COMPENSATION] Unlocking bike:', bikeId);
     try {
       await firstValueFrom(
-        this.fleetService.ChangeBikeStatus({
+        this.bikeService.ChangeBikeStatus({
           id: bikeId,
           status: BikeStatus.Available,
         }),
@@ -113,7 +122,7 @@ export class RentalActivities {
   async verifyUserBalance(accountId: string, amount: number): Promise<void> {
     try {
       const walletResponse = await firstValueFrom(
-        this.paymentService.GetWallet({ accountId }),
+        this.walletService.GetWallet({ accountId }),
       );
       const wallet = walletResponse.data as Wallet;
       if (!wallet) {
@@ -245,7 +254,7 @@ export class RentalActivities {
   }): Promise<void> {
     try {
       await firstValueFrom(
-        this.fleetService.ChangeBikeStatus({
+        this.bikeService.ChangeBikeStatus({
           id: data.id,
           status: data.status,
         }),

@@ -10,26 +10,29 @@ async function run() {
   const worker = await Worker.create({
     workflowsPath: require.resolve('./workflow'),
     activities: {
+      // Bike activities
       validateAvailableBike:
         activitiesInstance.validateAvailableBike.bind(activitiesInstance),
+      updateBikeStatus:
+        activitiesInstance.updateBikeStatus.bind(activitiesInstance),
       lockBike: activitiesInstance.lockBike.bind(activitiesInstance),
       unlockBike: activitiesInstance.unlockBike.bind(activitiesInstance),
+      // Wallet & Payment activities
       verifyUserBalance:
         activitiesInstance.verifyUserBalance.bind(activitiesInstance),
+      processPayment:
+        activitiesInstance.processPayment.bind(activitiesInstance),
+      // Rental activities
+      calculateFees: activitiesInstance.calculateFees.bind(activitiesInstance),
       createRentalRecord:
         activitiesInstance.createRentalRecord.bind(activitiesInstance),
       voidRentalRecord:
         activitiesInstance.voidRentalRecord.bind(activitiesInstance),
       getRental: activitiesInstance.getRental.bind(activitiesInstance),
-      calculateFees: activitiesInstance.calculateFees.bind(activitiesInstance),
-      updateBikeStatus:
-        activitiesInstance.updateBikeStatus.bind(activitiesInstance),
       completeRentalRecord:
         activitiesInstance.completeRentalRecord.bind(activitiesInstance),
       revertRentalRecord:
         activitiesInstance.revertRentalRecord.bind(activitiesInstance),
-      processPayment:
-        activitiesInstance.processPayment.bind(activitiesInstance),
     },
     taskQueue: 'rental-service',
   });
