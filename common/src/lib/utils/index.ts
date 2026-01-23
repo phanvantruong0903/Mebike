@@ -3,3 +3,4 @@ export * from './throw-error';
 export * from './prisma';
 export * from './ip.util';
 export * from './validator-constraints';
+export * from './grpc-client.factory';
