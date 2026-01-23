@@ -19,7 +19,7 @@ import { PackageDataloader } from './package.dataloader';
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
-        name: GRPC_PACKAGE.MEMBERSHIP,
+        name: GRPC_PACKAGE.PACKAGE,
         imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {

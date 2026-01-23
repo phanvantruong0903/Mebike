@@ -25,7 +25,7 @@ import { UserModule } from '../user/user.module';
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       {
-        name: GRPC_PACKAGE.RENTAL,
+        name: GRPC_PACKAGE.RESERVATION,
         imports: [ConsulModule],
         inject: [ConsulService],
         useFactory: async (consulService: ConsulService) => {
