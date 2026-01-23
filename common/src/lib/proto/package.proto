@@ -5,9 +5,9 @@ package package;
 service MembershipService {
   rpc CreatePackage (CreatePackageRequest) returns (PackageResponse);
   rpc UpdatePackage (UpdatePackageRequest) returns (PackageResponse);
-  rpc GetPackage (GetPackageRequest) returns (PackageResponse);
+  rpc GetPackage (PackageRequest) returns (PackageResponse);
   rpc GetPackageList (GetPackageListRequest) returns (PackageListResponse);
-  rpc TogglePackageStatus (TogglePackageStatusRequest) returns (PackageResponse);
+  rpc TogglePackageStatus (PackageRequest) returns (PackageResponse);
   rpc GetPackagesByIds (GetPackagesByIdsRequest) returns (PackageArrayResponse);
 }
 
@@ -38,11 +38,7 @@ message UpdatePackageRequest {
   optional string status = 6;
 }
 
-message GetPackageRequest {
-  string id = 1;
-}
-
-message TogglePackageStatusRequest {
+message PackageRequest {
   string id = 1;
 }
 
