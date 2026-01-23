@@ -11,6 +11,7 @@ import {
   GRPC_SERVICES,
   grpcPaginateResponse,
   grpcResponse,
+  PackageDto,
   SUBSCRIPTION_MESSAGES,
   SUBSCRIPTION_METHODS,
   SubscriptionModel,
@@ -54,13 +55,11 @@ export class SubscriptionController {
   }
 
   @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.GET_ONE)
-  async getSubscription({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getSubscription(
+    data: PackageDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.baseHandler.getOneById(id);
+      const result = await this.baseHandler.getOneById(data.id);
 
       if (!result) {
         throw new RpcException(SUBSCRIPTION_MESSAGES.NOT_FOUND);

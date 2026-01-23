@@ -60,11 +60,6 @@ export class PackageService extends BaseService<
     id: string,
     data: UpdatePackageDto,
   ): Promise<PackageModel> {
-    if (!id) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        PACKAGE_MESSAGES.REQUIRE('id'),
-      ]);
-    }
     if (data.usageType === UsageType.Infinite) {
       data.maxUsages = null as any;
     } else if (data.maxUsages !== undefined) {

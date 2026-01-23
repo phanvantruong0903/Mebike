@@ -50,7 +50,7 @@ export class PackageResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async updatePackage(
-    @Args('id') id: string,
+    @Args('id', { type: () => String, nullable: true }) id: string,
     @Args('body') body: UpdatePackageInput,
   ): Promise<PackageResponse> {
     try {
@@ -76,7 +76,9 @@ export class PackageResolver {
   @Query(() => PackageResponse, {
     name: GRAPHQL_NAME_PACKAGE.GET_ONE,
   })
-  async getPackage(@Args('id') id: string): Promise<PackageResponse> {
+  async getPackage(
+    @Args('id', { type: () => String, nullable: true }) id: string,
+  ): Promise<PackageResponse> {
     try {
       return await this.packageService.getPackage(id);
     } catch (error) {
@@ -140,7 +142,9 @@ export class PackageResolver {
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
-  async togglePackageStatus(@Args('id') id: string): Promise<PackageResponse> {
+  async togglePackageStatus(
+    @Args('id', { type: () => String, nullable: true }) id: string,
+  ): Promise<PackageResponse> {
     try {
       return await this.packageService.togglePackageStatus(id);
     } catch (error) {

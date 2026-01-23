@@ -28,7 +28,7 @@ export class PackageService implements OnModuleInit {
   private packageService!: PackageServiceClient;
 
   constructor(
-    @Inject(GRPC_PACKAGE.MEMBERSHIP) private readonly client: ClientGrpc,
+    @Inject(GRPC_PACKAGE.PACKAGE) private readonly client: ClientGrpc,
   ) {}
 
   onModuleInit() {

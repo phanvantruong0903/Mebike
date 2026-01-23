@@ -5,7 +5,6 @@ import {
   BaseGrpcHandler,
   buildFilter,
   buildSearchFilter,
-  ByIdDto,
   CreatePackageDto,
   GetPackageListDto,
   GRPC_SERVICES,
@@ -13,8 +12,10 @@ import {
   grpcResponse,
   PACKAGE_MESSAGES,
   PACKAGE_METHODS,
+  PackageDto,
   PackageModel,
   UpdatePackageDto,
+  UpdatePackageRequest,
 } from '@mebike/common';
 
 @Controller()
@@ -55,10 +56,11 @@ export class PackageController {
 
   @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.UPDATE)
   async updatePackage(
-    data: UpdatePackageDto & { id: string },
+    data: UpdatePackageRequest,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.packageService.updatePackage(data.id, data);
+      const { id, ...rest } = data;
+      const result = await this.packageService.updatePackage(id, rest);
 
       return grpcResponse<PackageModel>(
         result,
@@ -74,7 +76,7 @@ export class PackageController {
   }
 
   @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.GET_ONE)
-  async getPackage(data: ByIdDto): Promise<ReturnType<typeof grpcResponse>> {
+  async getPackage(data: PackageDto): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const result = await this.baseHandler.getOneById(data.id);
 
@@ -124,7 +126,7 @@ export class PackageController {
 
   @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.TOGGLE_STATUS)
   async togglePackageStatus(
-    data: ByIdDto,
+    data: PackageDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const result = await this.packageService.toggleStatus(data.id);

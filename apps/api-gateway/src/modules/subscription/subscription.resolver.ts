@@ -71,7 +71,7 @@ export class SubscriptionResolver {
   @Roles(Role.USER)
   async activateSubscription(
     @CurrentUser() user: UserProfile,
-    @Args('id') id: string,
+    @Args('id', { type: () => String, nullable: true }) id: string,
   ): Promise<SubscriptionResponse> {
     try {
       return await this.subscriptionService.activateSubscription({
@@ -99,7 +99,7 @@ export class SubscriptionResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async expireSubscription(
-    @Args('id') id: string,
+    @Args('id', { type: () => String, nullable: true }) id: string,
   ): Promise<SubscriptionResponse> {
     try {
       return await this.subscriptionService.expireSubscription(id);
@@ -121,7 +121,9 @@ export class SubscriptionResolver {
   @Query(() => SubscriptionResponse, {
     name: GRAPHQL_NAME_SUBSCRIPTION.GET_ONE,
   })
-  async getSubscription(@Args('id') id: string): Promise<SubscriptionResponse> {
+  async getSubscription(
+    @Args('id', { type: () => String, nullable: true }) id: string,
+  ): Promise<SubscriptionResponse> {
     try {
       return await this.subscriptionService.getSubscription(id);
     } catch (error) {
