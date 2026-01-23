@@ -36,8 +36,22 @@ export class AuthResolver {
   async createUser(
     @Args('body') body: CreateUserInput,
   ): Promise<RegisterResponse> {
-    const response = await this.authService.createUser(body);
-    return response;
+    try {
+      const response = await this.authService.createUser(body);
+      return response;
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => LoginResponse, { name: GRAPHQL_NAME_USER.REGISTER })
@@ -81,10 +95,24 @@ export class AuthResolver {
     @CurrentUser() user: UserProfile,
     @Args('body') body: ChangePasswordInput,
   ): Promise<ChangePasswordResponse> {
-    return this.authService.changePassword({
-      accountId: user.accountId,
-      ...body,
-    });
+    try {
+      return await this.authService.changePassword({
+        accountId: user.accountId,
+        ...body,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => UserResponse, {
@@ -134,7 +162,21 @@ export class AuthResolver {
   async verifyEmail(
     @CurrentUser() user: UserProfile,
   ): Promise<ChangePasswordResponse> {
-    return this.authService.verifyEmail(user.accountId);
+    try {
+      return await this.authService.verifyEmail(user.accountId);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => ChangePasswordResponse, {
@@ -145,7 +187,21 @@ export class AuthResolver {
     @CurrentUser() user: UserProfile,
     @Args('otp') otp: string,
   ): Promise<ChangePasswordResponse> {
-    return this.authService.verifyEmailProcess(user.accountId, otp);
+    try {
+      return await this.authService.verifyEmailProcess(user.accountId, otp);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => String)

@@ -19,6 +19,7 @@ import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
 import { StationService } from './station.service';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 
 @Resolver()
 export class StationResolver {
@@ -30,7 +31,21 @@ export class StationResolver {
   async createStation(
     @Args('body') body: CreateStationInput,
   ): Promise<StationResponse> {
-    return this.stationService.createStation(body);
+    try {
+      return await this.stationService.createStation(body);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => StationResponse, { name: GRAPQL_NAME_STATION.UPDATE })
@@ -40,18 +55,48 @@ export class StationResolver {
     @Args('body') body: UpdateStationInput,
     @Args('id') id: string,
   ): Promise<StationResponse> {
-    return this.stationService.updateStation(id, body);
+    try {
+      return await this.stationService.updateStation(id, body);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => StationResponse, { name: GRAPQL_NAME_STATION.GET_ONE })
+  @UseGuards(OptionalJwtAuthGuard)
   async getStation(
     @Args('id') id: string,
-    @CurrentUser() user: UserProfile,
-  ): Promise<StationResponse> {
-    return this.stationService.getStation({ id }, user);
+    @CurrentUser() user?: UserProfile,
+  ): Promise<StationResponse | null> {
+    try {
+      return await this.stationService.getStation({ id }, user);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => StationListResponse, { name: GRAPQL_NAME_STATION.GET_ALL })
+  @UseGuards(OptionalJwtAuthGuard)
   async getAllStation(
     @Args('params', {
       nullable: true,
@@ -59,23 +104,40 @@ export class StationResolver {
       defaultValue: {},
     })
     data: GetStationInput,
-    @CurrentUser() user: UserProfile,
+    @CurrentUser() user?: UserProfile,
   ): Promise<StationListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
 
-    const isAdmin = user?.role === Role.ADMIN;
-    if (!isAdmin) {
-      data.status = StationStatus.Active;
+      const isAdmin = user?.role === Role.ADMIN;
+      const { latitude, longitude } = data || {};
+      return await this.stationService.getAllStation({
+        page,
+        limit,
+        latitude: latitude ? Number(latitude) : undefined,
+        longitude: longitude ? Number(longitude) : undefined,
+        status: isAdmin ? data.status ?? undefined : StationStatus.Active,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      } as StationListResponse;
     }
-    const { latitude, longitude, status } = data || {};
-    return this.stationService.getAllStation({
-      page,
-      limit,
-      latitude: latitude ? Number(latitude) : undefined,
-      longitude: longitude ? Number(longitude) : undefined,
-      status,
-    });
   }
 
   @Mutation(() => StationResponse, { name: GRAPQL_NAME_STATION.UPDATE_STATUS })
@@ -84,20 +146,40 @@ export class StationResolver {
   async updateStationStatus(
     @Args('body') body: UpdateStationStatusInput,
   ): Promise<StationResponse> {
-    return this.stationService.changeStationStatus(body);
+    try {
+      return await this.stationService.changeStationStatus(body);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => [StationSearchResult], {
     name: GRAPQL_NAME_STATION.AUTO_COMPLETE,
   })
+  @UseGuards(OptionalJwtAuthGuard)
   async autoCompleteStation(
     @Args('query', { type: () => String }) query: string,
-    @CurrentUser() user: UserProfile,
+    @CurrentUser() user?: UserProfile,
   ): Promise<StationSearchResult[]> {
-    return this.stationService.autoComplete(query, user);
+    try {
+      return await this.stationService.autoComplete(query, user);
+    } catch (error: any) {
+      return [];
+    }
   }
 
   @Query(() => StationSearchPage, { name: GRAPQL_NAME_STATION.SEARCH })
+  @UseGuards(OptionalJwtAuthGuard)
   async searchStation(
     @Args('q', { nullable: true }) q: string,
     @Args('params', {
@@ -106,13 +188,25 @@ export class StationResolver {
       defaultValue: {},
     })
     data: GetStationInput,
-    @CurrentUser() user: UserProfile,
+    @CurrentUser() user?: UserProfile,
   ): Promise<StationSearchPage> {
-    const page = data.page ?? 1;
-    const limit = data.limit ?? 10;
-    const search = q ?? '';
+    try {
+      const page = data.page ?? 1;
+      const limit = data.limit ?? 10;
+      const search = q ?? '';
 
-    return this.stationService.searchStation(page, limit, search, user);
+      return await this.stationService.searchStation(page, limit, search, user);
+    } catch (error) {
+      return {
+        data: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      };
+    }
   }
 
   @Query(() => String)

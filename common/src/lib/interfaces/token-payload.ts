@@ -4,4 +4,5 @@ export interface TokenPayload {
   user_id: string;
   verify: UserVerifyStatus;
   role: Role;
+  workStationId?: string;
 }

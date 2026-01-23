@@ -26,8 +26,8 @@ interface UserServiceClient {
     password: string;
   }): Observable<UserResponse>;
   ChangeStatus(data: {
-    accountId: string;
-    status: UserStatus;
+    accountId?: string;
+    status?: UserStatus;
   }): Observable<UserResponse>;
   GetAccountsByAccountIds(data: { ids: string[] }): Observable<Account[]>;
   GetUserStats(data: object): Observable<UserStatsResponse>;
@@ -70,7 +70,7 @@ export class UserService implements OnModuleInit {
     return await lastValueFrom(this.userService.ChangePassword(payload));
   }
 
-  async changeStatus(data: { accountId: string; status: UserStatus }) {
+  async changeStatus(data: { accountId?: string; status?: UserStatus }) {
     return await lastValueFrom(this.userService.ChangeStatus(data));
   }
 

@@ -1,7 +1,11 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom, Observable } from 'rxjs';
-import { GraphQLError } from 'graphql';
 import {
   CreateWithDrawDto,
   GRPC_PACKAGE,
@@ -82,11 +86,7 @@ export class TransactionService implements OnModuleInit {
     const transaction = response.data as unknown as TransactionModel;
 
     if (user.role !== Role.ADMIN && transaction?.accountId !== user.accountId) {
-      throw new GraphQLError(PAYMENT_MESSAGES.FORBIDDEN, {
-        extensions: {
-          statusCode: 403,
-        },
-      });
+      throw new ForbiddenException(PAYMENT_MESSAGES.FORBIDDEN);
     }
 
     return response;
@@ -127,11 +127,7 @@ export class TransactionService implements OnModuleInit {
 
     const withdraw = response.data as unknown as WithdrawModel;
     if (user.role !== Role.ADMIN && withdraw?.accountId !== user.accountId) {
-      throw new GraphQLError(PAYMENT_MESSAGES.FORBIDDEN, {
-        extensions: {
-          statusCode: 403,
-        },
-      });
+      throw new ForbiddenException(PAYMENT_MESSAGES.FORBIDDEN);
     }
     return response;
   }

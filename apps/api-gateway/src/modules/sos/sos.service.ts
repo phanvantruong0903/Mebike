@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
 import {
@@ -14,7 +19,6 @@ import {
   GetSosDto,
   CreateSosDto,
 } from '@mebike/common';
-import { GraphQLError } from 'graphql/error';
 
 interface SosServiceClient {
   GetSos(data: { id: string }): Observable<SosResponse>;
@@ -63,18 +67,10 @@ export class SosService implements OnModuleInit {
     const sos = response.data as unknown as Sos;
 
     if (user.role === Role.USER && user.accountId !== sos.requesterId) {
-      throw new GraphQLError(SOS_MESSAGES.FORBIDDEN, {
-        extensions: {
-          statusCode: 403,
-        },
-      });
+      throw new ForbiddenException(SOS_MESSAGES.FORBIDDEN);
     }
     if (user.role === Role.SOS && sos.agentId !== user.accountId) {
-      throw new GraphQLError(SOS_MESSAGES.FORBIDDEN, {
-        extensions: {
-          statusCode: 403,
-        },
-      });
+      throw new ForbiddenException(SOS_MESSAGES.FORBIDDEN);
     }
     return response;
   }

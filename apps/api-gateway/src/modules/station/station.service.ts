@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
 import {
@@ -19,7 +24,6 @@ import {
   GetStationDto,
   STATION_MESSAGES,
 } from '@mebike/common';
-import { GraphQLError } from 'graphql/error';
 
 interface StationServiceClient {
   GetStation(data: { id: string }): Observable<StationResponse>;
@@ -97,13 +101,13 @@ export class StationService implements OnModuleInit {
     const response = await firstValueFrom(this.fleetService.GetStation(data));
     const station = response.data as Station;
 
-    if (user?.role !== Role.ADMIN && station.status !== StationStatus.Active) {
-      throw new GraphQLError(STATION_MESSAGES.NOT_FOUND, {
-        extensions: {
-          statusCode: 404,
-        },
-      });
+    const isAdmin = user?.role === Role.ADMIN && user?.role;
+    const isInactive = station?.status !== StationStatus.Active;
+
+    if (station && isInactive && !isAdmin) {
+      throw new NotFoundException(STATION_MESSAGES.NOT_FOUND);
     }
+
     return {
       ...response,
       data: station
@@ -124,7 +128,7 @@ export class StationService implements OnModuleInit {
 
   async autoComplete(
     query: string,
-    user: UserProfile,
+    user?: UserProfile,
   ): Promise<StationSearchResult[]> {
     let filter;
     if (user?.role === Role.ADMIN) {
@@ -143,7 +147,7 @@ export class StationService implements OnModuleInit {
     page: number,
     limit: number,
     search: string,
-    user: UserProfile,
+    user?: UserProfile,
   ): Promise<StationSearchPage> {
     let filter;
     if (user?.role === Role.ADMIN) {
