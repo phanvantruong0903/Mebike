@@ -105,6 +105,7 @@ export class AuthService
         user_id: userData.accountId,
         verify: userData.verify,
         role: userData.role,
+        workStationId: userData.workStationId,
       };
     } catch (error: unknown) {
       if (error instanceof RpcException) {
@@ -163,7 +164,7 @@ export class AuthService
         ]);
       }
 
-      const { user_id, verify, role } = decoded as TokenPayload;
+      const { user_id, verify, role, workStationId } = decoded as TokenPayload;
       if (!user_id) {
         throwGrpcError(401, SERVER_MESSAGE.UNAUTHORIZED, [
           USER_MESSAGES.INVALID_TOKEN_PAYLOAD,
@@ -187,11 +188,13 @@ export class AuthService
           user_id,
           verify,
           role,
+          workStationId,
         }),
         this.signRefreshToken({
           user_id,
           verify,
           role,
+          workStationId,
         }),
       ]);
 

@@ -27,7 +27,23 @@ export class WalletResolver {
   async updateWalletStatus(
     @Args('body') body: UpdateWalletStatusInput,
   ): Promise<WalletResponse> {
-    return this.walletService.changeWalletStatus(body);
+    try {
+      return await this.walletService.changeWalletStatus(body);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      console.error(error);
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => WalletResponse, { name: GRAPHQL_NAME_WALLET.GET_ONE })
@@ -38,14 +54,28 @@ export class WalletResolver {
     accountId: string | null,
     @CurrentUser() user: UserProfile,
   ): Promise<WalletResponse> {
-    let userId = '';
-    if (user.role === Role.ADMIN) {
-      userId = accountId || user.accountId;
-    } else {
-      userId = user.accountId;
-    }
+    try {
+      let userId = '';
+      if (user.role === Role.ADMIN) {
+        userId = accountId || user.accountId;
+      } else {
+        userId = user.accountId;
+      }
 
-    return this.walletService.getWallet({ accountId: userId });
+      return await this.walletService.getWallet({ accountId: userId });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => WalletListResponse, {
@@ -61,10 +91,30 @@ export class WalletResolver {
     })
     data: GetWalletInput,
   ): Promise<WalletListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
-    const status = data?.status;
-    return this.walletService.getAllWallet({ page, limit, status });
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
+      const status = data?.status;
+      return await this.walletService.getAllWallet({ page, limit, status });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        },
+      } as WalletListResponse;
+    }
   }
 
   @Query(() => String)

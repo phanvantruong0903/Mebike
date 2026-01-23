@@ -29,7 +29,21 @@ export class SupplierResolver {
   async createSupplier(
     @Args('body') body: CreateSupplierInput,
   ): Promise<SupplierResponse> {
-    return this.supplierService.createSupplier(body);
+    try {
+      return await this.supplierService.createSupplier(body);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.UPDATE })
@@ -39,15 +53,43 @@ export class SupplierResolver {
     @Args('body') body: UpdateSupplierInput,
     @Args('id') id: string,
   ): Promise<SupplierResponse> {
-    return this.supplierService.updateSupplier({
-      id,
-      ...body,
-    } as unknown as UpdateSupplierDto);
+    try {
+      return await this.supplierService.updateSupplier({
+        id,
+        ...body,
+      } as unknown as UpdateSupplierDto);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ONE })
   async getSupplier(@Args('id') id: string): Promise<SupplierResponse> {
-    return this.supplierService.getSupplier({ id });
+    try {
+      return await this.supplierService.getSupplier({ id });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SupplierListResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ALL })
@@ -61,9 +103,29 @@ export class SupplierResolver {
     })
     data: GetSupplierInput,
   ): Promise<SupplierListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
-    return this.supplierService.getAllSuppliers({ page, limit });
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
+      return await this.supplierService.getAllSuppliers({ page, limit });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      } as SupplierListResponse;
+    }
   }
 
   @Mutation(() => SupplierResponse, {
@@ -74,8 +136,22 @@ export class SupplierResolver {
   async changeSupplierStatus(
     @Args('body') body: CreateSupplierInput,
   ): Promise<SupplierResponse> {
-    const data = body as unknown as ChangeSupplierStatusDto;
-    return this.supplierService.changeSupplierStatus(data);
+    try {
+      const data = body as unknown as ChangeSupplierStatusDto;
+      return await this.supplierService.changeSupplierStatus(data);
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SupplierStatsResponse, {
@@ -84,7 +160,21 @@ export class SupplierResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async getSupplierStats(): Promise<SupplierStatsResponse> {
-    return this.supplierService.getSupplierStats();
+    try {
+      return await this.supplierService.getSupplierStats();
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => [SupplierSearchResult], {
@@ -95,7 +185,11 @@ export class SupplierResolver {
   async autoCompleteSupplier(
     @Args('query', { type: () => String }) query: string,
   ): Promise<SupplierSearchResult[]> {
-    return this.supplierService.autoComplete(query);
+    try {
+      return await this.supplierService.autoComplete(query);
+    } catch (error) {
+      return [];
+    }
   }
 
   @Query(() => SupplierSearchPage, { name: GRAPHQL_NAME_SUPPLIER.SEARCH })
@@ -110,11 +204,23 @@ export class SupplierResolver {
     })
     data: GetSupplierInput,
   ): Promise<SupplierSearchPage> {
-    const page = data.page ?? 1;
-    const limit = data.limit ?? 10;
-    const search = q ?? '';
+    try {
+      const page = data.page ?? 1;
+      const limit = data.limit ?? 10;
+      const search = q ?? '';
 
-    return this.supplierService.searchSupplier(page, limit, search);
+      return await this.supplierService.searchSupplier(page, limit, search);
+    } catch (error) {
+      return {
+        data: [],
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      };
+    }
   }
 
   @Query(() => String)

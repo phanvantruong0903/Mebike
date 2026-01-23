@@ -42,6 +42,7 @@ message GetAllBikesRequest {
   int32 limit = 2;
   optional string status = 3;
   optional string stationId = 4;
+  optional string supplierId = 5;
 }
 
 message Bike {

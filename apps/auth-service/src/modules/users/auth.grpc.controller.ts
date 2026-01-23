@@ -77,7 +77,7 @@ export class AuthGrpcController {
   async createUser(
     data: CreateUserDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
-    if (data.role !== Role.SUPPLIER) {
+    if (data.role !== Role.USER) {
       if (!data.workStationId) {
         throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
           STATION_MESSAGES.NOT_FOUND,
@@ -261,7 +261,10 @@ export class AuthGrpcController {
         name: data.name,
         phone: data.phone,
         YOB: data.YOB,
-        workStationId: 'workStationId' in data ? data.workStationId : undefined,
+        workStationId:
+          'workStationId' in data && data.workStationId
+            ? data.workStationId
+            : undefined,
       });
 
       if (shouldGenerateToken) {
@@ -270,6 +273,10 @@ export class AuthGrpcController {
             user_id: user.id,
             role: role,
             verify: UserVerifyStatus.Unverified,
+            workStationId:
+              'workStationId' in data && data.workStationId
+                ? data.workStationId
+                : undefined,
           });
 
         return grpcResponse(

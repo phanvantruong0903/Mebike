@@ -46,10 +46,24 @@ export class RentalResolver {
     @CurrentUser() user: UserProfile,
     @Args('body') body: CreateRentalInput,
   ): Promise<RentalResponse> {
-    return this.rentalService.createRental({
-      ...body,
-      accountId: user.accountId,
-    });
+    try {
+      return await this.rentalService.createRental({
+        ...body,
+        accountId: user.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.END })
@@ -59,15 +73,43 @@ export class RentalResolver {
     @CurrentUser() user: UserProfile,
     @Args('body') body: EndRentalInput,
   ): Promise<RentalResponse> {
-    return this.rentalService.endRental({
-      ...body,
-      accountId: user.accountId,
-    });
+    try {
+      return await this.rentalService.endRental({
+        ...body,
+        accountId: user.accountId,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.GET_ONE })
   async getRental(@Args('id') id: string): Promise<RentalResponse> {
-    return this.rentalService.getRental({ id });
+    try {
+      return await this.rentalService.getRental({ id });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => RentalListResponse, { name: GRAPHQL_NAME_RENTAL.GET_ALL })
@@ -79,14 +121,34 @@ export class RentalResolver {
     })
     data: GetRentalListInput,
   ): Promise<RentalListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
 
-    return this.rentalService.getRentalList({
-      page,
-      limit,
-      search: data.search,
-    });
+      return await this.rentalService.getRentalList({
+        page,
+        limit,
+        search: data.search,
+      });
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      } as RentalListResponse;
+    }
   }
 
   @ResolveField(() => UserProfile, { nullable: true })
