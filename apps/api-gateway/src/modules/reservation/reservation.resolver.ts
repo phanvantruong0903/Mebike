@@ -98,7 +98,10 @@ export class ReservationResolver {
   }
 
   @Query(() => ReservationResponse, { name: GRAPHQL_NAME_RESERVATION.GET_ONE })
-  async getReservation(@Args('id') id: string): Promise<ReservationResponse> {
+  async getReservation(
+    @Args('id', { type: () => String, nullable: true })
+    id: string,
+  ): Promise<ReservationResponse> {
     try {
       return await this.reservationService.getReservation({ id });
     } catch (error) {

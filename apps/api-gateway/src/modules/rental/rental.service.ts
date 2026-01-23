@@ -7,7 +7,6 @@ import {
   RentalResponse,
   RentalListResponse,
   CreateRentalInput,
-  GetRentalInput,
   GetRentalListInput,
   EndRentalInput,
   Rental,
@@ -20,7 +19,7 @@ interface RentalServiceClient {
   EndRental(
     data: EndRentalInput & { accountId: string },
   ): Observable<RentalResponse>;
-  GetRental(data: GetRentalInput): Observable<RentalResponse>;
+  GetRental(data: { id: string }): Observable<RentalResponse>;
   GetRentalList(data: GetRentalListInput): Observable<RentalListResponse>;
   GetRentalsByIds(data: { ids: string[] }): Observable<{ data: Rental[] }>;
 }

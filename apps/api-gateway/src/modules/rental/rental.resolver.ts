@@ -94,7 +94,9 @@ export class RentalResolver {
   }
 
   @Query(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.GET_ONE })
-  async getRental(@Args('id') id: string): Promise<RentalResponse> {
+  async getRental(
+    @Args('id', { type: () => String, nullable: true }) id: string,
+  ): Promise<RentalResponse> {
     try {
       return await this.rentalService.getRental({ id });
     } catch (error) {
