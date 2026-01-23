@@ -11,5 +11,5 @@ export class CreateSubscriptionDto {
 
   @IsBoolean()
   @IsOptional()
-  isActivated?: boolean;
+  isActivated?: boolean = false;
 }

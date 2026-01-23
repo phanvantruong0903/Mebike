@@ -99,19 +99,21 @@ export class SubscriptionService extends BaseService<
       );
     }
 
-    try {
-      subscription = await prismaMembership.subscription.update({
-        where: { id: subscription.id },
-        data: {
-          status: SubscriptionStatus.Active,
-          activatedAt: new Date(),
-          expiredAt: this.generateExpirationDate(new Date()),
-        },
-      });
-    } catch (dbError) {
-      throwGrpcError(500, SERVER_MESSAGE.DATABASE_ERROR, [
-        SUBSCRIPTION_MESSAGES.ACTIVATE_FAILED,
-      ]);
+    if (data.isActivated) {
+      try {
+        subscription = await prismaMembership.subscription.update({
+          where: { id: subscription.id },
+          data: {
+            status: SubscriptionStatus.Active,
+            activatedAt: new Date(),
+            expiredAt: this.generateExpirationDate(new Date()),
+          },
+        });
+      } catch (dbError) {
+        throwGrpcError(500, SERVER_MESSAGE.DATABASE_ERROR, [
+          SUBSCRIPTION_MESSAGES.ACTIVATE_FAILED,
+        ]);
+      }
     }
 
     return subscription;
