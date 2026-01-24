@@ -212,7 +212,6 @@ export class StationService
       'WITHDIST',
       'ASC',
     )) as [string, string][];
-    const total = geoResult.length;
 
     if (!geoResult.length) {
       return {
@@ -224,17 +223,26 @@ export class StationService
         stats,
       };
     }
-    const paginatedGeo = geoResult.slice(
+
+    const allStationIds = geoResult.map((item) => item[0]);
+    const stations = await this.getStationsByIds(allStationIds, status);
+    const stationMap = new Map(stations.map((s) => [s.id, s]));
+
+    const filteredGeoResult = geoResult.filter(([id]) => stationMap.has(id));
+    const total = filteredGeoResult.length;
+
+    const paginatedGeo = filteredGeoResult.slice(
       ((page ?? 1) - 1) * (limit ?? 10),
       (page ?? 1) * (limit ?? 10),
     );
+
     if (!paginatedGeo.length) {
       return {
         data: [],
         limit: limit,
         page: page,
-        total: 0,
-        totalPages: 0,
+        total,
+        totalPages: Math.ceil(total / (limit ?? 10)),
         stats,
       };
     }
@@ -253,13 +261,11 @@ export class StationService
       queries: searchStation,
     });
 
-    const stations = await this.getStationsByIds(stationIds);
-
     const result = paginatedGeo
       .map((item, index) => {
         const id = item[0];
         const distance = item[1];
-        const station = stations.find((s) => s.id === id);
+        const station = stationMap.get(id);
 
         if (!station) return null;
         const searchResult = bikeSearch.results[index];
@@ -304,9 +310,14 @@ export class StationService
     return station;
   }
 
-  async getStationsByIds(ids: string[]) {
+  async getStationsByIds(ids: string[], status?: StationStatus) {
+    const where: any = { id: { in: ids } };
+    if (status) {
+      where.status = status;
+    }
+
     const stations = await prismaFleet.station.findMany({
-      where: { id: { in: ids } },
+      where,
       include: {
         bikes: {
           include: {
