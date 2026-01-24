@@ -57,6 +57,7 @@ export const SUPPLIER_MESSAGES = {
   VALIDATION_FAILED: 'Supplier name or phone incorrect',
   UPDATE_FAIL: 'Update Supplier failed',
   GET_ALL_STATS_SUCCESS: 'Supplier stats retrieved successfully',
+  EXIST: 'Supplier existed',
 };
 
 export const STATION_MESSAGES = {

@@ -55,6 +55,14 @@ export class SupplierController {
       if (error instanceof RpcException) {
         throw error;
       }
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        (error as any).code === 'P2002'
+      ) {
+        throwGrpcError(409, SUPPLIER_MESSAGES.EXIST, [SUPPLIER_MESSAGES.EXIST]);
+      }
       const err = error as Error;
       throw new RpcException(err?.message || SUPPLIER_MESSAGES.UPDATE_FAIL);
     }
@@ -92,6 +100,14 @@ export class SupplierController {
     } catch (error: any) {
       if (error instanceof RpcException) {
         throw error;
+      }
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throwGrpcError(409, SUPPLIER_MESSAGES.EXIST, [SUPPLIER_MESSAGES.EXIST]);
       }
       const err = error as Error;
       throw new RpcException(err?.message || SUPPLIER_MESSAGES.CREATE_FAILED);

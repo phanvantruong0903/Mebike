@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import {
   BaseService,
   REDIS_CONSTANTS,
@@ -75,11 +75,10 @@ const VALID_SOS_STATUS: Record<EmergencyStatus, EmergencyStatus[]> = {
 };
 
 @Injectable()
-export class SosService extends BaseService<
-  SosModel,
-  CreateSosDto,
-  UpdateSosDto
-> {
+export class SosService
+  extends BaseService<SosModel, CreateSosDto, UpdateSosDto>
+  implements OnModuleInit
+{
   private rentalServiceClient!: RentalServiceClient;
   private stationServiceClient!: FleetServiceClient;
   private userServiceClient!: UserServiceClient;
@@ -92,10 +91,8 @@ export class SosService extends BaseService<
     @Inject(GRPC_PACKAGE.USER) private readonly userClient: ClientGrpc,
   ) {
     super(prismaIncident.emergencyRequest);
-    this.initialize();
   }
-
-  private initialize() {
+  onModuleInit() {
     this.rentalServiceClient =
       this.rentalClient.getService<RentalServiceClient>(GRPC_SERVICES.RENTAL);
     this.stationServiceClient =
