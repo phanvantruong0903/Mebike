@@ -55,10 +55,10 @@ export class StationController {
 
   @GrpcMethod(GRPC_SERVICES.FLEET, STATION_METHODS.UPDATE)
   async updateStation(
-    data: UpdateStationDto & { id: string },
+    data: UpdateStationDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.baseHandler.updateLogic(data.id, data);
+      const result = await this.stationService.updateStation(data);
 
       this.kafkaClient.emit(KAFKA_TOPIC.STATION_UPDATED, {
         id: result.id,

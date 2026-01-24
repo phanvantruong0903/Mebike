@@ -63,12 +63,12 @@ export class BikeService
       await meiliClient.getIndex('Bike');
     } catch {
       await meiliClient.createIndex('Bike', { primaryKey: 'id' });
-      await meiliClient.index('Bike').updateSettings({
-        searchableAttributes: ['chipId', 'id'],
-        filterableAttributes: ['status', 'supplierId', 'stationId'],
-        sortableAttributes: ['createdAt'],
-      });
     }
+    await meiliClient.index('Bike').updateSettings({
+      searchableAttributes: ['chipId', 'id'],
+      filterableAttributes: ['status', 'supplierId', 'stationId'],
+      sortableAttributes: ['createdAt'],
+    });
   }
 
   async cacheBikeToRedis(bike: BikeModel, ttlSecond: number) {
