@@ -30,6 +30,7 @@
     "@temporalio/client": "^1.14.0",
     "@temporalio/worker": "^1.14.0",
     "@temporalio/workflow": "^1.14.0",
+    "async-cache-dedupe": "^3.4.0",
     "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",

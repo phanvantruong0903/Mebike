@@ -8,6 +8,7 @@ import { BikeService } from './bike.service';
   imports: [
     RedisModule,
     ConsulModule,
+    RedisModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [BikeController],

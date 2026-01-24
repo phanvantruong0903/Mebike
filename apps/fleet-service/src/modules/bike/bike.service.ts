@@ -11,24 +11,47 @@ import {
   BikeStatus,
   meiliClient,
   REDIS_CONSTANTS,
-  KAFKA_SERVICE,
-  KAFKA_TOPIC,
   GetBikeDto,
 } from '@mebike/common';
 import Redis from 'ioredis';
-import { ClientKafka } from '@nestjs/microservices';
+import { createCache } from 'async-cache-dedupe';
 
 @Injectable()
 export class BikeService
   extends BaseService<BikeModel, CreateBikeDto, UpdateBikeDto>
   implements OnModuleInit
 {
+  private readonly requestDedup;
+
   constructor(
     @Inject(REDIS_CONSTANTS.REDIS_CLIENT) private readonly redisClient: Redis,
-    @Inject(KAFKA_SERVICE.FLEET_SERVICE)
-    private readonly kafkaClient: ClientKafka,
   ) {
     super(prismaFleet.bike);
+    this.requestDedup = createCache({
+      ttl: 5,
+      storage: {
+        type: 'memory',
+      },
+    });
+
+    this.requestDedup.define('fetchBikeById', {}, async (id: string) => {
+      const key = `bike:${id}`;
+
+      const cachedBike = await this.redisClient.get(key);
+      if (cachedBike) return JSON.parse(cachedBike);
+
+      const bike = await prismaFleet.bike.findUnique({
+        where: { id },
+        include: {
+          station: true,
+          supplier: true,
+        },
+      });
+      if (bike) {
+        this.cacheBikeToRedis(bike, 3600);
+      }
+      return bike;
+    });
   }
 
   async onModuleInit() {
@@ -48,32 +71,19 @@ export class BikeService
     }
   }
 
-  private syncCacheToRedis(bike: BikeModel, ttlSecond: number, topic: string) {
-    this.kafkaClient.emit(topic, JSON.stringify({ bike, ttlSecond }));
-  }
-
   async cacheBikeToRedis(bike: BikeModel, ttlSecond: number) {
     const key = `bike:${bike.id}`;
     await this.redisClient.set(key, JSON.stringify(bike), 'EX', ttlSecond);
   }
 
   async getBikeDetail(id: string) {
-    const bike = await this.redisClient.get(`bike:${id}`);
-    if (bike) return bike as unknown as BikeModel;
+    const bike = await (this.requestDedup as any).fetchBikeById(id);
 
-    const result = await prismaFleet.bike.findUnique({
-      where: { id },
-      include: {
-        station: true,
-        supplier: true,
-      },
-    });
-    if (!result) {
+    if (!bike) {
       throwGrpcError(404, BIKE_MESSAGES.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
     }
 
-    this.syncCacheToRedis(result, 3600, KAFKA_TOPIC.BIKE_CACHE_REFRESH);
-    return result as unknown as BikeModel;
+    return bike as unknown as BikeModel;
   }
 
   async createBike(data: CreateBikeDto) {
@@ -107,24 +117,20 @@ export class BikeService
     });
 
     if (bikeData) {
-      this.syncCacheToRedis(bikeData, 3600, KAFKA_TOPIC.BIKE_CREATED);
+      this.cacheBikeToRedis(bikeData, 3600);
     }
     return bikeData as unknown as BikeModel;
   }
 
   async changeBikeStatus(id: string, status: BikeStatus) {
-    await prismaFleet.bike.update({
+    const bikeData = await prismaFleet.bike.update({
       where: { id },
       data: { status },
-    });
-
-    const bikeData = await prismaFleet.bike.findUnique({
-      where: { id },
       include: { station: true, supplier: true },
     });
 
     if (bikeData) {
-      this.syncCacheToRedis(bikeData, 3600, KAFKA_TOPIC.BIKE_UPDATED);
+      this.cacheBikeToRedis(bikeData, 3600);
     }
 
     return bikeData;
@@ -150,6 +156,7 @@ export class BikeService
       limit,
       offset: (page - 1) * limit,
       sort: ['createdAt:desc'],
+      attributesToRetrieve: ['id'],
     });
 
     const bikeIds = result.hits.map((hit) => hit.id);
@@ -179,13 +186,13 @@ export class BikeService
         where: { id: { in: missingIds } },
         include: { station: true, supplier: true },
       });
-      await Promise.all(
-        missingBikes.map((bike) => {
-          this.syncCacheToRedis(bike, 3600, KAFKA_TOPIC.BIKE_CACHE_REFRESH);
-        }),
-      );
 
-      bikes.push(...missingBikes);
+      const pipeline = this.redisClient.pipeline();
+      missingBikes.forEach((bike) => {
+        pipeline.set(`bike:${bike.id}`, JSON.stringify(bike), 'EX', 3600);
+        bikes.push(bike);
+      });
+      await pipeline.exec();
     }
 
     const response = bikeIds.map((bikeId) =>

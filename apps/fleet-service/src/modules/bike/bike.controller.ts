@@ -1,10 +1,5 @@
-import { Controller, Inject, UsePipes, ValidationPipe } from '@nestjs/common';
-import {
-  ClientKafka,
-  EventPattern,
-  GrpcMethod,
-  RpcException,
-} from '@nestjs/microservices';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
   BaseGrpcHandler,
   GRPC_SERVICES,
@@ -20,8 +15,6 @@ import {
   ChangeBikeStatusDto,
   GetBikeDetailDto,
   GetBikesByIdsDto,
-  KAFKA_SERVICE,
-  KAFKA_TOPIC,
 } from '@mebike/common';
 import { BikeService } from './bike.service';
 
@@ -34,11 +27,7 @@ export class BikeController {
     UpdateBikeDto
   >;
 
-  constructor(
-    private readonly bikeService: BikeService,
-    @Inject(KAFKA_SERVICE.FLEET_SERVICE)
-    private readonly kafkaClient: ClientKafka,
-  ) {
+  constructor(private readonly bikeService: BikeService) {
     this.baseHandler = new BaseGrpcHandler(
       this.bikeService,
       CreateBikeDto,
@@ -52,7 +41,7 @@ export class BikeController {
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const result = await this.baseHandler.updateLogic(data.id, data);
-      this.kafkaClient.emit(KAFKA_TOPIC.BIKE_UPDATED, JSON.stringify(result));
+      await this.bikeService.cacheBikeToRedis(result, 3600);
 
       return grpcResponse<BikeModel>(result, BIKE_MESSAGES.UPDATE_SUCCESS);
     } catch (error) {
@@ -112,16 +101,7 @@ export class BikeController {
         filter.supplierId = data.supplierId;
       }
 
-      const result = await this.baseHandler.getAllLogic(
-        data.page,
-        data.limit,
-        filter,
-        undefined,
-        {
-          station: true,
-          supplier: true,
-        },
-      );
+      const result = await this.bikeService.getAllBikes(data);
       return grpcPaginateResponse(result, BIKE_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -168,13 +148,5 @@ export class BikeController {
     const { ids } = data;
     const bikes = await this.bikeService.getBikesByIds(ids);
     return grpcResponse(bikes, BIKE_MESSAGES.GET_ALL_SUCCESS);
-  }
-
-  @EventPattern(KAFKA_TOPIC.BIKE_CREATED)
-  @EventPattern(KAFKA_TOPIC.BIKE_UPDATED)
-  async handleBikeCreated(data: any) {
-    const payload = typeof data === 'string' ? JSON.parse(data) : data;
-    const { bike, ttlSecond } = payload;
-    await this.bikeService.cacheBikeToRedis(bike, ttlSecond ?? 3600);
   }
 }
