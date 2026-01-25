@@ -36,6 +36,8 @@ import { StationController } from './station.controller';
                   initialRetryTime: 300,
                   retries: 10,
                 },
+                connectionTimeout: 10000,
+                authenticationTimeout: 10000,
               },
               consumer: {
                 groupId: KAFKA_GROUP_ID.FLEET_SERVICE,

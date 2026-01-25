@@ -297,6 +297,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      meilisearch:
+        condition: service_started
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500
@@ -443,7 +445,6 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}
       - RESEND_API_KEY=${RESEND_API_KEY}
-      - MEILISEARCH_HOST=http://meilisearch:7700
     healthcheck:
       test: ['CMD', 'nc', '-z', '127.0.0.1', '50054']
       interval: 10s
@@ -466,6 +467,8 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+      meilisearch:
+        condition: service_started
     environment:
       - CONSUL_HOST=consul
       - CONSUL_PORT=8500

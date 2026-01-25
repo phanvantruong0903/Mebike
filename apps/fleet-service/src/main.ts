@@ -57,6 +57,8 @@ async function bootstrap() {
     options: {
       client: {
         brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+        connectionTimeout: 10000,
+        authenticationTimeout: 10000,
       },
       consumer: {
         groupId: KAFKA_GROUP_ID.FLEET_SERVICE,
