@@ -1,7 +1,6 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
-  BaseGrpcHandler,
   GRPC_SERVICES,
   grpcResponse,
   throwGrpcError,
