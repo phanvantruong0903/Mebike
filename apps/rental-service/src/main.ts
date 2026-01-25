@@ -5,7 +5,6 @@ import {
   ConsulService,
   CONSULT_SERVICE_ID,
   GrpcExceptionFilter,
-  KAFKA_GROUP_ID,
 } from '@mebike/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
@@ -58,24 +57,6 @@ async function bootstrap() {
     },
     { inheritAppConfig: true },
   );
-
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
-        connectionTimeout: 10000,
-        authenticationTimeout: 10000,
-      },
-      consumer: {
-        groupId: KAFKA_GROUP_ID.RENTAL_SERVICE,
-      },
-      subscribe: {
-        fromBeginning: true,
-      },
-    },
-  });
-
   await app.startAllMicroservices();
 }
 bootstrap();
