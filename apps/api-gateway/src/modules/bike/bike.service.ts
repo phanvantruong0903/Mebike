@@ -13,6 +13,7 @@ import {
   BikeResult,
   UpdateBikeDto,
   GetBikeDto,
+  BikeSearchResult,
 } from '@mebike/common';
 
 interface BikeServiceClient {
@@ -85,12 +86,12 @@ export class BikeService implements OnModuleInit {
     return response.data || [];
   }
 
-  async autoComplete(query: string): Promise<{ data: BikeResult[] }> {
+  async autoComplete(query: string): Promise<BikeSearchResult> {
     const result = await meiliClient.index('Bike').search(query, {
       limit: 10,
     });
     return {
-      data: result.hits as BikeResult[],
+      data: (result.hits as BikeResult[]) ?? [],
     };
   }
 
@@ -100,7 +101,7 @@ export class BikeService implements OnModuleInit {
       offset: (page - 1) * limit,
     });
     return {
-      data: result.hits as BikeResult[],
+      data: (result.hits as BikeResult[]) ?? [],
       pagination: {
         total: result.estimatedTotalHits || 0,
         page,

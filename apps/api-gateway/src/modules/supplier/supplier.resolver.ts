@@ -10,10 +10,10 @@ import {
   GRAPHQL_NAME_SUPPLIER,
   SupplierListResponse,
   GetSupplierInput,
-  SupplierStatsResponse,
   SupplierSearchResult,
   SupplierSearchPage,
   ChangeSupplierStatusDto,
+  SupplierStatsResponse,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
 import { Roles } from '../auth/role.decorator';
@@ -182,18 +182,19 @@ export class SupplierResolver {
     }
   }
 
-  @Query(() => [SupplierSearchResult], {
+  @Query(() => SupplierSearchResult, {
     name: GRAPHQL_NAME_SUPPLIER.AUTO_COMPLETE,
   })
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async autoCompleteSupplier(
-    @Args('query', { type: () => String }) query: string,
-  ): Promise<SupplierSearchResult[]> {
+    @Args('q', { nullable: true, type: () => String, defaultValue: '' })
+    query: string,
+  ): Promise<SupplierSearchResult> {
     try {
       return await this.supplierService.autoComplete(query);
     } catch (error) {
-      return [];
+      return { data: [] };
     }
   }
 

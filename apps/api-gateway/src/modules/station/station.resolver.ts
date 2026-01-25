@@ -163,18 +163,19 @@ export class StationResolver {
     }
   }
 
-  @Query(() => [StationSearchResult], {
+  @Query(() => StationSearchResult, {
     name: GRAPQL_NAME_STATION.AUTO_COMPLETE,
   })
   @UseGuards(OptionalJwtAuthGuard)
   async autoCompleteStation(
-    @Args('query', { type: () => String }) query: string,
+    @Args('q', { nullable: true, type: () => String, defaultValue: '' })
+    query: string,
     @CurrentUser() user?: UserProfile,
-  ): Promise<StationSearchResult[]> {
+  ): Promise<StationSearchResult> {
     try {
       return await this.stationService.autoComplete(query, user);
     } catch (error: any) {
-      return [];
+      return { data: [] };
     }
   }
 

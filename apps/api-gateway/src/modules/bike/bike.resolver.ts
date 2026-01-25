@@ -196,7 +196,8 @@ export class BikeResolver {
 
   @Query(() => BikeSearchResult, { name: GRAPHQL_NAME_BIKE.AUTO_COMPLETE })
   async autoCompleteBike(
-    @Args('query', { type: () => String }) query: string,
+    @Args('q', { nullable: true, type: () => String, defaultValue: '' })
+    query: string,
   ): Promise<BikeSearchResult> {
     try {
       return await this.bikeService.autoComplete(query);
