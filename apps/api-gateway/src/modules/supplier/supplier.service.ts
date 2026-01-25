@@ -43,19 +43,6 @@ export class SupplierService implements OnModuleInit {
     this.fleetService = this.client.getService<SupplierServiceClient>(
       GRPC_SERVICES.FLEET,
     );
-    await this.createSupplierIndex();
-    await meiliClient.index('Supplier').updateSettings({
-      searchableAttributes: ['name', 'id'],
-      filterableAttributes: ['status'],
-    });
-  }
-
-  async createSupplierIndex() {
-    try {
-      await meiliClient.getIndex('Supplier');
-    } catch {
-      await meiliClient.createIndex('Supplier', { primaryKey: 'id' });
-    }
   }
 
   async createSupplier(data: CreateSupplierInput) {

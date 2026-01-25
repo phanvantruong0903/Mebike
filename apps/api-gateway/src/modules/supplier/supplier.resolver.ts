@@ -106,7 +106,12 @@ export class SupplierResolver {
     try {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
-      return await this.supplierService.getAllSuppliers({ page, limit });
+      const status = data?.status ?? undefined;
+      return await this.supplierService.getAllSuppliers({
+        page,
+        limit,
+        status,
+      });
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;

@@ -22,19 +22,7 @@ import { SupplierService } from './supllier.service';
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class SupplierController {
-  private readonly baseHandler: BaseGrpcHandler<
-    SupplierModel,
-    CreateSupplierDto,
-    UpdateSupplierDto
-  >;
-
-  constructor(private readonly supplierService: SupplierService) {
-    this.baseHandler = new BaseGrpcHandler(
-      this.supplierService,
-      CreateSupplierDto,
-      UpdateSupplierDto,
-    );
-  }
+  constructor(private readonly supplierService: SupplierService) {}
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.UPDATE)
   async updateSupplier(
@@ -119,11 +107,7 @@ export class SupplierController {
     data: GetSupplierDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit, status } = data;
-      const filter: any = {};
-      if (status) filter.status = status;
-
-      const result = await this.baseHandler.getAllLogic(page, limit, filter);
+      const result = await this.supplierService.getAllSuppliers(data);
       return grpcPaginateResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
