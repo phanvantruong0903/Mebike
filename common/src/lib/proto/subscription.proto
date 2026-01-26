@@ -8,6 +8,8 @@ service MembershipService {
   rpc GetSubscriptionList (GetSubscriptionListRequest) returns (SubscriptionListResponse);
   rpc ActivateSubscription (ActivateSubscriptionRequest) returns (SubscriptionResponse);
   rpc ExpireSubscription (ExpireSubscriptionRequest) returns (SubscriptionResponse);
+  rpc UseSubscription (UseSubscriptionRequest) returns (SubscriptionResponse);
+  rpc RevertSubscriptionUsage (RevertSubscriptionUsageRequest) returns (SubscriptionResponse);
 }
 
 message Subscription {
@@ -20,6 +22,8 @@ message Subscription {
   string status = 7;
   string createdAt = 8;
   string updatedAt = 9;
+  optional int32 used = 10;
+  optional int32 left = 11;
 }
 
 message CreateSubscriptionRequest {
@@ -45,6 +49,16 @@ message GetSubscriptionListRequest {
   int32 page = 1;
   int32 limit = 2;
   optional string search = 3;
+}
+
+message UseSubscriptionRequest {
+  string subscriptionId = 1;
+  int32 count = 2;
+}
+
+message RevertSubscriptionUsageRequest {
+  string subscriptionId = 1;
+  int32 count = 2;
 }
 
 message SubscriptionResponse {

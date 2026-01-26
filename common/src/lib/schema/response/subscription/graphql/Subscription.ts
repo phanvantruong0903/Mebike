@@ -31,4 +31,10 @@ export class Subscription {
 
   @Field()
   updatedAt!: string;
+
+  @Field(() => Int, { nullable: true })
+  used?: number;
+
+  @Field(() => Int, { nullable: true })
+  left?: number;
 }

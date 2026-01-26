@@ -169,4 +169,62 @@ export class SubscriptionController {
       );
     }
   }
+
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.USE)
+  async useSubscription({
+    subscriptionId,
+    count,
+  }: {
+    subscriptionId: string;
+    count: number;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.subscriptionService.use(subscriptionId, count);
+
+      if (!result) {
+        throw new RpcException(SUBSCRIPTION_MESSAGES.NOT_FOUND);
+      }
+
+      return grpcResponse<any>(result, SUBSCRIPTION_MESSAGES.USE_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || SUBSCRIPTION_MESSAGES.USE_FAILED);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, SUBSCRIPTION_METHODS.REVERT_USE)
+  async revertSubscriptionUsage({
+    subscriptionId,
+    count,
+  }: {
+    subscriptionId: string;
+    count: number;
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.subscriptionService.revertSubscriptionUsage(
+        subscriptionId,
+        count,
+      );
+
+      if (!result) {
+        throw new RpcException(SUBSCRIPTION_MESSAGES.NOT_FOUND);
+      }
+
+      return grpcResponse<any>(
+        result,
+        SUBSCRIPTION_MESSAGES.REVERT_USE_SUCCESS,
+      );
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(
+        err?.message || SUBSCRIPTION_MESSAGES.REVERT_USE_FAILED,
+      );
+    }
+  }
 }

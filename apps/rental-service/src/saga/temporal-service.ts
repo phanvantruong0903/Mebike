@@ -102,6 +102,11 @@ export class TemporalService implements OnModuleDestroy {
             activitiesInstance.revertCancelledReservation.bind(
               activitiesInstance,
             ),
+          // Subscription activities
+          useSubscription:
+            activitiesInstance.useSubscription.bind(activitiesInstance),
+          revertSubscriptionUsage:
+            activitiesInstance.revertSubscriptionUsage.bind(activitiesInstance),
         },
         taskQueue: 'rental-queue',
       });

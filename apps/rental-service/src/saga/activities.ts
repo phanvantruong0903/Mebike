@@ -17,6 +17,7 @@ import {
   ReservationModel,
   ReservationStatus,
   SERVER_MESSAGE,
+  SubscriptionResponse,
   throwGrpcError,
   Wallet,
   WalletResponse,
@@ -42,16 +43,30 @@ interface WalletServiceClient {
   GetWallet(data: { accountId: string }): Observable<WalletResponse>;
 }
 
+interface SubscriptionServiceClient {
+  UseSubscription(data: {
+    subscriptionId: string;
+    count: number;
+  }): Observable<SubscriptionResponse>;
+  RevertSubscriptionUsage(data: {
+    subscriptionId: string;
+    count: number;
+  }): Observable<SubscriptionResponse>;
+}
+
 @Injectable()
 export class RentalActivities {
   private bikeService!: BikeServiceClient;
   private paymentService!: PaymentServiceClient;
   private walletService!: WalletServiceClient;
+  private subscriptionService!: SubscriptionServiceClient;
 
   constructor(
     @Inject(GRPC_PACKAGE.BIKE) private readonly fleetClient: ClientGrpc,
     @Inject(GRPC_PACKAGE.PAYMENT) private readonly paymentClient: ClientGrpc,
     @Inject(GRPC_PACKAGE.WALLET) private readonly walletClient: ClientGrpc,
+    @Inject(GRPC_PACKAGE.SUBSCRIPTION)
+    private readonly subscriptionClient: ClientGrpc,
     private readonly reservationService: ReservationService,
   ) {
     this.bikeService = this.fleetClient.getService<BikeServiceClient>(
@@ -63,6 +78,10 @@ export class RentalActivities {
     this.walletService = this.walletClient.getService<WalletServiceClient>(
       GRPC_SERVICES.PAYMENT,
     );
+    this.subscriptionService =
+      this.subscriptionClient.getService<SubscriptionServiceClient>(
+        GRPC_SERVICES.MEMBERSHIP,
+      );
   }
 
   async validateAvailableBike(
@@ -387,6 +406,57 @@ export class RentalActivities {
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
       console.error('[COMPENSATION] Failed to revert reservation:', msg);
+    }
+  }
+
+  // Subscription Activities
+  async useSubscription(data: {
+    subscriptionId: string;
+    count: number;
+  }): Promise<SubscriptionResponse> {
+    try {
+      return await firstValueFrom(
+        this.subscriptionService.UseSubscription({
+          subscriptionId: data.subscriptionId,
+          count: data.count,
+        }),
+      );
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
+    }
+  }
+
+  async revertSubscriptionUsage(data: {
+    subscriptionId: string;
+    count: number;
+  }): Promise<void> {
+    console.log(
+      '[COMPENSATION] Revert subscription usage:',
+      data.subscriptionId,
+    );
+    try {
+      const res = await firstValueFrom(
+        this.subscriptionService.RevertSubscriptionUsage({
+          subscriptionId: data.subscriptionId,
+          count: data.count,
+        }),
+      );
+
+      if (!res) {
+        console.warn(
+          '[COMPENSATION] Revert subscription usage failed:',
+          data.subscriptionId,
+        );
+      } else {
+        console.log(
+          '[COMPENSATION] Revert subscription usage success:',
+          data.subscriptionId,
+        );
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[COMPENSATION] Failed to revert subscription usage:', msg);
     }
   }
 

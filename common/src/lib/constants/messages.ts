@@ -234,6 +234,13 @@ export const SUBSCRIPTION_MESSAGES = {
   ALREADY_HAVE_SUBSCRIPTION: 'User already has subscription',
   CANNOT_ACTIVATE_OTHER_USER_SUBSCRIPTION:
     'Access denied, cannot activate other user subscription',
+  NOT_AVAILABLE: 'Subscription not available',
+  INVALID_USAGE_COUNT: 'Invalid usage count, must be greater than 0',
+  INVALID_REVERT_COUNT: 'Invalid revert count, must be greater than 0',
+  USE_SUCCESS: 'Subscription used successfully',
+  USE_FAILED: 'Subscription used failed',
+  REVERT_USE_SUCCESS: 'Subscription reverted successfully',
+  REVERT_USE_FAILED: 'Subscription reverted failed',
 };
 
 export const PACKAGE_MESSAGES = {

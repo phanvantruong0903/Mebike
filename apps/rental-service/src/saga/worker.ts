@@ -46,6 +46,11 @@ async function run() {
         activitiesInstance.cancelReservation.bind(activitiesInstance),
       revertCancelledReservation:
         activitiesInstance.revertCancelledReservation.bind(activitiesInstance),
+      // Subscription activities
+      useSubscription:
+        activitiesInstance.useSubscription.bind(activitiesInstance),
+      revertSubscriptionUsage:
+        activitiesInstance.revertSubscriptionUsage.bind(activitiesInstance),
     },
     taskQueue: 'rental-service',
   });

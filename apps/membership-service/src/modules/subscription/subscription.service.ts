@@ -6,12 +6,14 @@ import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
   PACKAGE_MESSAGES,
+  PackageModel,
   prismaMembership,
   SERVER_MESSAGE,
   SUBSCRIPTION_MESSAGES,
   SubscriptionModel,
   SubscriptionStatus,
   throwGrpcError,
+  UsageType,
 } from '@mebike/common';
 import {
   ConflictException,
@@ -178,9 +180,14 @@ export class SubscriptionService extends BaseService<
     });
   }
 
-  async getOne(id: string): Promise<SubscriptionModel | null> {
+  async getOne(
+    id: string,
+  ): Promise<(SubscriptionModel & { package: PackageModel }) | null> {
     const subscription = await prismaMembership.subscription.findUnique({
       where: { id },
+      include: {
+        package: true,
+      },
     });
     return subscription;
   }
@@ -206,6 +213,71 @@ export class SubscriptionService extends BaseService<
         SUBSCRIPTION_MESSAGES.CANNOT_ACTIVATE_OTHER_USER_SUBSCRIPTION,
       ]);
     }
+  }
+
+  async use(subscriptionId: string, count: number) {
+    if (count <= 0) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        SUBSCRIPTION_MESSAGES.INVALID_USAGE_COUNT,
+      ]);
+    }
+
+    const subscription = await this.getOne(subscriptionId);
+    if (!subscription) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        SUBSCRIPTION_MESSAGES.NOT_FOUND,
+      ]);
+    }
+
+    const INVALID_STATUSES: SubscriptionStatus[] = [
+      SubscriptionStatus.Cancelled,
+      SubscriptionStatus.Expired,
+    ];
+
+    if (INVALID_STATUSES.includes(subscription.status)) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        SUBSCRIPTION_MESSAGES.NOT_AVAILABLE,
+      ]);
+    }
+
+    if (subscription.status === SubscriptionStatus.Pending) {
+      await this.activate(subscriptionId);
+    }
+
+    let actualUsageCount = count;
+    if (
+      subscription.package.usageType !== UsageType.Infinite &&
+      subscription.package.maxUsages !== null
+    ) {
+      const remainingCount = Math.max(
+        0,
+        subscription.package.maxUsages - subscription.usageCounts,
+      );
+      actualUsageCount = remainingCount >= count ? count : remainingCount;
+    }
+
+    await prismaMembership.subscription.update({
+      where: { id: subscriptionId },
+      data: { usageCounts: { increment: actualUsageCount } },
+    });
+
+    return {
+      used: actualUsageCount,
+      left: count - actualUsageCount,
+    };
+  }
+
+  async revertSubscriptionUsage(subscriptionId: string, count: number) {
+    if (count <= 0) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        SUBSCRIPTION_MESSAGES.INVALID_REVERT_COUNT,
+      ]);
+    }
+
+    return await prismaMembership.subscription.update({
+      where: { id: subscriptionId },
+      data: { usageCounts: { decrement: count } },
+    });
   }
 
   async debitSubscription(data: DebitSubscriptionDto): Promise<ApiResponse> {

@@ -123,6 +123,8 @@ export const SUBSCRIPTION_METHODS = {
   GET_ALL: 'GetSubscriptionList',
   ACTIVATE: 'ActivateSubscription',
   EXPIRE: 'ExpireSubscription',
+  USE: 'UseSubscription',
+  REVERT_USE: 'RevertSubscriptionUsage',
 };
 
 export const PACKAGE_METHODS = {

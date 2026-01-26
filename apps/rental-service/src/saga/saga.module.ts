@@ -47,6 +47,12 @@ import { ReservationModule } from '../modules/reservation/reservation.module';
         'payment',
         'payment.proto',
       ),
+      createGrpcClient(
+        GRPC_PACKAGE.SUBSCRIPTION,
+        CONSULT_SERVICE_ID.MEMBERSHIP,
+        'subscription',
+        'subscription.proto',
+      ),
     ]),
   ],
   providers: [RentalActivities, TemporalService],
