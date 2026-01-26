@@ -10,7 +10,7 @@ import {
   throwGrpcError,
   TrendValue,
 } from '@mebike/common';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { TemporalService } from '../../saga/temporal-service';
 
@@ -19,7 +19,6 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
   constructor(private readonly temporalService: TemporalService) {
     super(prismaRental.rental);
   }
-  private readonly logger = new Logger(RentalService.name);
 
   override async create(data: CreateRentalDto): Promise<RentalModel> {
     const minimumRent = Number(process.env.RE_MINIMUM_RENT_AMOUNT || '2000');
@@ -30,7 +29,6 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
       });
 
       if (!result.success) {
-        this.logger.error('error:', result);
         throwGrpcError(
           result.statusCode || 500,
           result.message || SERVER_MESSAGE.INTERNAL_SERVER,
@@ -212,16 +210,6 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
   async getTodayRentalPerHour() {
     const now = new Date();
     return await this.getRentalPerHourByDate(now.toString());
-  }
-
-  generateDuration(start: Date, end: Date) {
-    return Math.ceil((end.getTime() - start.getTime()) / 60000);
-  }
-
-  generateTotalPrice(minutes: number) {
-    const halfHourUnit = Math.max(1, Math.ceil(minutes / 30));
-    const pricePer30Min = Number(process.env.RE_PRICE_PER_30_MINS || '2000');
-    return pricePer30Min * halfHourUnit;
   }
 
   async getByIds(ids: string[]) {

@@ -177,6 +177,27 @@ export class RentalResolver {
     return this.stationDataLoader.batchStations.load(rental.endStationId);
   }
 
+  @ResolveField(() => String)
+  async startTime(@Parent() rental: RentalModel) {
+    return new Date(rental.startTime).toISOString();
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  async endTime(@Parent() rental: RentalModel) {
+    if (!rental.endTime) return null;
+    return new Date(rental.endTime).toISOString();
+  }
+
+  @ResolveField(() => String)
+  async createdAt(@Parent() rental: RentalModel) {
+    return new Date(rental.createdAt).toISOString();
+  }
+
+  @ResolveField(() => String)
+  async updatedAt(@Parent() rental: RentalModel) {
+    return new Date(rental.updatedAt).toISOString();
+  }
+
   @Query(() => String)
   _healthCheck(): string {
     return 'API is running';
