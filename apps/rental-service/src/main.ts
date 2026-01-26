@@ -59,21 +59,6 @@ async function bootstrap() {
     { inheritAppConfig: true },
   );
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
-      },
-      consumer: {
-        groupId: KAFKA_GROUP_ID.RENTAL_SERVICE,
-      },
-      subscribe: {
-        fromBeginning: true,
-      },
-    },
-  });
-
   await app.startAllMicroservices();
 }
 bootstrap();
