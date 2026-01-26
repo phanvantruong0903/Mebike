@@ -5,10 +5,11 @@ import { Kind, ValueNode } from 'graphql';
 export class IsoDateScalar implements CustomScalar<string, string> {
   description = 'ISO Date custom scalar type';
   parseValue(value: unknown): string {
-    if (typeof value === 'string') {
-      return new Date(value).toISOString();
+    const date = new Date(value as string);
+    if (Number.isNaN(date.getTime())) {
+      throw new Error(`Invalid date value: ${value}`);
     }
-    throw new Error('IsoDate scalar only accepts string input');
+    return date.toISOString();
   }
 
   serialize(value: unknown): string {
@@ -28,7 +29,11 @@ export class IsoDateScalar implements CustomScalar<string, string> {
 
   parseLiteral(ast: ValueNode): string {
     if (ast.kind === Kind.STRING) {
-      return new Date(ast.value).toISOString();
+      const date = new Date(ast.value);
+      if (Number.isNaN(date.getTime())) {
+        return '';
+      }
+      return date.toISOString();
     }
     return '';
   }

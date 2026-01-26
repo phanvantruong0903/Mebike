@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Bike } from '../../bike';
-import { IsoDateScalar } from '../../../../graphql/index';
+import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
 
 @ObjectType()
 export class ContactInfo {

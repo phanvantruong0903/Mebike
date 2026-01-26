@@ -4,7 +4,7 @@ import { ReservationStatus } from '../../../../prisma/index';
 import { Bike } from '../../bike';
 import { UserProfile } from '../../user';
 import { Subscription } from '../../subscription';
-import { IsoDateScalar } from 'src/lib/graphql';
+import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
 
 @ObjectType()
 export class Reservation {

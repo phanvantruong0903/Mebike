@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Role, UserStatus, UserVerifyStatus } from '../../../../prisma/index';
 import { Account } from '../../auth';
-import { IsoDateScalar } from '../../../../graphql/index';
+import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
 
 @ObjectType()
 export class UserProfile {

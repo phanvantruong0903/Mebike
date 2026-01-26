@@ -146,7 +146,7 @@ export class StationService
 
     if (!longitude || !latitude) {
       const stationSearch = await meiliClient.index('Station').search('', {
-        filter: filter.join(' AND '),
+        ...(filter.length ? { filter: filter.join(' AND ') } : {}),
         limit,
         offset: ((page ?? 1) - 1) * (limit ?? 10),
         sort: ['createdAt:desc'],
@@ -157,7 +157,7 @@ export class StationService
       const searchQueries = stationSearch.hits.map((station) => ({
         indexUid: 'Bike',
         q: '',
-        filter: `stationId = "${SqlString.escape(station.id)}"`,
+        filter: `stationId = "${station.id}"`, // sql string chỉ cho search filter
         facets: ['status'],
         limit: 0,
       }));
@@ -253,7 +253,7 @@ export class StationService
     const searchStation = stationIds.map((stationId) => ({
       indexUid: 'Bike',
       q: '',
-      filter: `stationId = "${SqlString.escape(stationId)}"`,
+      filter: `stationId = "${stationId}"`,
       facets: ['status'],
       limit: 0,
     }));

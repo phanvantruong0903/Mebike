@@ -279,7 +279,7 @@ export class SupplierService
 
     if (status) filter.push(`status = "${SqlString.escape(status)}"`);
     const result = await meiliClient.index('Supplier').search('', {
-      filter,
+      ...(filter.length ? { filter: filter.join(' AND ') } : {}),
       sort: ['createdAt:desc'],
       limit,
       offset: (page - 1) * limit,
@@ -316,12 +316,7 @@ export class SupplierService
       const pipeline = this.redisClient.pipeline();
       missingSuppliers.forEach((sup) => {
         suppliers.push(sup);
-        pipeline.set(
-          `supplier:${SqlString.escape(sup.id)}`,
-          JSON.stringify(sup),
-          'EX',
-          3600,
-        );
+        pipeline.set(`supplier:${sup.id}`, JSON.stringify(sup), 'EX', 3600);
       });
       await pipeline.exec();
     }

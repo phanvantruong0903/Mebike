@@ -1,7 +1,7 @@
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Bike } from '../../bike';
 import { StationStatus } from '../../../../prisma/index';
-import { IsoDateScalar } from '../../../../graphql/index';
+import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
 
 @ObjectType()
 export class Station {

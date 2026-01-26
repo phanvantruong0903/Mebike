@@ -4,7 +4,7 @@ import { UserProfile } from '../../user';
 import { Bike } from '../../bike';
 import { Rental } from '../../rental';
 import { Station } from '../../station';
-import { IsoDateScalar } from '../../../../graphql/index';
+import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
 
 @ObjectType()
 export class Sos {

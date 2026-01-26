@@ -154,7 +154,7 @@ export class BikeService
       filter.push(`supplierId = "${SqlString.escape(supplierId)}"`);
 
     const result = await meiliClient.index('Bike').search('', {
-      filter: filter.join(' AND '),
+      ...(filter.length ? { filter: filter.join(' AND ') } : {}),
       limit,
       offset: (page - 1) * limit,
       sort: ['createdAt:desc'],

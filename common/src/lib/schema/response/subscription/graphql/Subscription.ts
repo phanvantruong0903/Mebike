@@ -2,7 +2,7 @@ import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { SubscriptionStatus } from '../../../../prisma/index';
 import { UserProfile } from '../../user';
 import { Package } from '../../package';
-import { IsoDateScalar } from '../../../../graphql/index';
+import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
 
 @ObjectType('SubscriptionData')
 export class Subscription {
