@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -51,10 +52,13 @@ export class SosResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
     try {
-      return await this.sosService.createSos({
-        ...body,
-        requesterId: user.accountId,
-      } as unknown as CreateSosDto);
+      return plainToInstance(
+        SosResponse,
+        await this.sosService.createSos({
+          ...body,
+          requesterId: user.accountId,
+        } as unknown as CreateSosDto),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode =
@@ -79,11 +83,14 @@ export class SosResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
     try {
-      return await this.sosService.updateSosStatus({
-        ...body,
-        accountId: user.accountId,
-        role: user.role,
-      } as unknown as UpdateSosDto);
+      return plainToInstance(
+        SosResponse,
+        await this.sosService.updateSosStatus({
+          ...body,
+          accountId: user.accountId,
+          role: user.role,
+        } as unknown as UpdateSosDto),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode =
@@ -118,13 +125,16 @@ export class SosResolver {
 
       const status = data?.status;
 
-      return await this.sosService.getAllSos(
-        {
-          page,
-          limit,
-          status,
-        },
-        user,
+      return plainToInstance(
+        SosListResponse,
+        await this.sosService.getAllSos(
+          {
+            page,
+            limit,
+            status,
+          },
+          user,
+        ),
       );
     } catch (error) {
       const err = error as any;
@@ -156,7 +166,10 @@ export class SosResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<SosResponse> {
     try {
-      return await this.sosService.getSos({ id }, user);
+      return plainToInstance(
+        SosResponse,
+        await this.sosService.getSos({ id }, user),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode =

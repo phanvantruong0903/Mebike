@@ -1,5 +1,7 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
 
+import { Type } from 'class-transformer';
+
 type ClassType<T = unknown> = new (...args: unknown[]) => T;
 
 interface ApiResponseOptions {
@@ -45,6 +47,7 @@ export function ApiResponseType<TItem>(
     message!: string;
 
     @Field(() => (isArray ? [TItemClass] : TItemClass), { nullable: true })
+    @Type(() => TItemClass)
     data?: TItem | TItem[] | null;
 
     @Field(() => [String], { nullable: true })

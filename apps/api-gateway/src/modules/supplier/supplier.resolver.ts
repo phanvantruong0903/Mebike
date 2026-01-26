@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -30,7 +31,10 @@ export class SupplierResolver {
     @Args('body') body: CreateSupplierInput,
   ): Promise<SupplierResponse> {
     try {
-      return await this.supplierService.createSupplier(body);
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.createSupplier(body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -54,10 +58,13 @@ export class SupplierResolver {
     @Args('id') id: string,
   ): Promise<SupplierResponse> {
     try {
-      return await this.supplierService.updateSupplier({
-        id,
-        ...body,
-      } as unknown as UpdateSupplierDto);
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.updateSupplier({
+          id,
+          ...body,
+        } as unknown as UpdateSupplierDto),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -76,7 +83,10 @@ export class SupplierResolver {
   @Query(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ONE })
   async getSupplier(@Args('id') id: string): Promise<SupplierResponse> {
     try {
-      return await this.supplierService.getSupplier({ id });
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.getSupplier({ id }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -107,11 +117,14 @@ export class SupplierResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
       const status = data?.status ?? undefined;
-      return await this.supplierService.getAllSuppliers({
-        page,
-        limit,
-        status,
-      });
+      return plainToInstance(
+        SupplierListResponse,
+        await this.supplierService.getAllSuppliers({
+          page,
+          limit,
+          status,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -143,7 +156,10 @@ export class SupplierResolver {
   ): Promise<SupplierResponse> {
     try {
       const data = body as unknown as ChangeSupplierStatusDto;
-      return await this.supplierService.changeSupplierStatus(data);
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.changeSupplierStatus(data),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -166,7 +182,10 @@ export class SupplierResolver {
   @Roles(Role.ADMIN)
   async getSupplierStats(): Promise<SupplierStatsResponse> {
     try {
-      return await this.supplierService.getSupplierStats();
+      return plainToInstance(
+        SupplierStatsResponse,
+        await this.supplierService.getSupplierStats(),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -215,7 +234,10 @@ export class SupplierResolver {
       const limit = data.limit ?? 10;
       const search = q ?? '';
 
-      return await this.supplierService.searchSupplier(page, limit, search);
+      return plainToInstance(
+        SupplierSearchPage,
+        await this.supplierService.searchSupplier(page, limit, search),
+      );
     } catch (error) {
       return {
         data: [],

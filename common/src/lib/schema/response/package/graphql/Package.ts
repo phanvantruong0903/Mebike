@@ -1,6 +1,12 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  ID,
+  Int,
+  ObjectType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { PackageStatus, UsageType } from '../../../../prisma/index';
-import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class Package {
@@ -22,9 +28,11 @@ export class Package {
   @Field(() => PackageStatus)
   status!: PackageStatus;
 
-  @Field(() => IsoDateScalar)
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  createdAt!: Date;
 
-  @Field(() => IsoDateScalar)
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  updatedAt!: Date;
 }

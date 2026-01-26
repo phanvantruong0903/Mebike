@@ -1,4 +1,5 @@
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import {
   Args,
   Mutation,
@@ -50,7 +51,10 @@ export class UserResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
       const status = data?.status;
-      return await this.userService.getAllUser({ page, limit, status });
+      return plainToInstance(
+        UserListResponse,
+        await this.userService.getAllUser({ page, limit, status }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -87,7 +91,10 @@ export class UserResolver {
         userId = user.accountId;
       }
 
-      return await this.userService.getUserDetail(userId);
+      return plainToInstance(
+        UserResponse,
+        await this.userService.getUserDetail(userId),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -111,7 +118,10 @@ export class UserResolver {
   ): Promise<UserResponse> {
     try {
       const id = user?.accountId;
-      return await this.userService.updateUser(id, data);
+      return plainToInstance(
+        UserResponse,
+        await this.userService.updateUser(id, data),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -133,10 +143,13 @@ export class UserResolver {
     @Args('data') data: ChangeUserStatusInput,
   ): Promise<UserResponse> {
     try {
-      return await this.userService.changeStatus({
-        accountId: data.accountId,
-        status: data.status,
-      });
+      return plainToInstance(
+        UserResponse,
+        await this.userService.changeStatus({
+          accountId: data.accountId,
+          status: data.status,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -162,7 +175,10 @@ export class UserResolver {
   @Roles(Role.ADMIN)
   async getUserStats(): Promise<UserStatsResponse> {
     try {
-      return await this.userService.getUserStats();
+      return plainToInstance(
+        UserStatsResponse,
+        await this.userService.getUserStats(),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;

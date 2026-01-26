@@ -1,8 +1,7 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import { BikeStatus } from '../../../../prisma';
 import { Station } from '../../station';
 import { Supplier } from '../../supplier';
-import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
 
 @ObjectType()
 export class BikeResult {
@@ -21,11 +20,11 @@ export class BikeResult {
   @Field(() => BikeStatus)
   status!: BikeStatus;
 
-  @Field(() => IsoDateScalar)
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  createdAt!: Date;
 
-  @Field(() => IsoDateScalar)
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  updatedAt!: Date;
 
   @Field(() => Station, { nullable: true })
   station?: Station;

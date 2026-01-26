@@ -1,7 +1,7 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import { Role, UserStatus, UserVerifyStatus } from '../../../../prisma/index';
 import { Account } from '../../auth';
-import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class UserProfile {
@@ -44,9 +44,11 @@ export class UserProfile {
   @Field(() => String, { nullable: true })
   workStationId?: string;
 
-  @Field(() => IsoDateScalar)
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  createdAt!: Date;
 
-  @Field(() => IsoDateScalar)
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  updatedAt!: Date;
 }

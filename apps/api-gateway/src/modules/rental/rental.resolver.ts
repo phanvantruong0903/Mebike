@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -47,10 +48,13 @@ export class RentalResolver {
     @Args('body') body: CreateRentalInput,
   ): Promise<RentalResponse> {
     try {
-      return await this.rentalService.createRental({
-        ...body,
-        accountId: user.accountId,
-      });
+      return plainToInstance(
+        RentalResponse,
+        await this.rentalService.createRental({
+          ...body,
+          accountId: user.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -74,10 +78,13 @@ export class RentalResolver {
     @Args('body') body: EndRentalInput,
   ): Promise<RentalResponse> {
     try {
-      return await this.rentalService.endRental({
-        ...body,
-        accountId: user.accountId,
-      });
+      return plainToInstance(
+        RentalResponse,
+        await this.rentalService.endRental({
+          ...body,
+          accountId: user.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -96,7 +103,10 @@ export class RentalResolver {
   @Query(() => RentalResponse, { name: GRAPHQL_NAME_RENTAL.GET_ONE })
   async getRental(@Args('id') id: string): Promise<RentalResponse> {
     try {
-      return await this.rentalService.getRental({ id });
+      return plainToInstance(
+        RentalResponse,
+        await this.rentalService.getRental({ id }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -125,11 +135,14 @@ export class RentalResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
 
-      return await this.rentalService.getRentalList({
-        page,
-        limit,
-        search: data.search,
-      });
+      return plainToInstance(
+        RentalListResponse,
+        await this.rentalService.getRentalList({
+          page,
+          limit,
+          search: data.search,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;

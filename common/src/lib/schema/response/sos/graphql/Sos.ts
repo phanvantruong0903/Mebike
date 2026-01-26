@@ -1,10 +1,10 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import { EmergencyStatus } from '../../../../prisma/index';
 import { UserProfile } from '../../user';
 import { Bike } from '../../bike';
 import { Rental } from '../../rental';
 import { Station } from '../../station';
-import { IsoDateScalar } from '../../../../graphql/iso-date.scalar';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class Sos {
@@ -65,15 +65,19 @@ export class Sos {
   @Field(() => EmergencyStatus)
   status!: EmergencyStatus;
 
-  @Field(() => IsoDateScalar)
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  createdAt!: Date;
 
-  @Field(() => IsoDateScalar, { nullable: true })
-  startedAt?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => new Date(value))
+  startedAt?: Date;
 
-  @Field(() => IsoDateScalar, { nullable: true })
-  resolvedAt?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => new Date(value))
+  resolvedAt?: Date;
 
-  @Field(() => IsoDateScalar)
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 }

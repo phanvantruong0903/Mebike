@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -32,7 +33,10 @@ export class StationResolver {
     @Args('body') body: CreateStationInput,
   ): Promise<StationResponse> {
     try {
-      return await this.stationService.createStation(body);
+      return plainToInstance(
+        StationResponse,
+        await this.stationService.createStation(body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -56,7 +60,10 @@ export class StationResolver {
     @Args('id') id: string,
   ): Promise<StationResponse> {
     try {
-      return await this.stationService.updateStation(id, body);
+      return plainToInstance(
+        StationResponse,
+        await this.stationService.updateStation(id, body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -79,7 +86,10 @@ export class StationResolver {
     @CurrentUser() user?: UserProfile,
   ): Promise<StationResponse | null> {
     try {
-      return await this.stationService.getStation({ id }, user);
+      return plainToInstance(
+        StationResponse,
+        await this.stationService.getStation({ id }, user),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -112,13 +122,16 @@ export class StationResolver {
 
       const isAdmin = user?.role === Role.ADMIN;
       const { latitude, longitude } = data || {};
-      return await this.stationService.getAllStation({
-        page,
-        limit,
-        latitude: latitude ? Number(latitude) : undefined,
-        longitude: longitude ? Number(longitude) : undefined,
-        status: isAdmin ? data.status ?? undefined : StationStatus.Active,
-      });
+      return plainToInstance(
+        StationListResponse,
+        await this.stationService.getAllStation({
+          page,
+          limit,
+          latitude: latitude ? Number(latitude) : undefined,
+          longitude: longitude ? Number(longitude) : undefined,
+          status: isAdmin ? data.status ?? undefined : StationStatus.Active,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -147,7 +160,10 @@ export class StationResolver {
     @Args('body') body: UpdateStationStatusInput,
   ): Promise<StationResponse> {
     try {
-      return await this.stationService.changeStationStatus(body);
+      return plainToInstance(
+        StationResponse,
+        await this.stationService.changeStationStatus(body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -196,7 +212,10 @@ export class StationResolver {
       const limit = data.limit ?? 10;
       const search = q ?? '';
 
-      return await this.stationService.searchStation(page, limit, search, user);
+      return plainToInstance(
+        StationSearchPage,
+        await this.stationService.searchStation(page, limit, search, user),
+      );
     } catch (error) {
       return {
         data: [],

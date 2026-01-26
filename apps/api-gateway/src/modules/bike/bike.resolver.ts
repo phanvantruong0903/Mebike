@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import {
@@ -47,7 +48,10 @@ export class BikeResolver {
   @Roles(Role.ADMIN)
   async createBike(@Args('body') body: CreateBikeInput): Promise<BikeResponse> {
     try {
-      return await this.bikeService.createBike(body);
+      return plainToInstance(
+        BikeResponse,
+        await this.bikeService.createBike(body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -71,10 +75,13 @@ export class BikeResolver {
     @Args('id') id: string,
   ): Promise<BikeResponse> {
     try {
-      return await this.bikeService.updateBike({
-        id,
-        ...body,
-      } as unknown as UpdateBikeDto);
+      return plainToInstance(
+        BikeResponse,
+        await this.bikeService.updateBike({
+          id,
+          ...body,
+        } as unknown as UpdateBikeDto),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -93,7 +100,10 @@ export class BikeResolver {
   @Query(() => BikeResponse, { name: GRAPHQL_NAME_BIKE.GET_ONE })
   async getBike(@Args('id') id: string): Promise<BikeResponse> {
     try {
-      return await this.bikeService.getBike({ id });
+      return plainToInstance(
+        BikeResponse,
+        await this.bikeService.getBike({ id }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -131,12 +141,15 @@ export class BikeResolver {
         stationId = user.workStationId;
       }
 
-      return await this.bikeService.getAllBike({
-        page,
-        limit,
-        status,
-        stationId,
-      });
+      return plainToInstance(
+        BikeListResponse,
+        await this.bikeService.getAllBike({
+          page,
+          limit,
+          status,
+          stationId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -166,7 +179,10 @@ export class BikeResolver {
     @Args('status', { type: () => BikeStatus }) status: BikeStatus,
   ): Promise<BikeResponse> {
     try {
-      return await this.bikeService.changeBikeStatus({ id, status });
+      return plainToInstance(
+        BikeResponse,
+        await this.bikeService.changeBikeStatus({ id, status }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -225,7 +241,10 @@ export class BikeResolver {
       const limit = data?.limit ?? 10;
       const search = q ?? '';
 
-      return await this.bikeService.searchBike(page, limit, search);
+      return plainToInstance(
+        BikeSearchPage,
+        await this.bikeService.searchBike(page, limit, search),
+      );
     } catch (error) {
       return {
         data: [],

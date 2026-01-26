@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -45,10 +46,13 @@ export class SubscriptionResolver {
     @Args('body') body: CreateSubscriptionInput,
   ): Promise<SubscriptionResponse> {
     try {
-      return await this.subscriptionService.createSubscription({
-        ...body,
-        accountId: user.accountId,
-      });
+      return plainToInstance(
+        SubscriptionResponse,
+        await this.subscriptionService.createSubscription({
+          ...body,
+          accountId: user.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -74,10 +78,13 @@ export class SubscriptionResolver {
     @Args('id') id: string,
   ): Promise<SubscriptionResponse> {
     try {
-      return await this.subscriptionService.activateSubscription({
-        id,
-        accountId: user.accountId,
-      });
+      return plainToInstance(
+        SubscriptionResponse,
+        await this.subscriptionService.activateSubscription({
+          id,
+          accountId: user.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -102,7 +109,10 @@ export class SubscriptionResolver {
     @Args('id') id: string,
   ): Promise<SubscriptionResponse> {
     try {
-      return await this.subscriptionService.expireSubscription(id);
+      return plainToInstance(
+        SubscriptionResponse,
+        await this.subscriptionService.expireSubscription(id),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -123,7 +133,10 @@ export class SubscriptionResolver {
   })
   async getSubscription(@Args('id') id: string): Promise<SubscriptionResponse> {
     try {
-      return await this.subscriptionService.getSubscription(id);
+      return plainToInstance(
+        SubscriptionResponse,
+        await this.subscriptionService.getSubscription(id),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -154,11 +167,14 @@ export class SubscriptionResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
 
-      return await this.subscriptionService.getSubscriptionList({
-        page,
-        limit,
-        search: data.search,
-      });
+      return plainToInstance(
+        SubscriptionListResponse,
+        await this.subscriptionService.getSubscriptionList({
+          page,
+          limit,
+          search: data.search,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;

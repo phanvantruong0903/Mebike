@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -28,7 +29,10 @@ export class PackageResolver {
     @Args('body') body: CreatePackageInput,
   ): Promise<PackageResponse> {
     try {
-      return await this.packageService.createPackage(body);
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.createPackage(body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -54,10 +58,13 @@ export class PackageResolver {
     @Args('body') body: UpdatePackageInput,
   ): Promise<PackageResponse> {
     try {
-      return await this.packageService.updatePackage({
-        id,
-        ...body,
-      });
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.updatePackage({
+          id,
+          ...body,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -78,7 +85,10 @@ export class PackageResolver {
   })
   async getPackage(@Args('id') id: string): Promise<PackageResponse> {
     try {
-      return await this.packageService.getPackage(id);
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.getPackage(id),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -109,11 +119,14 @@ export class PackageResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
 
-      return await this.packageService.getPackageList({
-        page,
-        limit,
-        search: data.search,
-      });
+      return plainToInstance(
+        PackageListResponse,
+        await this.packageService.getPackageList({
+          page,
+          limit,
+          search: data.search,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -142,7 +155,10 @@ export class PackageResolver {
   @Roles(Role.ADMIN)
   async togglePackageStatus(@Args('id') id: string): Promise<PackageResponse> {
     try {
-      return await this.packageService.togglePackageStatus(id);
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.togglePackageStatus(id),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
