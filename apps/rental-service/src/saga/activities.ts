@@ -5,6 +5,7 @@ import {
   BikeResponse,
   BikeStatus,
   CreateRentalDto,
+  CreateReservationDto,
   DebitRentalDto,
   GRPC_PACKAGE,
   GRPC_SERVICES,
@@ -13,6 +14,8 @@ import {
   RENTAL_MESSAGES,
   RentalModel,
   RentalStatus,
+  ReservationModel,
+  ReservationStatus,
   SERVER_MESSAGE,
   throwGrpcError,
   Wallet,
@@ -21,6 +24,7 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, Observable } from 'rxjs';
+import { ReservationService } from '../modules/reservation/reservation.service';
 
 interface BikeServiceClient {
   GetBike(data: { id: string }): Observable<BikeResponse>;
@@ -48,6 +52,7 @@ export class RentalActivities {
     @Inject(GRPC_PACKAGE.BIKE) private readonly fleetClient: ClientGrpc,
     @Inject(GRPC_PACKAGE.PAYMENT) private readonly paymentClient: ClientGrpc,
     @Inject(GRPC_PACKAGE.WALLET) private readonly walletClient: ClientGrpc,
+    private readonly reservationService: ReservationService,
   ) {
     this.bikeService = this.fleetClient.getService<BikeServiceClient>(
       GRPC_SERVICES.FLEET,
@@ -86,8 +91,6 @@ export class RentalActivities {
       stationId: bike.station.id,
     };
   }
-
-  // Create Rental Activities
 
   async lockBike(bikeId: string): Promise<void> {
     console.log('[COMPENSATION] Locking bike:', bikeId);
@@ -141,6 +144,8 @@ export class RentalActivities {
     }
   }
 
+  // Rental Activities
+
   async createRentalRecord(
     data: CreateRentalDto,
     stationId: string,
@@ -172,8 +177,6 @@ export class RentalActivities {
       console.error('[COMPENSATION] Failed to void rental:', msg);
     }
   }
-
-  // End Rental Activities
 
   async getRental(rentalId: string): Promise<RentalModel> {
     const rental = await prismaRental.rental.findUnique({
@@ -245,6 +248,145 @@ export class RentalActivities {
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
       console.error('[COMPENSATION] Failed to revert rental record:', msg);
+    }
+  }
+
+  // Reservation Activities
+
+  async createReservationRecord(
+    data: CreateReservationDto,
+    stationId: string,
+  ): Promise<ReservationModel> {
+    try {
+      return await prismaRental.reservation.create({
+        data: {
+          ...data,
+          stationId,
+          endTime: this.reservationService.generateEndTime(data.startTime),
+        },
+      });
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
+    }
+  }
+
+  async voidReservationRecord(reservationId: string): Promise<void> {
+    console.log('[COMPENSATION] Voiding reservation:', reservationId);
+    try {
+      const res = await prismaRental.reservation.delete({
+        where: { id: reservationId },
+      });
+
+      if (!res) {
+        console.warn(
+          '[COMPENSATION] Voided reservation failed:',
+          reservationId,
+        );
+      } else {
+        console.log(
+          '[COMPENSATION] Voided reservation success:',
+          reservationId,
+        );
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[COMPENSATION] Failed to void reservation:', msg);
+    }
+  }
+
+  async activateReservation(
+    reservation: ReservationModel,
+  ): Promise<ReservationModel> {
+    try {
+      const [completedReservation] = await prismaRental.$transaction([
+        prismaRental.reservation.update({
+          where: { id: reservation.id, status: ReservationStatus.Pending },
+          data: {
+            status: ReservationStatus.Completed,
+          },
+        }),
+        prismaRental.rental.create({
+          data: {
+            accountId: reservation.accountId,
+            bikeId: reservation.bikeId,
+            startStationId: reservation.stationId,
+          },
+        }),
+      ]);
+      return completedReservation;
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
+    }
+  }
+
+  async revertCompletedReservation(reservationId: string) {
+    console.log('[COMPENSATION] Revert reservation:', reservationId);
+    try {
+      const res = await prismaRental.$transaction([
+        prismaRental.reservation.update({
+          where: { id: reservationId, status: ReservationStatus.Completed },
+          data: { status: ReservationStatus.Pending },
+        }),
+        prismaRental.rental.delete({
+          where: { reservationId },
+        }),
+      ]);
+
+      if (!res) {
+        console.warn(
+          '[COMPENSATION] Revert reservation failed:',
+          reservationId,
+        );
+      } else {
+        console.log(
+          '[COMPENSATION] Revert reservation success:',
+          reservationId,
+        );
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[COMPENSATION] Failed to revert reservation:', msg);
+    }
+  }
+
+  async cancelReservation(reservationId: string): Promise<ReservationModel> {
+    try {
+      return await prismaRental.reservation.update({
+        where: { id: reservationId, status: ReservationStatus.Pending },
+        data: {
+          status: ReservationStatus.Cancelled,
+        },
+      });
+    } catch (error: any) {
+      const errorObj = error?.error || error;
+      throw new Error(JSON.stringify(errorObj));
+    }
+  }
+
+  async revertCancelledReservation(reservationId: string) {
+    console.log('[COMPENSATION] Revert reservation:', reservationId);
+    try {
+      const res = await prismaRental.reservation.update({
+        where: { id: reservationId, status: ReservationStatus.Cancelled },
+        data: { status: ReservationStatus.Pending },
+      });
+
+      if (!res) {
+        console.warn(
+          '[COMPENSATION] Revert reservation failed:',
+          reservationId,
+        );
+      } else {
+        console.log(
+          '[COMPENSATION] Revert reservation success:',
+          reservationId,
+        );
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('[COMPENSATION] Failed to revert reservation:', msg);
     }
   }
 

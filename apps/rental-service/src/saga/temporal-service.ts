@@ -85,6 +85,23 @@ export class TemporalService implements OnModuleDestroy {
             activitiesInstance.completeRentalRecord.bind(activitiesInstance),
           revertRentalRecord:
             activitiesInstance.revertRentalRecord.bind(activitiesInstance),
+          // Reservation activities
+          createReservationRecord:
+            activitiesInstance.createReservationRecord.bind(activitiesInstance),
+          voidReservationRecord:
+            activitiesInstance.voidReservationRecord.bind(activitiesInstance),
+          activateReservation:
+            activitiesInstance.activateReservation.bind(activitiesInstance),
+          revertCompletedReservation:
+            activitiesInstance.revertCompletedReservation.bind(
+              activitiesInstance,
+            ),
+          cancelReservation:
+            activitiesInstance.cancelReservation.bind(activitiesInstance),
+          revertCancelledReservation:
+            activitiesInstance.revertCancelledReservation.bind(
+              activitiesInstance,
+            ),
         },
         taskQueue: 'rental-queue',
       });

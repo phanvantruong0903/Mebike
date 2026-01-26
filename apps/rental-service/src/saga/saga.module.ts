@@ -12,6 +12,7 @@ import { RentalActivities } from './activities';
 import { TemporalService } from './temporal-service';
 import { ConfigModule } from '@nestjs/config';
 import { RentalModule } from '../modules/rental/rental.module';
+import { ReservationModule } from '../modules/reservation/reservation.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RentalModule } from '../modules/rental/rental.module';
     RedisModule,
     JwtSharedModule,
     forwardRef(() => RentalModule),
+    forwardRef(() => ReservationModule),
     ConfigModule.forRoot({ isGlobal: true }),
     ClientsModule.registerAsync([
       createGrpcClient(

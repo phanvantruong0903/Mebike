@@ -42,7 +42,7 @@ export class ReservationService extends BaseService<
   CreateReservationDto
 > {
   private fleetService!: FleetServiceClient;
-  constructor(@Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc) {
+  constructor(@Inject(GRPC_PACKAGE.BIKE) private readonly client: ClientGrpc) {
     super(prismaRental.reservation);
     this.fleetService = this.client.getService<FleetServiceClient>(
       GRPC_SERVICES.FLEET,
