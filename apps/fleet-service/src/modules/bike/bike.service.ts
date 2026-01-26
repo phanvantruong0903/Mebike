@@ -48,7 +48,7 @@ export class BikeService
         },
       });
       if (bike) {
-        this.cacheBikeToRedis(bike, 3600);
+        await this.cacheBikeToRedis(bike, 3600);
       }
       return bike;
     });
@@ -117,7 +117,7 @@ export class BikeService
     });
 
     if (bikeData) {
-      this.cacheBikeToRedis(bikeData, 3600);
+      await this.cacheBikeToRedis(bikeData, 3600);
     }
     return bikeData as unknown as BikeModel;
   }
@@ -130,7 +130,7 @@ export class BikeService
     });
 
     if (bikeData) {
-      this.cacheBikeToRedis(bikeData, 3600);
+      await this.cacheBikeToRedis(bikeData, 3600);
     }
 
     return bikeData;
@@ -147,9 +147,11 @@ export class BikeService
     const { page = 1, limit = 10, status, stationId, supplierId } = data;
 
     const filter: string[] = [];
-    if (status) filter.push(`status = "${status}"`);
-    if (stationId) filter.push(`stationId = "${stationId}"`);
-    if (supplierId) filter.push(`supplierId = "${supplierId}"`);
+    if (status) filter.push(`status = "${status.replace(/"/g, '\\"')}"`);
+    if (stationId)
+      filter.push(`stationId = "${stationId.replace(/"/g, '\\"')}"`);
+    if (supplierId)
+      filter.push(`supplierId = "${supplierId.replace(/"/g, '\\"')}"`);
 
     const result = await meiliClient.index('Bike').search('', {
       filter: filter.join(' AND '),

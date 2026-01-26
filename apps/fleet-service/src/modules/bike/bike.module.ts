@@ -6,7 +6,6 @@ import { BikeService } from './bike.service';
 
 @Module({
   imports: [
-    RedisModule,
     ConsulModule,
     RedisModule,
     ConfigModule.forRoot({ isGlobal: true }),

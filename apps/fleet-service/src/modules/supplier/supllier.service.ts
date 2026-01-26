@@ -220,7 +220,7 @@ export class SupplierService
       supplierData as unknown as CreateSupplierDto,
     );
 
-    if (result) this.cacheSupplierToRedis(result, 3600);
+    if (result) await this.cacheSupplierToRedis(result, 3600);
     return result;
   }
 
@@ -284,8 +284,6 @@ export class SupplierService
       offset: (page - 1) * limit,
       attributesToRetrieve: ['id'],
     });
-
-    console.log(result);
 
     const supplierIds = result.hits.map((hit) => hit.id);
     if (supplierIds.length === 0) {

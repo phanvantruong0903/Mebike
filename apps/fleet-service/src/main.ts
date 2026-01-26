@@ -56,7 +56,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
+        brokers: (process.env.KAFKA_BROKERS || 'localhost:9092').split(','),
         connectionTimeout: 10000,
         authenticationTimeout: 10000,
       },

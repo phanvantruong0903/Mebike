@@ -62,8 +62,8 @@ export class StationService
     });
   }
 
-  onModuleInit() {
-    this.createStationIndex();
+  async onModuleInit() {
+    await this.createStationIndex();
   }
 
   async cacheStationToRedis(station: StationModel, ttlSecond: number) {
@@ -138,7 +138,7 @@ export class StationService
     const { page, limit, longitude, latitude, status } = data;
     const filter: string[] = [];
     if (status) {
-      filter.push(`status = ${status}`);
+      filter.push(`status = "${status}"`);
     }
 
     const stats = await this.getStationStats();
@@ -304,7 +304,7 @@ export class StationService
     });
 
     if (station) {
-      this.cacheStationToRedis(station, 3600);
+      await this.cacheStationToRedis(station, 3600);
     }
 
     return station;
