@@ -2,6 +2,7 @@ import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { SubscriptionStatus } from '../../../../prisma/index';
 import { UserProfile } from '../../user';
 import { Package } from '../../package';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType('SubscriptionData')
 export class Subscription {
@@ -14,10 +15,10 @@ export class Subscription {
   @Field(() => Package, { nullable: true })
   package?: Package;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => IsoDateScalar, { nullable: true })
   activatedAt?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => IsoDateScalar, { nullable: true })
   expiredAt?: string;
 
   @Field(() => Int, { nullable: true })
@@ -26,9 +27,9 @@ export class Subscription {
   @Field(() => SubscriptionStatus)
   status!: SubscriptionStatus;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

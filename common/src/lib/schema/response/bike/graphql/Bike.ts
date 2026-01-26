@@ -2,6 +2,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Station } from '../../station';
 import { Supplier } from '../../supplier';
 import { BikeStatus } from '../../../../prisma/index';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class Bike {
@@ -20,9 +21,9 @@ export class Bike {
   @Field(() => BikeStatus)
   status!: BikeStatus;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

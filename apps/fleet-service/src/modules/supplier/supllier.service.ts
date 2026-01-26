@@ -15,6 +15,7 @@ import {
 } from '@mebike/common';
 import Redis from 'ioredis';
 import { createCache } from 'async-cache-dedupe';
+import * as SqlString from 'sqlstring';
 
 @Injectable()
 export class SupplierService
@@ -147,7 +148,7 @@ export class SupplierService
     }
 
     const searchSupplier = await meiliClient.index('Bike').search('', {
-      filter: `supplierId = "${supplier.id}"`,
+      filter: `supplierId = "${SqlString.escape(supplier.id)}"`,
       facets: ['status'],
       limit: 0,
     });
@@ -254,7 +255,7 @@ export class SupplierService
     }
 
     const searchSupplier = await meiliClient.index('Bike').search('', {
-      filter: `supplierId = "${supplier.id}"`,
+      filter: `supplierId = "${SqlString.escape(supplier.id)}"`,
       facets: ['status'],
       limit: 0,
     });
@@ -276,7 +277,7 @@ export class SupplierService
     const { page, limit, status } = data;
     const filter: string[] = [];
 
-    if (status) filter.push(`status = "${status}"`);
+    if (status) filter.push(`status = "${SqlString.escape(status)}"`);
     const result = await meiliClient.index('Supplier').search('', {
       filter,
       sort: ['createdAt:desc'],
@@ -315,7 +316,12 @@ export class SupplierService
       const pipeline = this.redisClient.pipeline();
       missingSuppliers.forEach((sup) => {
         suppliers.push(sup);
-        pipeline.set(`supplier:${sup.id}`, JSON.stringify(sup), 'EX', 3600);
+        pipeline.set(
+          `supplier:${SqlString.escape(sup.id)}`,
+          JSON.stringify(sup),
+          'EX',
+          3600,
+        );
       });
       await pipeline.exec();
     }

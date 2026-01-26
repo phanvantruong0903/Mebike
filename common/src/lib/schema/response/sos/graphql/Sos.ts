@@ -4,6 +4,7 @@ import { UserProfile } from '../../user';
 import { Bike } from '../../bike';
 import { Rental } from '../../rental';
 import { Station } from '../../station';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class Sos {
@@ -64,15 +65,15 @@ export class Sos {
   @Field(() => EmergencyStatus)
   status!: EmergencyStatus;
 
-  @Field(() => String)
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => IsoDateScalar, { nullable: true })
   startedAt?: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => IsoDateScalar, { nullable: true })
   resolvedAt?: string;
 
-  @Field(() => String)
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

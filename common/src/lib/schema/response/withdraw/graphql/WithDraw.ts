@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { WithdrawStatus } from '../../../../prisma/index';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class Withdraw {
@@ -30,9 +31,9 @@ export class Withdraw {
   @Field(() => WithdrawStatus)
   status!: WithdrawStatus;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

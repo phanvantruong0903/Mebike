@@ -15,6 +15,7 @@ import {
 } from '@mebike/common';
 import Redis from 'ioredis';
 import { createCache } from 'async-cache-dedupe';
+import * as SqlString from 'sqlstring';
 
 @Injectable()
 export class BikeService
@@ -147,11 +148,10 @@ export class BikeService
     const { page = 1, limit = 10, status, stationId, supplierId } = data;
 
     const filter: string[] = [];
-    if (status) filter.push(`status = "${status.replace(/"/g, '\\"')}"`);
-    if (stationId)
-      filter.push(`stationId = "${stationId.replace(/"/g, '\\"')}"`);
+    if (status) filter.push(`status = "${SqlString.escape(status)}"`);
+    if (stationId) filter.push(`stationId = "${SqlString.escape(stationId)}"`);
     if (supplierId)
-      filter.push(`supplierId = "${supplierId.replace(/"/g, '\\"')}"`);
+      filter.push(`supplierId = "${SqlString.escape(supplierId)}"`);
 
     const result = await meiliClient.index('Bike').search('', {
       filter: filter.join(' AND '),

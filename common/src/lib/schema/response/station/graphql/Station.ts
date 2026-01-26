@@ -1,6 +1,7 @@
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Bike } from '../../bike';
 import { StationStatus } from '../../../../prisma/index';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class Station {
@@ -31,10 +32,10 @@ export class Station {
   @Field(() => [Bike])
   bikes!: Bike[];
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 
   @Field(() => StationStatus)

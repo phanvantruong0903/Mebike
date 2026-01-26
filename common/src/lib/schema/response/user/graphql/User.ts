@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Role, UserStatus, UserVerifyStatus } from '../../../../prisma/index';
 import { Account } from '../../auth';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class UserProfile {
@@ -43,9 +44,9 @@ export class UserProfile {
   @Field(() => String, { nullable: true })
   workStationId?: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

@@ -16,6 +16,7 @@ import {
 } from '@mebike/common';
 import Redis from 'ioredis';
 import { createCache } from 'async-cache-dedupe';
+import * as SqlString from 'sqlstring';
 
 @Injectable()
 export class StationService
@@ -138,7 +139,7 @@ export class StationService
     const { page, limit, longitude, latitude, status } = data;
     const filter: string[] = [];
     if (status) {
-      filter.push(`status = "${status}"`);
+      filter.push(`status = "${SqlString.escape(status)}"`);
     }
 
     const stats = await this.getStationStats();
@@ -156,7 +157,7 @@ export class StationService
       const searchQueries = stationSearch.hits.map((station) => ({
         indexUid: 'Bike',
         q: '',
-        filter: `stationId = "${station.id}"`,
+        filter: `stationId = "${SqlString.escape(station.id)}"`,
         facets: ['status'],
         limit: 0,
       }));
@@ -252,7 +253,7 @@ export class StationService
     const searchStation = stationIds.map((stationId) => ({
       indexUid: 'Bike',
       q: '',
-      filter: `stationId = "${stationId}"`,
+      filter: `stationId = "${SqlString.escape(stationId)}"`,
       facets: ['status'],
       limit: 0,
     }));

@@ -18,6 +18,7 @@ import { SubscriptionModule } from '../modules/subscription/subscription.module'
 import { PackageModule } from '../modules/package/package.module';
 import { SosModule } from '../modules/sos/sos.module';
 import { formatError } from '../config/graphql.config';
+import { IsoDateScalar } from '@mebike/common';
 
 @Module({
   imports: [
@@ -51,6 +52,6 @@ import { formatError } from '../config/graphql.config';
     PackageModule,
     SosModule,
   ],
-  providers: [HttpErrorStatusPlugin],
+  providers: [HttpErrorStatusPlugin, IsoDateScalar],
 })
 export class AppModule {}

@@ -4,6 +4,7 @@ import { ReservationStatus } from '../../../../prisma/index';
 import { Bike } from '../../bike';
 import { UserProfile } from '../../user';
 import { Subscription } from '../../subscription';
+import { IsoDateScalar } from 'src/lib/graphql';
 
 @ObjectType()
 export class Reservation {
@@ -34,9 +35,9 @@ export class Reservation {
   @Field(() => ReservationStatus)
   status!: ReservationStatus;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

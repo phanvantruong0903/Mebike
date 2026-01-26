@@ -4,6 +4,7 @@ import { RentalStatus } from '../../../../prisma/index';
 import { Bike } from '../../bike';
 import { UserProfile } from '../../user';
 import { Subscription } from '../../subscription';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class Rental {
@@ -22,7 +23,7 @@ export class Rental {
   @Field(() => Station, { nullable: true })
   endStation?: Station;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   startTime!: string;
 
   @Field(() => String, { nullable: true })
@@ -40,9 +41,9 @@ export class Rental {
   @Field(() => RentalStatus)
   status!: RentalStatus;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

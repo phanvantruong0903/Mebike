@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { PackageStatus, UsageType } from '../../../../prisma/index';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class Package {
@@ -21,9 +22,9 @@ export class Package {
   @Field(() => PackageStatus)
   status!: PackageStatus;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }

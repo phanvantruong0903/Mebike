@@ -4,6 +4,7 @@ import {
   TransactionStatus,
   TransactionType,
 } from '../../../../prisma/index';
+import { IsoDateScalar } from '../../../../graphql/index';
 
 @ObjectType()
 export class Transaction {
@@ -28,9 +29,9 @@ export class Transaction {
   @Field()
   description!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   createdAt!: string;
 
-  @Field()
+  @Field(() => IsoDateScalar)
   updatedAt!: string;
 }
