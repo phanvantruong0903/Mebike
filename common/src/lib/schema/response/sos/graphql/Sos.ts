@@ -66,15 +66,15 @@ export class Sos {
   status!: EmergencyStatus;
 
   @Field(() => GraphQLISODateTime)
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Transform(({ value }) => new Date(value))
   createdAt!: Date;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
-  @Transform(({ value }) => new Date(value))
+  @Transform(({ value }) => (value ? new Date(value) : null))
   startedAt?: Date;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
-  @Transform(({ value }) => new Date(value))
+  @Transform(({ value }) => (value ? new Date(value) : null))
   resolvedAt?: Date;
 
   @Field(() => GraphQLISODateTime)

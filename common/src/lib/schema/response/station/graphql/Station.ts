@@ -39,12 +39,12 @@ export class Station {
   @Field(() => [Bike])
   bikes!: Bike[];
 
-  @Field(() => GraphQLISODateTime, { nullable: true })
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
   createdAt!: Date;
 
-  @Field(() => GraphQLISODateTime, { nullable: true })
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
   updatedAt!: Date;
 
   @Field(() => StationStatus)

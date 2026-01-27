@@ -29,10 +29,10 @@ export class Package {
   status!: PackageStatus;
 
   @Field(() => GraphQLISODateTime)
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Transform(({ value }) => new Date(value))
   createdAt!: Date;
 
   @Field(() => GraphQLISODateTime)
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Transform(({ value }) => new Date(value))
   updatedAt!: Date;
 }

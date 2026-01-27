@@ -22,9 +22,11 @@ export class Subscription {
   package?: Package;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
   activatedAt?: Date;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
   expiredAt?: Date;
 
   @Field(() => Int, { nullable: true })
@@ -34,10 +36,10 @@ export class Subscription {
   status!: SubscriptionStatus;
 
   @Field(() => GraphQLISODateTime)
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Transform(({ value }) => new Date(value))
   createdAt!: Date;
 
   @Field(() => GraphQLISODateTime)
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Transform(({ value }) => new Date(value))
   updatedAt!: Date;
 }

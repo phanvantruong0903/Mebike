@@ -140,7 +140,7 @@ export class RentalResolver {
         await this.rentalService.getRentalList({
           page,
           limit,
-          search: data.search,
+          search: data?.search,
         }),
       );
     } catch (error) {

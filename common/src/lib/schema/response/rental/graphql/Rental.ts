@@ -31,10 +31,12 @@ export class Rental {
   endStation?: Station;
 
   @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
   startTime!: Date;
 
-  @Field(() => String, { nullable: true })
-  endTime?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  endTime?: Date;
 
   @Field(() => Int)
   duration!: number;
@@ -49,10 +51,10 @@ export class Rental {
   status!: RentalStatus;
 
   @Field(() => GraphQLISODateTime)
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Transform(({ value }) => new Date(value))
   createdAt!: Date;
 
   @Field(() => GraphQLISODateTime)
-  @Transform(({ value }) => (value ? new Date(value) : null))
+  @Transform(({ value }) => new Date(value))
   updatedAt!: Date;
 }
