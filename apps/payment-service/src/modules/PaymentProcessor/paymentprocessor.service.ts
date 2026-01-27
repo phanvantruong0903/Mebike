@@ -5,17 +5,19 @@ import querystring from 'qs';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  DebitRentalDto,
   PAYMENT_MESSAGES,
   PaymentMethod,
   prismaPayment,
+  Prisma,
   SERVER_MESSAGE,
   throwGrpcError,
   TransactionStatus,
   TransactionType,
   WalletModel,
   WalletStatus,
+  DebitSubscriptionDto,
 } from '@mebike/common';
+import { RpcException } from '@nestjs/microservices';
 
 interface PaymentData {
   amount: number;
@@ -30,6 +32,21 @@ interface VnpParams {
   [key: string]: string | number;
 }
 
+interface DebitParams {
+  accountId: string;
+  amount: number;
+  description: string;
+  transactionType: TransactionType;
+}
+
+/**
+ * Produce a new object with keys sorted alphabetically and values URL-encoded.
+ *
+ * Filters out entries whose value is `undefined`, `null`, or an empty string. Encodes each value using percent-encoding and replaces percent-encoded spaces (`%20`) with `+`.
+ *
+ * @param obj - Input map of VNPay parameters with string or numeric values
+ * @returns A new `VnpParams` object containing only the filtered keys in alphabetical order and their URL-encoded string values (spaces encoded as `+`)
+ */
 function sortObject(obj: VnpParams): VnpParams {
   const sorted: VnpParams = {};
   const str = Object.keys(obj).sort();
@@ -113,42 +130,7 @@ export class PaymentprocessorService {
     amount: number,
     description: string,
   ) {
-    const findWallet = await this.checkWalletExist(accountId);
-
-    const newAmount = findWallet.balance.add(amount);
-    const transactionId = uuidv4();
-
-    await Promise.all([
-      prismaPayment.wallet.update({
-        where: {
-          accountId,
-        },
-        data: {
-          balance: newAmount,
-        },
-      }),
-      prismaPayment.walletHistory.create({
-        data: {
-          walletId: findWallet.id,
-          transactionId,
-          type: TransactionType.TOPUP,
-          amount,
-          balanceBefore: findWallet.balance,
-          balanceAfter: newAmount,
-        },
-      }),
-      prismaPayment.transaction.create({
-        data: {
-          id: transactionId,
-          accountId,
-          type: TransactionType.TOPUP,
-          amount,
-          paymentMethod: PaymentMethod.VNPAY,
-          description,
-          status: TransactionStatus.SUCCESS,
-        },
-      }),
-    ]);
+    return await this.handleDepositRequest(accountId, amount, description);
   }
 
   async createWallet(accountId: string): Promise<WalletModel> {
@@ -169,53 +151,31 @@ export class PaymentprocessorService {
     return result;
   }
 
-  async debit(data: DebitRentalDto) {
-    this.validateData(
+  async debit(data: DebitParams) {
+    await this.validateData(
       data.accountId,
       data.amount,
       data.description,
       data.transactionType,
     );
-    const wallet = await this.checkWalletExist(data.accountId);
-    const newAmount = wallet.balance.sub(data.amount);
-    if (newAmount.lt(0)) {
-      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
-        PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
-      ]);
-    }
+    return await this.handleDebitRequest(
+      data.accountId,
+      data.amount,
+      data.description,
+      data.transactionType,
+    );
+  }
 
-    const transactionId = uuidv4();
-    await Promise.all([
-      prismaPayment.wallet.update({
-        where: {
-          accountId: data.accountId,
-        },
-        data: {
-          balance: newAmount,
-        },
-      }),
-      prismaPayment.walletHistory.create({
-        data: {
-          walletId: wallet.id,
-          transactionId,
-          type: data.transactionType,
-          amount: data.amount,
-          balanceBefore: wallet.balance,
-          balanceAfter: newAmount,
-        },
-      }),
-      prismaPayment.transaction.create({
-        data: {
-          id: transactionId,
-          accountId: data.accountId,
-          type: data.transactionType,
-          amount: data.amount,
-          paymentMethod: PaymentMethod.BALANCE,
-          status: TransactionStatus.SUCCESS,
-          description: data.description || 'Debit for rental service',
-        },
-      }),
-    ]);
+  async debitForSubscription(data: DebitSubscriptionDto) {
+    const description = PAYMENT_MESSAGES.DEBIT_SUBSCRIPTION_DESCRIPTION(
+      data.subscriptionId,
+    );
+    return await this.debit({
+      accountId: data.accountId,
+      amount: data.amount,
+      description,
+      transactionType: TransactionType.FEE,
+    });
   }
 
   async checkWalletExist(accountId: string): Promise<WalletModel> {
@@ -275,6 +235,201 @@ export class PaymentprocessorService {
           PAYMENT_MESSAGES.TRANSACTION_TYPE_REQUIRED,
         ]);
       }
+    }
+  }
+
+  private async handleDepositRequest(
+    accountId: string,
+    amount: number,
+    description: string,
+  ) {
+    const transactionId = uuidv4();
+
+    try {
+      return await prismaPayment.$transaction(
+        // @ts-expect-error - Prisma transaction callback type inference issue, tx parameter type is complex and verbose to annotate
+        async (tx) => {
+          const wallet = await tx.wallet.findUnique({
+            where: {
+              accountId,
+            },
+          });
+          if (!wallet) {
+            throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+              PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+            ]);
+          }
+
+          if (wallet.status === WalletStatus.BLOCKED) {
+            throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+              PAYMENT_MESSAGES.WALLET_BLOCKED,
+            ]);
+          }
+
+          const updatedWallet = await tx.wallet.update({
+            where: {
+              accountId,
+            },
+            data: {
+              balance: { increment: amount },
+            },
+          });
+
+          const balanceAfter = updatedWallet.balance;
+          const balanceBefore = updatedWallet.balance.sub(amount);
+
+          await tx.transaction.create({
+            data: {
+              id: transactionId,
+              accountId,
+              type: TransactionType.TOPUP,
+              amount,
+              paymentMethod: PaymentMethod.VNPAY,
+              status: TransactionStatus.SUCCESS,
+              description,
+            },
+          });
+
+          await tx.walletHistory.create({
+            data: {
+              walletId: wallet.id,
+              transactionId,
+              type: TransactionType.TOPUP,
+              amount,
+              balanceBefore,
+              balanceAfter,
+            },
+          });
+
+          return updatedWallet;
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+        },
+      );
+    } catch (error: any) {
+      try {
+        await prismaPayment.transaction.create({
+          data: {
+            id: transactionId,
+            accountId,
+            type: TransactionType.TOPUP,
+            amount,
+            paymentMethod: PaymentMethod.VNPAY,
+            description: `Failed to deposit ${amount} to account ${accountId} - Error: ${error.message}`,
+            status: TransactionStatus.FAILED,
+          },
+        });
+      } catch (logError: any) {
+        console.error('Failed to log failed transaction:', logError);
+      }
+
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+        SERVER_MESSAGE.INTERNAL_SERVER,
+      ]);
+    }
+  }
+
+  private async handleDebitRequest(
+    accountId: string,
+    amount: number,
+    description: string,
+    transactionType: TransactionType,
+  ) {
+    const transactionId = uuidv4();
+
+    try {
+      return await prismaPayment.$transaction(
+        // @ts-expect-error - Prisma transaction callback type inference issue, tx parameter type is complex and verbose to annotate
+        async (tx) => {
+          const wallet = await tx.wallet.findUnique({
+            where: {
+              accountId,
+            },
+          });
+          if (!wallet) {
+            throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+              PAYMENT_MESSAGES.WALLET_NOT_FOUND,
+            ]);
+          }
+
+          if (wallet.status === WalletStatus.BLOCKED) {
+            throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+              PAYMENT_MESSAGES.WALLET_BLOCKED,
+            ]);
+          }
+
+          const updatedWallet = await tx.wallet
+            .update({
+              where: {
+                accountId,
+                balance: { gte: amount },
+              },
+              data: {
+                balance: { decrement: amount },
+              },
+            })
+            .catch(() => {
+              throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+                PAYMENT_MESSAGES.NOT_ENOUGH_BALANCE,
+              ]);
+            });
+
+          const balanceAfter = updatedWallet.balance;
+          const balanceBefore = updatedWallet.balance.add(amount);
+
+          await tx.transaction.create({
+            data: {
+              id: transactionId,
+              accountId,
+              type: transactionType,
+              amount,
+              paymentMethod: PaymentMethod.BALANCE,
+              status: TransactionStatus.SUCCESS,
+              description: description || 'Debit for Rental Service',
+            },
+          });
+
+          await tx.walletHistory.create({
+            data: {
+              walletId: wallet.id,
+              transactionId,
+              type: transactionType,
+              amount,
+              balanceBefore,
+              balanceAfter,
+            },
+          });
+
+          return updatedWallet;
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+        },
+      );
+    } catch (error: any) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      try {
+        await prismaPayment.transaction.create({
+          data: {
+            id: transactionId,
+            accountId,
+            type: transactionType,
+            amount,
+            paymentMethod: PaymentMethod.BALANCE,
+            description: `Failed to debit ${amount} for rental service - Error: ${error.message}`,
+            status: TransactionStatus.FAILED,
+          },
+        });
+      } catch (logError: any) {
+        console.error('Failed to log failed transaction:', logError);
+      }
+
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+        SERVER_MESSAGE.INTERNAL_SERVER,
+      ]);
     }
   }
 }

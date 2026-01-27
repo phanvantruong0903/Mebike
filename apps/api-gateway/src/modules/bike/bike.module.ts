@@ -10,11 +10,12 @@ import {
 } from '@mebike/common';
 import { ConfigModule } from '@nestjs/config';
 import { BikeService } from './bike.service';
-import { BikeResolver } from './bike.resolver';
+import { BikeResolver, BikeResultResolver } from './bike.resolver';
 import { SupplierModule } from '../supplier/supplier.module';
 import { StationModule } from '../station/station.module';
 import { StationDataloader } from './station.dataloader';
 import { SupplierDataloader } from './supplier.dataloader';
+import { BikeController } from './bike.controller';
 
 @Module({
   imports: [
@@ -44,7 +45,14 @@ import { SupplierDataloader } from './supplier.dataloader';
       },
     ]),
   ],
-  providers: [BikeService, BikeResolver, StationDataloader, SupplierDataloader],
-  exports: [BikeService],
+  controllers: [BikeController],
+  providers: [
+    BikeService,
+    BikeResolver,
+    StationDataloader,
+    SupplierDataloader,
+    BikeResultResolver,
+  ],
+  exports: [BikeService, StationDataloader],
 })
 export class BikeModule {}

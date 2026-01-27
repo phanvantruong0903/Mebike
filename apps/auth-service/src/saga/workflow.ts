@@ -9,7 +9,7 @@ const {
 } = proxyActivities({
   startToCloseTimeout: '1 minute',
   retry: {
-    maximumAttempts: 3,
+    maximumAttempts: 1,
   },
 });
 
@@ -20,6 +20,7 @@ export interface UserCreationWorkflow {
   phone: string;
   role: string;
   YOB: number;
+  workStationId?: string;
 }
 
 export async function userCreationWorkflow(
@@ -34,6 +35,7 @@ export async function userCreationWorkflow(
         role: data.role || 'USER',
         phone: data.phone,
         YOB: data.YOB,
+        workStationId: data.workStationId,
       }),
       createWallet({
         accountId: data.accountId,

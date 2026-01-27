@@ -7,21 +7,22 @@ import {
   SupplierResponse,
   SupplierListResponse,
   SupplierStatsResponse,
-  UpdateSupplierInput,
-  ChangeSupplierStatusInput,
+  UpdateSupplierDto,
   CreateSupplierInput,
   GetSupplierInput,
   Supplier,
+  SupplierSearchResult,
+  meiliClient,
+  SupplierSearchPage,
+  ChangeSupplierStatusDto,
 } from '@mebike/common';
 
 interface SupplierServiceClient {
   GetSupplier(data: { id: string }): Observable<SupplierResponse>;
-  UpdateSupplier(
-    data: UpdateSupplierInput & { id: string },
-  ): Observable<SupplierResponse>;
+  UpdateSupplier(data: UpdateSupplierDto): Observable<SupplierResponse>;
   GetAllSuppliers(data: GetSupplierInput): Observable<SupplierListResponse>;
   ChangeSupplierStatus(
-    data: ChangeSupplierStatusInput & { id: string },
+    data: ChangeSupplierStatusDto,
   ): Observable<SupplierResponse>;
   GetSupplierStats(
     data: Record<string, never>,
@@ -38,7 +39,7 @@ export class SupplierService implements OnModuleInit {
     @Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     this.fleetService = this.client.getService<SupplierServiceClient>(
       GRPC_SERVICES.FLEET,
     );
@@ -48,7 +49,7 @@ export class SupplierService implements OnModuleInit {
     return await firstValueFrom(this.fleetService.CreateSupplier(data));
   }
 
-  async updateSupplier(data: UpdateSupplierInput & { id: string }) {
+  async updateSupplier(data: UpdateSupplierDto) {
     return await firstValueFrom(this.fleetService.UpdateSupplier(data));
   }
 
@@ -68,7 +69,7 @@ export class SupplierService implements OnModuleInit {
     };
   }
 
-  async changeSupplierStatus(data: ChangeSupplierStatusInput & { id: string }) {
+  async changeSupplierStatus(data: ChangeSupplierStatusDto) {
     return await firstValueFrom(this.fleetService.ChangeSupplierStatus(data));
   }
 
@@ -95,5 +96,42 @@ export class SupplierService implements OnModuleInit {
       this.fleetService.GetSupplierByIds({ ids }),
     );
     return response.data || [];
+  }
+
+  async autoComplete(query: string): Promise<SupplierSearchResult> {
+    const result = await meiliClient.index('Supplier').search(query, {
+      limit: 10,
+    });
+    const suppliers = (result.hits as Supplier[]) ?? [];
+    return {
+      data: suppliers.map((supplier) => ({
+        ...supplier,
+        bikes: [],
+      })),
+    };
+  }
+
+  async searchSupplier(
+    page: number,
+    limit: number,
+    search: string,
+  ): Promise<SupplierSearchPage> {
+    const result = await meiliClient.index('Supplier').search(search, {
+      limit,
+      offset: (page - 1) * limit,
+    });
+    const suppliers = (result.hits as Supplier[]) ?? [];
+    return {
+      data: suppliers.map((supplier) => ({
+        ...supplier,
+        bikes: [],
+      })),
+      pagination: {
+        total: result.estimatedTotalHits || 0,
+        page,
+        limit,
+        totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      },
+    };
   }
 }

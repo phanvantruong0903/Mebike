@@ -4,34 +4,23 @@ package reservation;
 
 service RentalService {
   rpc CreateReservation (CreateReservationRequest) returns (ReservationResponse);
-  rpc ConfirmReservation (ConfirmReservationRequest) returns (ReservationResponse);
+  rpc ActivateReservation (ActivateReservationRequest) returns (ReservationResponse);
   rpc GetReservation (GetReservationRequest) returns (ReservationResponse);
   rpc GetReservationList (GetReservationListRequest) returns (ReservationListResponse);
 }
 
-enum ReservationStatus {
-  Pending = 0;
-  Active = 1;
-  Cancelled = 2;
-  Expired = 3;
-}
-
 message Reservation {
   string id = 1;
-  optional User user = 2;
-  optional Bike bike = 3;
-  optional Station station = 4;
+  string accountId = 2;
+  string bikeId = 3;
+  string stationId = 4;
   string startTime = 5;
   string endTime = 6;
   string prepaid = 7;
   optional string subscriptionId = 8;
-  ReservationStatus status = 9;
+  string status = 9;
   string createdAt = 10;
   string updatedAt = 11;
-}
-
-message ReservationList {
-  repeated Reservation data = 1;
 }
 
 message CreateReservationRequest {
@@ -41,7 +30,7 @@ message CreateReservationRequest {
   optional string subscriptionId = 4;
 }
 
-message ConfirmReservationRequest {
+message ActivateReservationRequest {
   string accountId = 1;
   string id = 2;
 }
@@ -67,7 +56,7 @@ message ReservationResponse {
 message ReservationListResponse {
   bool success = 1;
   string message = 2;
-  ReservationList data = 3;
+  repeated Reservation data = 3;
   Pagination pagination = 4;
   int32 statusCode = 5;
   repeated string errors = 6;
@@ -78,11 +67,6 @@ message Pagination {
   int32 page = 2;
   int32 limit = 3;
   int32 totalPages = 4;
-}
-
-message User {
-  string id = 1;
-  string name = 2;
 }
 
 message Bike {

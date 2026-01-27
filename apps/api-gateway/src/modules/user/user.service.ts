@@ -10,13 +10,14 @@ import {
   UserStatus,
   Account,
   UserStatsResponse,
+  UserProfile,
 } from '@mebike/common';
 
 interface UserServiceClient {
   GetAllUsers(data: {
     page: number;
     limit: number;
-    search?: string;
+    status?: UserStatus;
   }): Observable<UserListResponse>;
   GetUser(data: { id: string }): Observable<UserResponse>;
   UpdateUser(data: { id: string } & UpdateUserInput): Observable<UserResponse>;
@@ -25,11 +26,14 @@ interface UserServiceClient {
     password: string;
   }): Observable<UserResponse>;
   ChangeStatus(data: {
-    accountId: string;
-    status: UserStatus;
+    accountId?: string;
+    status?: UserStatus;
   }): Observable<UserResponse>;
   GetAccountsByAccountIds(data: { ids: string[] }): Observable<Account[]>;
   GetUserStats(data: object): Observable<UserStatsResponse>;
+  GetUsersByAccountIds(data: {
+    accountIds: string[];
+  }): Observable<{ data: UserProfile[] }>;
 }
 
 @Injectable()
@@ -44,7 +48,7 @@ export class UserService implements OnModuleInit {
     );
   }
 
-  async getAllUser(data: { page: number; limit: number; search: string }) {
+  async getAllUser(data: { page: number; limit: number; status?: UserStatus }) {
     const response = await lastValueFrom(this.userService.GetAllUsers(data));
     return {
       ...response,
@@ -66,11 +70,18 @@ export class UserService implements OnModuleInit {
     return await lastValueFrom(this.userService.ChangePassword(payload));
   }
 
-  async changeStatus(data: { accountId: string; status: UserStatus }) {
+  async changeStatus(data: { accountId?: string; status?: UserStatus }) {
     return await lastValueFrom(this.userService.ChangeStatus(data));
   }
 
   async getUserStats() {
     return await firstValueFrom(this.userService.GetUserStats({}));
+  }
+
+  async getUsersByAccountIds(accountIds: string[]): Promise<UserProfile[]> {
+    const response = await firstValueFrom(
+      this.userService.GetUsersByAccountIds({ accountIds }),
+    );
+    return response.data || [];
   }
 }

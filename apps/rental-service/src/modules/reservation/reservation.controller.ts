@@ -2,10 +2,10 @@ import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
+  ActivateReservationDto,
   BaseGrpcHandler,
   buildFilter,
   buildSearchFilter,
-  ConfirmReservationDto,
   CreateReservationDto,
   GetReservationDto,
   GetReservationListDto,
@@ -54,23 +54,25 @@ export class ReservationController {
     }
   }
 
-  @GrpcMethod(GRPC_SERVICES.RENTAL, RESERVATION_METHODS.CONFIRM)
-  async confirmReservation(
-    data: ConfirmReservationDto,
+  @GrpcMethod(GRPC_SERVICES.RENTAL, RESERVATION_METHODS.ACTIVATE)
+  async activateReservation(
+    data: ActivateReservationDto,
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.reservationService.confirm(data);
+      const result = await this.reservationService.activate(data);
 
       return grpcResponse<ReservationModel>(
         result,
-        RESERVATION_MESSAGES.CONFIRM_SUCCESS,
+        RESERVATION_MESSAGES.ACTIVATE_SUCCESS,
       );
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
       }
       const err = error as Error;
-      throw new RpcException(err?.message || RESERVATION_MESSAGES.CONFIRM_FAIL);
+      throw new RpcException(
+        err?.message || RESERVATION_MESSAGES.ACTIVATE_FAIL,
+      );
     }
   }
 
@@ -108,7 +110,7 @@ export class ReservationController {
       const { page, limit, search, ...filterFields } = data;
       const filter = buildFilter(filterFields);
 
-      const searchFields = ['userId', 'stationId', 'status'];
+      const searchFields = ['accountId', 'stationId', 'status'];
       const searchFilter = buildSearchFilter(search, searchFields);
 
       const where = {

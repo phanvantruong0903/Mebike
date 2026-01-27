@@ -5,3 +5,4 @@ export * from './consul';
 export * from './kafka-service';
 export * from './redis';
 export * from './enum';
+export * from './meili-index';

@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  output = "../../../common/src/lib/prisma/rental/generated"
+  provider      = "prisma-client-js"
+  output        = "../../../common/src/lib/prisma/rental/generated"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
@@ -11,14 +11,16 @@ datasource db {
 
 model Rental {
   id             String       @id @default(uuid())
-  userId         String
+  accountId      String
   bikeId         String?
-  startStation   String
-  endStation     String?
+  startStationId String
+  endStationId   String?
+  reservationId  String?      @unique
+  reservation    Reservation? @relation(fields: [reservationId], references: [id])
   startTime      DateTime     @default(now())
   endTime        DateTime?
   duration       Int          @default(0)
-  totalPrice     Decimal      @default(0)
+  totalPrice     Decimal      @default(0) @db.Decimal(10, 2)
   subscriptionId String?
   status         RentalStatus @default(Rented)
   createdAt      DateTime     @default(now())
@@ -28,24 +30,25 @@ model Rental {
 }
 
 model Reservation {
-  id                    String       @id @default(uuid())
-  userId                String
-  bikeId                String?
-  stationId             String
-  startTime             DateTime     @default(now())
-  endTime               DateTime?
-  prepaid               Decimal
-  subscriptionId        String?
-  status                ReservationStatus   @default(Pending)
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  id             String            @id @default(uuid())
+  accountId      String
+  bikeId         String?
+  stationId      String
+  startTime      DateTime          @default(now())
+  endTime        DateTime
+  prepaid        Decimal           @default(0) @db.Decimal(10, 2)
+  subscriptionId String?
+  status         ReservationStatus @default(Pending)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  Rental         Rental?
 
   @@map("reservations")
 }
 
 enum ReservationStatus {
   Pending
-  Active
+  Completed
   Cancelled
   Expired
 }

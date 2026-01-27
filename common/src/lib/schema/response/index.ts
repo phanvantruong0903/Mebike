@@ -11,3 +11,4 @@ export * from './rental';
 export * from './reservation';
 export * from './subscription';
 export * from './package';
+export * from './sos';

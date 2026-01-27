@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../modules/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { formatError } from '../config/graphql.config';
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { UserModule } from '../modules/user/user.module';
@@ -17,6 +16,8 @@ import { RentalModule } from '../modules/rental/rental.module';
 import { ReservationModule } from '../modules/reservation/reservation.module';
 import { SubscriptionModule } from '../modules/subscription/subscription.module';
 import { PackageModule } from '../modules/package/package.module';
+import { SosModule } from '../modules/sos/sos.module';
+import { formatError } from '../config/graphql.config';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { PackageModule } from '../modules/package/package.module';
     ReservationModule,
     SubscriptionModule,
     PackageModule,
+    SosModule,
   ],
   providers: [HttpErrorStatusPlugin],
 })

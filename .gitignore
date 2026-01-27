@@ -60,3 +60,6 @@ prisma/generated/
 # Traefik
 traefik/logs
 
+# Agent
+.agent
+

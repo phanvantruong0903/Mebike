@@ -25,6 +25,7 @@ export class UserService extends BaseService<
   }
 
   async getUserStat() {
+    // @ts-expect-error Prisma groupBy has complex type signatures that TypeScript cannot narrow down properly
     const stats = await prismaUser.profile.groupBy({
       by: ['role', 'verify'],
       _count: {
@@ -34,16 +35,46 @@ export class UserService extends BaseService<
 
     const countTotalByRole = (role: Role) => {
       return stats
-        .filter((item) => item.role === role)
-        .reduce((acc, curr) => acc + curr._count.id, 0);
+        .filter(
+          (item: {
+            role: Role;
+            verify: UserVerifyStatus;
+            _count: { id: number };
+          }) => item.role === role,
+        )
+        .reduce(
+          (
+            acc: number,
+            curr: {
+              role: Role;
+              verify: UserVerifyStatus;
+              _count: { id: number };
+            },
+          ) => acc + curr._count.id,
+          0,
+        );
     };
 
     const result = {
-      totalUsers: stats.reduce((acc, curr) => acc + curr._count.id, 0),
+      totalUsers: stats.reduce(
+        (
+          acc: number,
+          curr: {
+            role: Role;
+            verify: UserVerifyStatus;
+            _count: { id: number };
+          },
+        ) => acc + curr._count.id,
+        0,
+      ),
       totalUser: countTotalByRole(Role.USER),
       totalUserUnverfied:
         stats.find(
-          (item) =>
+          (item: {
+            role: Role;
+            verify: UserVerifyStatus;
+            _count: { id: number };
+          }) =>
             item.role === Role.USER &&
             item.verify === UserVerifyStatus.Unverified,
         )?._count.id ?? 0,
@@ -138,5 +169,19 @@ export class UserService extends BaseService<
       data: { status },
     });
     return profile;
+  }
+
+  async getUsersByAccountIds(accountIds: string[]) {
+    const users = await prismaUser.profile.findMany({
+      where: { accountId: { in: accountIds } },
+    });
+    return users;
+  }
+
+  async findFreeSos(stationId: string) {
+    const result = await prismaUser.profile.findMany({
+      where: { workStationId: stationId, role: Role.SOS },
+    });
+    return result;
   }
 }

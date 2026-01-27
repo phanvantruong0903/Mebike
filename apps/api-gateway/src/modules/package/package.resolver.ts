@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -27,7 +28,24 @@ export class PackageResolver {
   async createPackage(
     @Args('body') body: CreatePackageInput,
   ): Promise<PackageResponse> {
-    return this.packageService.createPackage(body);
+    try {
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.createPackage(body),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => PackageResponse, {
@@ -39,17 +57,51 @@ export class PackageResolver {
     @Args('id') id: string,
     @Args('body') body: UpdatePackageInput,
   ): Promise<PackageResponse> {
-    return this.packageService.updatePackage({
-      id,
-      ...body,
-    });
+    try {
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.updatePackage({
+          id,
+          ...body,
+        }),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => PackageResponse, {
     name: GRAPHQL_NAME_PACKAGE.GET_ONE,
   })
   async getPackage(@Args('id') id: string): Promise<PackageResponse> {
-    return this.packageService.getPackage(id);
+    try {
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.getPackage(id),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => PackageListResponse, {
@@ -63,14 +115,63 @@ export class PackageResolver {
     })
     data: GetPackageListInput,
   ): Promise<PackageListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
 
-    return this.packageService.getPackageList({
-      page,
-      limit,
-      search: data.search,
-    });
+      return plainToInstance(
+        PackageListResponse,
+        await this.packageService.getPackageList({
+          page,
+          limit,
+          search: data.search,
+        }),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      } as PackageListResponse;
+    }
+  }
+
+  @Mutation(() => PackageResponse, {
+    name: GRAPHQL_NAME_PACKAGE.TOGGLE_STATUS,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async togglePackageStatus(@Args('id') id: string): Promise<PackageResponse> {
+    try {
+      return plainToInstance(
+        PackageResponse,
+        await this.packageService.togglePackageStatus(id),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => String)

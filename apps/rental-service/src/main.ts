@@ -5,11 +5,18 @@ import {
   ConsulService,
   CONSULT_SERVICE_ID,
   GrpcExceptionFilter,
-  KAFKA_GROUP_ID,
 } from '@mebike/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'node:path';
 import { config as dotenvConfig } from 'dotenv';
+/**
+ * Bootstraps the Nest application: loads environment variables, registers the service with Consul,
+ * applies global validation and exception handling, connects gRPC and Kafka microservices, and starts them.
+ *
+ * This performs process-wide setup including determining host/port, registering the RENTAL service in Consul,
+ * configuring ValidationPipe and GrpcExceptionFilter, loading protobuf definitions for gRPC, configuring Kafka
+ * client/consumer settings, and starting all connected microservices.
+ */
 async function bootstrap() {
   dotenvConfig();
 
@@ -39,7 +46,7 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['reservation', 'grpc.health.v1'],
+        package: ['rental', 'reservation', 'grpc.health.v1'],
         protoPath: [
           join(process.cwd(), 'common/src/lib/proto/rental.proto'),
           join(process.cwd(), 'common/src/lib/proto/reservation.proto'),
@@ -50,22 +57,6 @@ async function bootstrap() {
     },
     { inheritAppConfig: true },
   );
-
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: [process.env.KAFKA_BROKERS || 'localhost:9092'],
-      },
-      consumer: {
-        groupId: KAFKA_GROUP_ID.RENTAL_SERVICE,
-      },
-      subscribe: {
-        fromBeginning: true,
-      },
-    },
-  });
-
   await app.startAllMicroservices();
 }
 bootstrap();

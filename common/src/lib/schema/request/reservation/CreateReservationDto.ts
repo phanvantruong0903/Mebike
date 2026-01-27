@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  Validate,
+} from 'class-validator';
+import { IsFutureDateConstraint } from '../../../utils';
+import { RESERVATION_MESSAGES } from '../../../constants';
 
 export class CreateReservationDto {
   @IsString()
@@ -9,13 +18,13 @@ export class CreateReservationDto {
   @IsNotEmpty()
   bikeId!: string;
 
-  @IsString()
+  @Type(() => Date)
+  @IsDate()
+  @Validate(IsFutureDateConstraint, {
+    message: RESERVATION_MESSAGES.FUTURE_START_TIME,
+  })
   @IsNotEmpty()
-  stationId!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  startTime!: string;
+  startTime!: Date;
 
   @IsString()
   @IsOptional()

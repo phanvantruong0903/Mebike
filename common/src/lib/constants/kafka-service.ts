@@ -34,4 +34,7 @@ export const KAFKA_TOPIC = {
   WELCOME_EMAIL: 'notification.send_email_welcome',
   WALLET_CREATED: 'wallet.created',
   VERIFY_EMAIL: 'notification.send_email_verify_email',
+  BIKE_CREATED: 'bike.created',
+  BIKE_UPDATED: 'bike.updated',
+  BIKE_CACHE_REFRESH: 'bike.cache_refresh',
 } as const;

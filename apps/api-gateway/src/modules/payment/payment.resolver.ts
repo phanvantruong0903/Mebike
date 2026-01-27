@@ -1,11 +1,13 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
   PaymentResponse,
   GRAPHQL_NAME_PAYMENT,
   CreatePaymentInput,
+  CreatePaymentUrlDto,
   getClientIp,
   UserProfile,
 } from '@mebike/common';
@@ -27,12 +29,14 @@ export class PaymentResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<PaymentResponse> {
     const ipAddr = getClientIp(context.req);
-
-    return this.paymentService.createPayment({
-      ...body,
-      ipAddr,
-      accountId: user.accountId,
-    });
+    return plainToInstance(
+      PaymentResponse,
+      await this.paymentService.createPayment({
+        ...body,
+        ipAddr,
+        accountId: user.accountId,
+      } as unknown as CreatePaymentUrlDto),
+    );
   }
 
   @Query(() => String)

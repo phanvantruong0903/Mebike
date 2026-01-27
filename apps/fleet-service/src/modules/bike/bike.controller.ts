@@ -12,8 +12,9 @@ import {
   CreateBikeDto,
   UpdateBikeDto,
   GetBikeDto,
-  buildSearchFilter,
   ChangeBikeStatusDto,
+  GetBikeDetailDto,
+  GetBikesByIdsDto,
 } from '@mebike/common';
 import { BikeService } from './bike.service';
 
@@ -40,6 +41,8 @@ export class BikeController {
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const result = await this.baseHandler.updateLogic(data.id, data);
+      await this.bikeService.cacheBikeToRedis(result, 3600);
+
       return grpcResponse<BikeModel>(result, BIKE_MESSAGES.UPDATE_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -51,13 +54,11 @@ export class BikeController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_ONE)
-  async getBikeDetail({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getBikeDetail(
+    data: GetBikeDetailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.bikeService.getBikeDetail(id);
+      const result = await this.bikeService.getBikeDetail(data.id);
       return grpcResponse<BikeModel>(result, BIKE_MESSAGES.GET_DETAIL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -89,19 +90,18 @@ export class BikeController {
     data: GetBikeDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const searchFields = ['id', 'chipId', 'supplierId', 'stationId'];
-      const searchFilter = buildSearchFilter(data.search, searchFields);
+      const filter: any = {};
+      if (data.stationId) {
+        filter.stationId = data.stationId;
+      }
+      if (data.status) {
+        filter.status = data.status;
+      }
+      if (data.supplierId) {
+        filter.supplierId = data.supplierId;
+      }
 
-      const result = await this.baseHandler.getAllLogic(
-        data.page,
-        data.limit,
-        searchFilter,
-        undefined,
-        {
-          station: true,
-          supplier: true,
-        },
-      );
+      const result = await this.bikeService.getAllBikes(data);
       return grpcPaginateResponse(result, BIKE_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -139,5 +139,14 @@ export class BikeController {
       const err = error as Error;
       throw new RpcException(err?.message);
     }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.FLEET, BIKE_METHODS.GET_BIKES_BY_IDS)
+  async getBikesByIds(
+    data: GetBikesByIdsDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    const { ids } = data;
+    const bikes = await this.bikeService.getBikesByIds(ids);
+    return grpcResponse(bikes, BIKE_MESSAGES.GET_ALL_SUCCESS);
   }
 }

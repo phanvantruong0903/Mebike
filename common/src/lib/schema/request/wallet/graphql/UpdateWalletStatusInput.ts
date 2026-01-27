@@ -3,9 +3,9 @@ import { WalletStatus } from '../../../../prisma/index';
 
 @InputType()
 export class UpdateWalletStatusInput {
-  @Field(() => String)
-  id!: string;
+  @Field(() => String, { nullable: true })
+  id?: string;
 
-  @Field(() => WalletStatus)
-  status!: WalletStatus;
+  @Field(() => WalletStatus, { nullable: true })
+  status?: WalletStatus;
 }

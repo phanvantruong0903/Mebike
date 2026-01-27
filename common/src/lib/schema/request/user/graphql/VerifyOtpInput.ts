@@ -2,9 +2,9 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class VerifyOtpInput {
-  @Field()
-  email!: string;
+  @Field({ nullable: true })
+  email?: string;
 
-  @Field()
-  otp!: string;
+  @Field({ nullable: true })
+  otp?: string;
 }

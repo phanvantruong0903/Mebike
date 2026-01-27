@@ -5,7 +5,7 @@ import {
   GRPC_PACKAGE,
   GRPC_SERVICES,
   CreateReservationInput,
-  ConfirmReservationInput,
+  ActivateReservationInput,
   GetReservationInput,
   GetReservationListInput,
   ReservationResponse,
@@ -14,10 +14,10 @@ import {
 
 interface ReservationServiceClient {
   CreateReservation(
-    data: CreateReservationInput,
+    data: CreateReservationInput & { accountId: string },
   ): Observable<ReservationResponse>;
-  ConfirmReservation(
-    data: ConfirmReservationInput,
+  ActivateReservation(
+    data: ActivateReservationInput & { accountId: string },
   ): Observable<ReservationResponse>;
   GetReservation(data: GetReservationInput): Observable<ReservationResponse>;
   GetReservationList(
@@ -39,15 +39,19 @@ export class ReservationService implements OnModuleInit {
     );
   }
 
-  async createReservation(data: CreateReservationInput) {
+  async createReservation(
+    data: CreateReservationInput & { accountId: string },
+  ) {
     return await firstValueFrom(
       this.reservationService.CreateReservation(data),
     );
   }
 
-  async confirmReservation(data: ConfirmReservationInput) {
+  async activateReservation(
+    data: ActivateReservationInput & { accountId: string },
+  ) {
     return await firstValueFrom(
-      this.reservationService.ConfirmReservation(data),
+      this.reservationService.ActivateReservation(data),
     );
   }
 

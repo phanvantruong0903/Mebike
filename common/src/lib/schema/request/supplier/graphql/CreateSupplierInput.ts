@@ -2,15 +2,15 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateSupplierInput {
-  @Field()
-  name!: string;
+  @Field({ nullable: true })
+  name?: string;
 
-  @Field(() => String)
-  phone!: string;
+  @Field(() => String, { nullable: true })
+  phone?: string;
 
-  @Field(() => String)
-  address!: string;
+  @Field(() => String, { nullable: true })
+  address?: string;
 
-  @Field(() => Number)
-  contactFee!: number;
+  @Field(() => Number, { nullable: true })
+  contactFee?: number;
 }

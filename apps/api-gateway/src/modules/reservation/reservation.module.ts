@@ -14,11 +14,12 @@ import { ReservationResolver } from './reservation.resolver';
 import { StationModule } from '../station/station.module';
 import { BikeDataloader } from './bike.dataloader';
 import { BikeModule } from '../bike/bike.module';
-import { StationDataloader } from '../bike/station.dataloader';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     RedisModule,
+    UserModule,
     StationModule,
     BikeModule,
     ConfigModule.forRoot({ isGlobal: true }),
@@ -46,11 +47,6 @@ import { StationDataloader } from '../bike/station.dataloader';
       },
     ]),
   ],
-  providers: [
-    ReservationService,
-    ReservationResolver,
-    BikeDataloader,
-    StationDataloader,
-  ],
+  providers: [ReservationService, ReservationResolver, BikeDataloader],
 })
 export class ReservationModule {}

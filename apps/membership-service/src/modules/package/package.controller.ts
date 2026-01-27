@@ -5,6 +5,7 @@ import {
   BaseGrpcHandler,
   buildFilter,
   buildSearchFilter,
+  ByIdDto,
   CreatePackageDto,
   GetPackageListDto,
   GRPC_SERVICES,
@@ -57,7 +58,7 @@ export class PackageController {
     data: UpdatePackageDto & { id: string },
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.packageService.update(data?.id, data);
+      const result = await this.packageService.updatePackage(data.id, data);
 
       return grpcResponse<PackageModel>(
         result,
@@ -73,13 +74,9 @@ export class PackageController {
   }
 
   @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.GET_ONE)
-  async getPackage({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getPackage(data: ByIdDto): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.baseHandler.getOneById(id);
+      const result = await this.baseHandler.getOneById(data.id);
 
       if (!result) {
         throw new RpcException(PACKAGE_MESSAGES.NOT_FOUND);
@@ -116,6 +113,48 @@ export class PackageController {
 
       const result = await this.baseHandler.getAllLogic(page, limit, where);
       return grpcPaginateResponse(result, PACKAGE_MESSAGES.GET_ALL_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || PACKAGE_MESSAGES.GET_ALL_FAIL);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.TOGGLE_STATUS)
+  async togglePackageStatus(
+    data: ByIdDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.packageService.toggleStatus(data.id);
+
+      return grpcResponse<PackageModel>(
+        result,
+        PACKAGE_MESSAGES.TOGGLE_STATUS_SUCCESS,
+      );
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(
+        err?.message || PACKAGE_MESSAGES.TOGGLE_STATUS_FAIL,
+      );
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.MEMBERSHIP, PACKAGE_METHODS.GET_PACKAGES_BY_IDS)
+  async getPackagesByIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = await this.packageService.getByIds(data.ids);
+
+      return grpcResponse<PackageModel[]>(
+        result,
+        PACKAGE_MESSAGES.GET_ALL_SUCCESS,
+      );
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;

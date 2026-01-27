@@ -10,13 +10,19 @@ import {
   GetRentalInput,
   GetRentalListInput,
   EndRentalInput,
+  Rental,
 } from '@mebike/common';
 
 interface RentalServiceClient {
-  CreateRental(data: CreateRentalInput): Observable<RentalResponse>;
-  EndRental(data: EndRentalInput): Observable<RentalResponse>;
+  CreateRental(
+    data: CreateRentalInput & { accountId: string },
+  ): Observable<RentalResponse>;
+  EndRental(
+    data: EndRentalInput & { accountId: string },
+  ): Observable<RentalResponse>;
   GetRental(data: GetRentalInput): Observable<RentalResponse>;
   GetRentalList(data: GetRentalListInput): Observable<RentalListResponse>;
+  GetRentalsByIds(data: { ids: string[] }): Observable<{ data: Rental[] }>;
 }
 
 @Injectable()
@@ -33,11 +39,11 @@ export class RentalService implements OnModuleInit {
     );
   }
 
-  async createRental(data: CreateRentalInput) {
+  async createRental(data: CreateRentalInput & { accountId: string }) {
     return await firstValueFrom(this.rentalService.CreateRental(data));
   }
 
-  async endRental(data: EndRentalInput) {
+  async endRental(data: EndRentalInput & { accountId: string }) {
     return await firstValueFrom(this.rentalService.EndRental(data));
   }
 
@@ -53,5 +59,12 @@ export class RentalService implements OnModuleInit {
 
   async getRental(data: { id: string }) {
     return await firstValueFrom(this.rentalService.GetRental(data));
+  }
+
+  async getRentalByIds(ids: string[]): Promise<Rental[]> {
+    const response = await firstValueFrom(
+      this.rentalService.GetRentalsByIds({ ids }),
+    );
+    return response.data ?? [];
   }
 }

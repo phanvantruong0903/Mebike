@@ -1,5 +1,6 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import { Bike } from '../../bike';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class ContactInfo {
@@ -30,11 +31,13 @@ export class Supplier {
   @Field(() => [Bike])
   bikes!: Bike[];
 
-  @Field()
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  createdAt!: Date;
 
-  @Field()
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 
   @Field(() => Number, { nullable: true })
   totalBikes?: number;

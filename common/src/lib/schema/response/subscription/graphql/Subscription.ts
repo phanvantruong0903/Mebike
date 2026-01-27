@@ -1,7 +1,14 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  ID,
+  Int,
+  ObjectType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { SubscriptionStatus } from '../../../../prisma/index';
 import { UserProfile } from '../../user';
 import { Package } from '../../package';
+import { Transform } from 'class-transformer';
 
 @ObjectType('SubscriptionData')
 export class Subscription {
@@ -14,11 +21,13 @@ export class Subscription {
   @Field(() => Package, { nullable: true })
   package?: Package;
 
-  @Field(() => String, { nullable: true })
-  activatedAt?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  activatedAt?: Date;
 
-  @Field(() => String, { nullable: true })
-  expiredAt?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  expiredAt?: Date;
 
   @Field(() => Int, { nullable: true })
   usageCounts?: number;
@@ -26,9 +35,11 @@ export class Subscription {
   @Field(() => SubscriptionStatus)
   status!: SubscriptionStatus;
 
-  @Field()
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  createdAt!: Date;
 
-  @Field()
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 }

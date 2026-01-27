@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package sos;
+
+service IncidentService {
+  rpc CreateSos (CreateSosRequest) returns (CreateSosResponse);
+  rpc GetAllSos (GetAllSosRequest) returns (GetAllSosResponse);
+  rpc GetSos (GetSosByIdRequest) returns (GetSosByIdResponse);
+  rpc UpdateSosStatus (UpdateSosStatusRequest) returns (GetSosByIdResponse);
+}
+
+message Sos {
+  string id = 1;
+  string rentalId = 2;
+  string requesterId = 3;
+  string bikeId = 4;
+  string issue = 5;
+  repeated string photos = 6;
+  bool isContinuingRental = 7;
+  string latitude = 8;
+  string longitude = 9;
+  string agentId = 10;
+  optional string agentNotes = 11;
+  string stationId = 12;
+  string status = 13;
+  string createdAt = 14;
+  optional string startedAt = 15;
+  optional string resolvedAt = 16;
+  string updatedAt = 17;
+}
+
+message CreateSosRequest {
+  string rentalId = 1;
+  string requesterId = 2;
+  string issue = 3;
+  repeated string photos = 4;
+  bool isContinuingRental = 5;
+  string latitude = 6;
+  string longitude = 7;
+}
+
+message CreateSosResponse {
+  bool success = 1;
+  string message = 2;
+  Sos data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message GetAllSosRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  optional string status = 3;
+  string accountId = 4;
+  string role = 5;
+}
+
+message GetAllSosResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Sos data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message GetSosByIdRequest {
+  string id = 1;
+}
+
+message GetSosByIdResponse {
+  bool success = 1;
+  string message = 2;
+  Sos data = 3;
+  repeated string errors = 4;
+  int32 statusCode = 5;
+}
+
+message UpdateSosStatusRequest {
+  string id = 1;
+  string status = 2;
+  string accountId = 3;
+  string role = 4;
+  optional string agentNotes = 5;
+  repeated string resolvedPhotos = 6;
+}

@@ -1,29 +1,83 @@
 import {
   BaseService,
+  Bike,
+  BIKE_MESSAGES,
+  BikeResponse,
+  BikeStatus,
   CreateRentalDto,
   EndRentalDto,
+  GRPC_PACKAGE,
+  GRPC_SERVICES,
   prismaRental,
   RENTAL_MESSAGES,
   RentalModel,
   RentalStatus,
+  SERVER_MESSAGE,
+  throwGrpcError,
   TrendValue,
 } from '@mebike/common';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import type { ClientGrpc } from '@nestjs/microservices';
+import { firstValueFrom, Observable } from 'rxjs';
+
+interface FleetServiceClient {
+  GetBike(data: { id: string }): Observable<BikeResponse>;
+  ChangeBikeStatus(data: {
+    id: string;
+    status: BikeStatus;
+  }): Observable<BikeResponse>;
+}
 
 @Injectable()
 export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
-  constructor() {
+  private fleetService!: FleetServiceClient;
+
+  constructor(@Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc) {
     super(prismaRental.rental);
+    this.fleetService = this.client.getService<FleetServiceClient>(
+      GRPC_SERVICES.FLEET,
+    );
+  }
+
+  private getFleetService(): FleetServiceClient {
+    if (!this.fleetService) {
+      throwGrpcError(500, SERVER_MESSAGE.INTERNAL_SERVER, [
+        `Failed to load ${GRPC_SERVICES.FLEET}. Check proto definitions.`,
+      ]);
+    }
+    return this.fleetService;
   }
 
   override async create(data: CreateRentalDto): Promise<RentalModel> {
-    return await prismaRental.rental.create({
-      data: {
-        ...data,
-        userId: data.accountId,
-        startStation: data.stationId,
-      },
-    });
+    const bikeResponse = await this.getBikeById(data.bikeId);
+    if (!bikeResponse || !bikeResponse.data) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [BIKE_MESSAGES.NOT_FOUND]);
+    }
+
+    const bike = bikeResponse.data as Bike;
+    if (bike.status !== BikeStatus.Available) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        BIKE_MESSAGES.NOT_AVAILABLE,
+      ]);
+    }
+
+    if (!bike.station?.id) {
+      throwGrpcError(400, SERVER_MESSAGE.BAD_REQUEST, [
+        BIKE_MESSAGES.NOT_ASSIGNED_STATION,
+      ]);
+    }
+
+    const [createdRental] = await Promise.all([
+      prismaRental.rental.create({
+        data: {
+          ...data,
+          startStationId: bike.station.id,
+        },
+      }),
+      this.changeBikeStatus(data.bikeId, BikeStatus.Booked),
+    ]);
+
+    return createdRental;
   }
 
   async end(data: EndRentalDto): Promise<RentalModel> {
@@ -31,9 +85,9 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
       where: { id: data.id, status: RentalStatus.Rented },
     });
     if (!rental) {
-      throw new Error(
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
         RENTAL_MESSAGES.NOT_FOUND_WITH_STATUS(RentalStatus.Rented),
-      );
+      ]);
     }
 
     const now = new Date();
@@ -48,15 +102,16 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
       prismaRental.rental.update({
         where: { id: data.id },
         data: {
-          ...data,
-          endStation: rental.startStation,
+          endStationId: rental.startStationId,
           endTime: now,
           duration: duration,
           totalPrice: totalPrice,
           status: RentalStatus.Completed,
         },
       }),
+      this.changeBikeStatus(rental.bikeId, BikeStatus.Available),
     ]);
+
     return updatedRental;
   }
 
@@ -64,6 +119,11 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     const rental = await prismaRental.rental.findUnique({
       where: { id },
     });
+    if (!rental) {
+      throwGrpcError(404, SERVER_MESSAGE.NOT_FOUND, [
+        RENTAL_MESSAGES.NOT_FOUND,
+      ]);
+    }
     return rental;
   }
 
@@ -161,28 +221,28 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     const endOfDate = new Date(date);
     endOfDate.setHours(23, 59, 59, 999);
 
-    const result = await prismaRental.rental.groupBy({
-      by: ['startTime'],
+    const rentals = await prismaRental.rental.findMany({
       where: {
         startTime: {
           gte: startOfDate,
           lte: endOfDate,
         },
       },
-      _count: {
-        _all: true,
-      },
-      orderBy: {
-        startTime: 'asc',
+      select: {
+        startTime: true,
       },
     });
 
-    const fullDay = Array.from({ length: 24 }, (_, hour) => {
-      const found = result.find((g) => g.startTime.getTime() === hour);
+    const hourCounts = new Map<number, number>();
+    rentals.forEach((rental) => {
+      const hour = rental.startTime.getHours();
+      hourCounts.set(hour, (hourCounts.get(hour) || 0) + 1);
+    });
 
+    const fullDay = Array.from({ length: 24 }, (_, hour) => {
       return {
         hour,
-        totalRentals: found ? found._count._all : 0,
+        totalRentals: hourCounts.get(hour) || 0,
       };
     });
 
@@ -202,5 +262,26 @@ export class RentalService extends BaseService<RentalModel, CreateRentalDto> {
     const halfHourUnit = Math.max(1, Math.ceil(minutes / 30));
     const pricePer30Min = Number(process.env.PRICE_PER_30_MINS || '2000');
     return pricePer30Min * halfHourUnit;
+  }
+
+  // bike functions
+  async getBikeById(id: string) {
+    const service = this.getFleetService();
+    return await firstValueFrom(service.GetBike({ id }));
+  }
+
+  async changeBikeStatus(id: string, status: BikeStatus) {
+    const service = this.getFleetService();
+    return await firstValueFrom(service.ChangeBikeStatus({ id, status }));
+  }
+
+  async getByIds(ids: string[]) {
+    return await prismaRental.rental.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
   }
 }

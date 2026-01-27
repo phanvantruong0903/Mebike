@@ -1,5 +1,12 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  ID,
+  Int,
+  ObjectType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { PackageStatus, UsageType } from '../../../../prisma/index';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class Package {
@@ -12,8 +19,8 @@ export class Package {
   @Field(() => String)
   price!: string;
 
-  @Field(() => Int)
-  maxUsages!: number;
+  @Field(() => Int, { nullable: true })
+  maxUsages?: number;
 
   @Field(() => UsageType)
   usageType!: UsageType;
@@ -21,9 +28,11 @@ export class Package {
   @Field(() => PackageStatus)
   status!: PackageStatus;
 
-  @Field()
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  createdAt!: Date;
 
-  @Field()
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 }

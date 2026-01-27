@@ -1,4 +1,5 @@
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import {
   Args,
   Mutation,
@@ -46,11 +47,33 @@ export class UserResolver {
     })
     data?: GetUsersInput,
   ): Promise<UserListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
+      const status = data?.status;
+      return plainToInstance(
+        UserListResponse,
+        await this.userService.getAllUser({ page, limit, status }),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
 
-    return this.userService.getAllUser({ page, limit, search });
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      } as UserListResponse;
+    }
   }
 
   @Query(() => UserResponse, { name: GRAPHQL_NAME_USER.GET_ONE })
@@ -60,14 +83,31 @@ export class UserResolver {
     id: string | undefined,
     @CurrentUser() user: UserProfile,
   ): Promise<UserResponse> {
-    let userId = '';
-    if (user.role === Role.ADMIN) {
-      userId = id || user.accountId;
-    } else {
-      userId = user.accountId;
-    }
+    try {
+      let userId = '';
+      if (user.role === Role.ADMIN) {
+        userId = id || user.accountId;
+      } else {
+        userId = user.accountId;
+      }
 
-    return this.userService.getUserDetail(userId);
+      return plainToInstance(
+        UserResponse,
+        await this.userService.getUserDetail(userId),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => UserResponse, { name: GRAPHQL_NAME_USER.UPDATE })
@@ -76,8 +116,25 @@ export class UserResolver {
     @CurrentUser() user: UserProfile,
     @Args('data') data: UpdateUserInput,
   ): Promise<UserResponse> {
-    const id = user?.accountId;
-    return this.userService.updateUser(id, data);
+    try {
+      const id = user?.accountId;
+      return plainToInstance(
+        UserResponse,
+        await this.userService.updateUser(id, data),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => UserResponse, { name: GRAPHQL_NAME_USER.CHANGE_STATUS })
@@ -85,7 +142,27 @@ export class UserResolver {
   async changeStatus(
     @Args('data') data: ChangeUserStatusInput,
   ): Promise<UserResponse> {
-    return this.userService.changeStatus(data);
+    try {
+      return plainToInstance(
+        UserResponse,
+        await this.userService.changeStatus({
+          accountId: data.accountId,
+          status: data.status,
+        }),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @ResolveField(() => Account)
@@ -97,7 +174,24 @@ export class UserResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async getUserStats(): Promise<UserStatsResponse> {
-    return this.userService.getUserStats();
+    try {
+      return plainToInstance(
+        UserStatsResponse,
+        await this.userService.getUserStats(),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => String)

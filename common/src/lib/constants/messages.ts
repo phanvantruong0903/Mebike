@@ -40,6 +40,8 @@ export const USER_MESSAGES = {
   ACCESS_TOKEN_REQUIRED: 'Access Token is required',
   USER_VERIFY_SUCCESS: 'User verified successfully',
   DELETE_FAILED: 'Delete User failed',
+  GET_USERS_BY_ACCOUNT_IDS_SUCCESS: 'Get users by account ids successfully',
+  FIND_FREE_SOS_SUCCESS: 'Find free SOS successfully',
 };
 
 export const SUPPLIER_MESSAGES = {
@@ -55,6 +57,7 @@ export const SUPPLIER_MESSAGES = {
   VALIDATION_FAILED: 'Supplier name or phone incorrect',
   UPDATE_FAIL: 'Update Supplier failed',
   GET_ALL_STATS_SUCCESS: 'Supplier stats retrieved successfully',
+  EXIST: 'Supplier already exists',
 };
 
 export const STATION_MESSAGES = {
@@ -71,6 +74,10 @@ export const STATION_MESSAGES = {
   UPDATE_FAIL: 'Update Station failed',
   GET_ALL_STATS_SUCCESS: 'Station stats retrieved successfully',
   STATION_FULL: 'Station is full',
+  NO_STATION_NEARBY:
+    'We are experiencing high demand. Please try your request again shortly. ',
+  NO_STATION_NEARBY_AND_BIKE:
+    'Sorry, there are no cars available in your area right now. Please try again shortly.',
 };
 
 export const BIKE_MESSAGES = {
@@ -86,6 +93,9 @@ export const BIKE_MESSAGES = {
   VALIDATION_FAILED: 'Bike name or phone incorrect',
   UPDATE_FAIL: 'Update Bike failed',
   GET_ALL_STATS_SUCCESS: 'Bike stats retrieved successfully',
+  NOT_ASSIGNED_STATION: 'Bike is not assigned to any station',
+  // status messages
+  NOT_AVAILABLE: 'Bike is not available',
 };
 
 export const PAYMENT_MESSAGES = {
@@ -121,6 +131,9 @@ export const PAYMENT_MESSAGES = {
   FORBIDDEN: 'Forbidden: You can only view your own transactions',
   GET_ALL_WITHDRAW_SUCCESS: 'Withdraws retrieved successfully',
   GET_ONE_WITHDRAW_SUCCESS: 'Withdraw retrieved successfully',
+  // Description
+  DEBIT_SUBSCRIPTION_DESCRIPTION: (subscriptionId: string) =>
+    `Debit subscription for subscription ID: ${subscriptionId}`,
 };
 
 export const SERVER_MESSAGE = {
@@ -138,6 +151,7 @@ export const SERVER_MESSAGE = {
   DELETED_NOT_IMPLEMENTED: 'Delete method is not implemented',
   BAD_REQUEST: 'Bad Request',
   UNAUTHORIZED: 'Unauthorized',
+  FORBIDDEN: 'Forbidden',
 };
 
 export const RENTAL_MESSAGES = {
@@ -150,8 +164,7 @@ export const RENTAL_MESSAGES = {
   SUMMARIZE_SUCCESS: 'Rental summarized successfully',
   SUMMARIZE_FAIL: 'Rental summarized failed',
   NOT_FOUND: 'Rental not found',
-  NOT_FOUND_WITH_STATUS: (status: string) =>
-    `Rental not found with status ${status}`,
+  NOT_FOUND_WITH_STATUS: (status: string) => `${status} rental not found`,
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create Rental failed',
   VALIDATION_FAILED: 'Rental name or phone incorrect',
@@ -161,6 +174,9 @@ export const RENTAL_MESSAGES = {
   INVALID_ID: 'Invalid id format',
   GET_ONE_SUCCESS: 'Rental retrieved successfully',
   GET_ONE_FAILED: 'Rental retrieved failed',
+  BIKE_NOT_ASSIGNED: 'Bike not assigned to this reservation',
+  GET_BY_IDS_SUCCESS: 'Rentals retrieved successfully',
+  GET_BY_IDS_FAIL: 'Rentals retrieved failed',
 };
 
 export const RESERVATION_MESSAGES = {
@@ -173,8 +189,7 @@ export const RESERVATION_MESSAGES = {
   SUMMARIZE_SUCCESS: 'Reservation summarized successfully',
   SUMMARIZE_FAIL: 'Reservation summarized failed',
   NOT_FOUND: 'Reservation not found',
-  NOT_FOUND_WITH_STATUS: (status: string) =>
-    `Reservation not found with status ${status}`,
+  NOT_FOUND_WITH_STATUS: (status: string) => `${status} reservation not found`,
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create Reservation failed',
   VALIDATION_FAILED: 'Reservation name or phone incorrect',
@@ -184,8 +199,11 @@ export const RESERVATION_MESSAGES = {
   INVALID_ID: 'Invalid id format',
   GET_ONE_SUCCESS: 'Reservation retrieved successfully',
   GET_ONE_FAILED: 'Reservation retrieved failed',
-  CONFIRM_SUCCESS: 'Reservation confirmed successfully',
-  CONFIRM_FAIL: 'Reservation confirmed failed',
+  ACTIVATE_SUCCESS: 'Reservation activated successfully',
+  ACTIVATE_FAIL: 'Reservation activated failed',
+  INVALID_ACTIVATE_TIME:
+    'Activation time must be between start time and end time',
+  FUTURE_START_TIME: 'Start time must be in the future',
 };
 
 export const SUBSCRIPTION_MESSAGES = {
@@ -198,8 +216,7 @@ export const SUBSCRIPTION_MESSAGES = {
   SUMMARIZE_SUCCESS: 'Subscription summarized successfully',
   SUMMARIZE_FAIL: 'Subscription summarized failed',
   NOT_FOUND: 'Subscription not found',
-  NOT_FOUND_WITH_STATUS: (status: string) =>
-    `Subscription not found with status ${status}`,
+  NOT_FOUND_WITH_STATUS: (status: string) => `${status} subscription not found`,
   VALIDATION_ERROR: 'Validation error',
   CREATE_FAILED: 'Create Subscription failed',
   VALIDATION_FAILED: 'Subscription name or phone incorrect',
@@ -213,6 +230,9 @@ export const SUBSCRIPTION_MESSAGES = {
   ACTIVATE_FAILED: 'Subscription activated failed',
   EXPIRE_SUCCESS: 'Subscription expired successfully',
   EXPIRE_FAILED: 'Subscription expired failed',
+  ALREADY_HAVE_SUBSCRIPTION: 'User already has subscription',
+  CANNOT_ACTIVATE_OTHER_USER_SUBSCRIPTION:
+    'Access denied, cannot activate other user subscription',
 };
 
 export const PACKAGE_MESSAGES = {
@@ -229,4 +249,36 @@ export const PACKAGE_MESSAGES = {
   UPDATE_FAIL: 'Update Package failed',
   GET_ONE_SUCCESS: 'Package retrieved successfully',
   GET_ONE_FAILED: 'Package retrieved failed',
+  EXISTS: (name: string) => `Package ${name} already exists`,
+  MAX_USAGES_MUST_BE_POSITIVE: 'Max usages must be positive',
+  TOGGLE_STATUS_SUCCESS: 'Toggle Package status successfully',
+  TOGGLE_STATUS_FAIL: 'Toggle Package status failed',
+  REQUIRE: (field: string) => `${field} is required`,
+};
+
+export const SOS_MESSAGES = {
+  EXISTED: 'SOS already exists',
+  CREATE_SUCCESS: 'SOS created successfully',
+  UPDATE_SUCCESS: 'SOS updated successfully',
+  GET_ALL_SUCCESS: 'SOS retrieved successfully',
+  GET_ALL_FAIL: 'SOS retrieved failed',
+  GET_DETAIL_SUCCESS: 'SOS details retrieved successfully',
+  DELETE_SUCCESS: 'SOS deleted successfully',
+  NOT_FOUND: 'SOS not found',
+  VALIDATION_ERROR: 'Validation error',
+  CREATE_FAILED: 'Create SOS failed',
+  VALIDATION_FAILED: 'SOS name incorrect',
+  UPDATE_FAIL: 'Update SOS failed',
+  GET_ONE_SUCCESS: 'SOS retrieved successfully',
+  GET_ONE_FAILED: 'SOS retrieved failed',
+  UPDATE_FAILED: 'Update SOS failed',
+  INVALID_STATUS: 'Invalid SOS status',
+  CANNOT_CANCEL: 'Cannot cancel SOS that is not in processing status',
+  CANNOT_UPDATE_OTHER: 'Cannot update other SOS',
+  JUST_ONLY_CANCEL: 'Just only cancel SOS',
+  PHOTOS_REQUIRED: 'Photos are required',
+  FORBIDDEN: 'Forbidden: You can only view your own SOS',
+  CANNOT_CREATE_NOT_IN_PROGRESS_RENTAL:
+    'Cannot create for rental not In Progress',
+  AGENT_NOTES_REQUIRED: 'Agent notes are required',
 };

@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  output = "../../../common/src/lib/prisma/membership/generated"
+  provider      = "prisma-client-js"
+  output        = "../../../common/src/lib/prisma/membership/generated"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
@@ -10,28 +10,30 @@ datasource db {
 }
 
 model Subscription {
-  id                    String       @id @default(uuid())
-  userId                String
-  packageId             String?
-  activatedAt           DateTime?
-  expiredAt             DateTime?
-  usageCounts           Int          @default(0)
-  status                SubscriptionStatus   @default(Pending)
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  id          String             @id @default(uuid())
+  accountId   String
+  packageId   String
+  package     Package            @relation(fields: [packageId], references: [id])
+  activatedAt DateTime?
+  expiredAt   DateTime?
+  usageCounts Int                @default(0)
+  status      SubscriptionStatus @default(Pending)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
   @@map("subscriptions")
 }
 
 model Package {
-  id                    String       @id @default(uuid())
-  name                  String       @unique
-  price                 Decimal     
-  maxUsages             Int?
-  usageType             UsageType      @default(Finite)
-  status                PackageStatus   @default(Active)
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
+  id           String         @id @default(uuid())
+  name         String         @unique
+  price        Decimal        @db.Decimal(10, 2)
+  maxUsages    Int?
+  usageType    UsageType      @default(Finite)
+  status       PackageStatus  @default(Active)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Subscription Subscription[]
 
   @@map("packages")
 }

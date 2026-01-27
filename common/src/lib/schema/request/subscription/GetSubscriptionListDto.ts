@@ -15,4 +15,12 @@ export class GetSubscriptionListDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  accountId?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
 }

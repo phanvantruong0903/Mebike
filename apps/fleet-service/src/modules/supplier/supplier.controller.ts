@@ -1,7 +1,6 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
-  BaseGrpcHandler,
   GRPC_SERVICES,
   grpcResponse,
   throwGrpcError,
@@ -13,26 +12,16 @@ import {
   SUPPLIER_MESSAGES,
   ChangeSupplierStatusDto,
   SupplierModel,
-  buildSearchFilter,
+  GetSupplierDetailDto,
+  GetSupplierDto,
+  GetSuppliersByIdsDto,
 } from '@mebike/common';
 import { SupplierService } from './supllier.service';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class SupplierController {
-  private readonly baseHandler: BaseGrpcHandler<
-    SupplierModel,
-    CreateSupplierDto,
-    UpdateSupplierDto
-  >;
-
-  constructor(private readonly supplierService: SupplierService) {
-    this.baseHandler = new BaseGrpcHandler(
-      this.supplierService,
-      CreateSupplierDto,
-      UpdateSupplierDto,
-    );
-  }
+  constructor(private readonly supplierService: SupplierService) {}
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.UPDATE)
   async updateSupplier(
@@ -53,19 +42,25 @@ export class SupplierController {
       if (error instanceof RpcException) {
         throw error;
       }
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        (error as any).code === 'P2002'
+      ) {
+        throwGrpcError(409, SUPPLIER_MESSAGES.EXIST, [SUPPLIER_MESSAGES.EXIST]);
+      }
       const err = error as Error;
       throw new RpcException(err?.message || SUPPLIER_MESSAGES.UPDATE_FAIL);
     }
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_ONE)
-  async getSupplierDetail({
-    id,
-  }: {
-    id: string;
-  }): Promise<ReturnType<typeof grpcResponse>> {
+  async getSupplierDetail(
+    data: GetSupplierDetailDto,
+  ): Promise<ReturnType<typeof grpcResponse>> {
     try {
-      const result = await this.supplierService.getSupplierDetail(id);
+      const result = await this.supplierService.getSupplierDetail(data.id);
       return grpcResponse<SupplierModel>(
         result,
         SUPPLIER_MESSAGES.GET_DETAIL_SUCCESS,
@@ -93,23 +88,25 @@ export class SupplierController {
       if (error instanceof RpcException) {
         throw error;
       }
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throwGrpcError(409, SUPPLIER_MESSAGES.EXIST, [SUPPLIER_MESSAGES.EXIST]);
+      }
       const err = error as Error;
       throw new RpcException(err?.message || SUPPLIER_MESSAGES.CREATE_FAILED);
     }
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_ALL)
-  async getAllSuppliers(data: {
-    page: number;
-    limit: number;
-    search?: string;
-  }): Promise<ReturnType<typeof grpcPaginateResponse>> {
+  async getAllSuppliers(
+    data: GetSupplierDto,
+  ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit } = data;
-      const searchFilter = ['name', 'id'];
-      const search = buildSearchFilter(data.search, searchFilter);
-
-      const result = await this.baseHandler.getAllLogic(page, limit, search);
+      const result = await this.supplierService.getAllSuppliers(data);
       return grpcPaginateResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -158,7 +155,7 @@ export class SupplierController {
   }
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.GET_SUPPLIERS_BY_IDS)
-  async getSupplierByIds(data: { ids: string[] }) {
+  async getSupplierByIds(data: GetSuppliersByIdsDto) {
     const result = await this.supplierService.getSuppliersByIds(data.ids);
     return grpcResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
   }

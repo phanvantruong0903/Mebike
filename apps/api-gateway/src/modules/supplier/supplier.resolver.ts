@@ -1,15 +1,19 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
   CreateSupplierInput,
   UpdateSupplierInput,
+  UpdateSupplierDto,
   SupplierResponse,
   GRAPHQL_NAME_SUPPLIER,
   SupplierListResponse,
   GetSupplierInput,
-  ChangeSupplierStatusInput,
+  SupplierSearchResult,
+  SupplierSearchPage,
+  ChangeSupplierStatusDto,
   SupplierStatsResponse,
 } from '@mebike/common';
 import { RoleGuard } from '../auth/role.guard';
@@ -26,7 +30,24 @@ export class SupplierResolver {
   async createSupplier(
     @Args('body') body: CreateSupplierInput,
   ): Promise<SupplierResponse> {
-    return this.supplierService.createSupplier(body);
+    try {
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.createSupplier(body),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Mutation(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.UPDATE })
@@ -36,15 +57,49 @@ export class SupplierResolver {
     @Args('body') body: UpdateSupplierInput,
     @Args('id') id: string,
   ): Promise<SupplierResponse> {
-    return this.supplierService.updateSupplier({
-      id,
-      ...body,
-    });
+    try {
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.updateSupplier({
+          id,
+          ...body,
+        } as unknown as UpdateSupplierDto),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SupplierResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ONE })
   async getSupplier(@Args('id') id: string): Promise<SupplierResponse> {
-    return this.supplierService.getSupplier({ id });
+    try {
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.getSupplier({ id }),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SupplierListResponse, { name: GRAPHQL_NAME_SUPPLIER.GET_ALL })
@@ -58,11 +113,37 @@ export class SupplierResolver {
     })
     data: GetSupplierInput,
   ): Promise<SupplierListResponse> {
-    const page = data?.page ?? 1;
-    const limit = data?.limit ?? 10;
-    const search = data?.search ?? '';
+    try {
+      const page = data?.page ?? 1;
+      const limit = data?.limit ?? 10;
+      const status = data?.status ?? undefined;
+      return plainToInstance(
+        SupplierListResponse,
+        await this.supplierService.getAllSuppliers({
+          page,
+          limit,
+          status,
+        }),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
 
-    return this.supplierService.getAllSuppliers({ page, limit, search });
+      return {
+        success: false,
+        message: message,
+        data: [],
+        errors: [message],
+        statusCode: statusCode,
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      } as SupplierListResponse;
+    }
   }
 
   @Mutation(() => SupplierResponse, {
@@ -71,9 +152,27 @@ export class SupplierResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async changeSupplierStatus(
-    @Args('body') body: ChangeSupplierStatusInput,
+    @Args('body') body: CreateSupplierInput,
   ): Promise<SupplierResponse> {
-    return this.supplierService.changeSupplierStatus(body);
+    try {
+      const data = body as unknown as ChangeSupplierStatusDto;
+      return plainToInstance(
+        SupplierResponse,
+        await this.supplierService.changeSupplierStatus(data),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
   }
 
   @Query(() => SupplierStatsResponse, {
@@ -82,7 +181,74 @@ export class SupplierResolver {
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(Role.ADMIN)
   async getSupplierStats(): Promise<SupplierStatsResponse> {
-    return this.supplierService.getSupplierStats();
+    try {
+      return plainToInstance(
+        SupplierStatsResponse,
+        await this.supplierService.getSupplierStats(),
+      );
+    } catch (error) {
+      const err = error as any;
+      const statusCode = err?.status || 500;
+      const message = err?.message || 'An error occurred';
+
+      return {
+        success: false,
+        message: message,
+        data: null,
+        errors: [message],
+        statusCode: statusCode,
+      };
+    }
+  }
+
+  @Query(() => SupplierSearchResult, {
+    name: GRAPHQL_NAME_SUPPLIER.AUTO_COMPLETE,
+  })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async autoCompleteSupplier(
+    @Args('q', { nullable: true, type: () => String, defaultValue: '' })
+    query: string,
+  ): Promise<SupplierSearchResult> {
+    try {
+      return await this.supplierService.autoComplete(query);
+    } catch (error) {
+      return { data: [] };
+    }
+  }
+
+  @Query(() => SupplierSearchPage, { name: GRAPHQL_NAME_SUPPLIER.SEARCH })
+  @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles(Role.ADMIN)
+  async searchSupplier(
+    @Args('q', { nullable: true }) q: string,
+    @Args('params', {
+      nullable: true,
+      type: () => GetSupplierInput,
+      defaultValue: {},
+    })
+    data: GetSupplierInput,
+  ): Promise<SupplierSearchPage> {
+    try {
+      const page = data.page ?? 1;
+      const limit = data.limit ?? 10;
+      const search = q ?? '';
+
+      return plainToInstance(
+        SupplierSearchPage,
+        await this.supplierService.searchSupplier(page, limit, search),
+      );
+    } catch (error) {
+      return {
+        data: [],
+        pagination: {
+          total: 0,
+          page: data?.page ?? 1,
+          limit: data?.limit ?? 10,
+          totalPages: 0,
+        },
+      };
+    }
   }
 
   @Query(() => String)

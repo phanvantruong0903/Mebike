@@ -12,6 +12,7 @@ import {
   GRPC_SERVICES,
   grpcPaginateResponse,
   grpcResponse,
+  Rental,
   RENTAL_MESSAGES,
   RENTAL_METHODS,
   RentalModel,
@@ -89,7 +90,12 @@ export class RentalController {
       const { page, limit, search, ...filterFields } = data;
       const filter = buildFilter(filterFields);
 
-      const searchFields = ['startStation', 'endStation', 'status'];
+      const searchFields = [
+        'accountId',
+        'startStationId',
+        'endStationId',
+        'status',
+      ];
       const searchFilter = buildSearchFilter(search, searchFields);
 
       const where = {
@@ -128,6 +134,24 @@ export class RentalController {
       }
       const err = error as Error;
       throw new RpcException(err?.message || RENTAL_MESSAGES.SUMMARIZE_FAIL);
+    }
+  }
+
+  @GrpcMethod(GRPC_SERVICES.RENTAL, RENTAL_METHODS.GET_BY_IDS)
+  async getRentalsByIds(data: {
+    ids: string[];
+  }): Promise<ReturnType<typeof grpcResponse>> {
+    try {
+      const result = (await this.rentalService.getByIds(
+        data.ids,
+      )) as unknown as Rental[];
+      return grpcResponse(result, RENTAL_MESSAGES.GET_BY_IDS_SUCCESS);
+    } catch (error) {
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      const err = error as Error;
+      throw new RpcException(err?.message || RENTAL_MESSAGES.GET_BY_IDS_FAIL);
     }
   }
 }

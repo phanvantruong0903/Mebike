@@ -1,9 +1,10 @@
-import { IsString, IsNotEmpty, IsIn } from 'class-validator';
+import { IsString, IsNotEmpty, IsIn, IsUUID } from 'class-validator';
 import { StationStatus } from '../../../prisma/index';
 
 export class UpdateStationStatusDto {
   @IsString()
   @IsNotEmpty()
+  @IsUUID()
   id!: string;
 
   @IsString()

@@ -3,20 +3,23 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { Observable, firstValueFrom } from 'rxjs';
 import {
   GRPC_PACKAGE,
-  GRPC_SERVICES,
-  UpdateBikeInput,
-  GetBikeInput,
   CreateBikeInput,
   BikeResponse,
   BikeListResponse,
   BikeStatus,
   Bike,
+  GRPC_SERVICES,
+  meiliClient,
+  BikeResult,
+  UpdateBikeDto,
+  GetBikeDto,
+  BikeSearchResult,
 } from '@mebike/common';
 
 interface BikeServiceClient {
   GetBike(data: { id: string }): Observable<BikeResponse>;
-  UpdateBike(data: UpdateBikeInput & { id: string }): Observable<BikeResponse>;
-  GetAllBikes(data: GetBikeInput): Observable<BikeListResponse>;
+  UpdateBike(data: UpdateBikeDto): Observable<BikeResponse>;
+  GetAllBikes(data: GetBikeDto): Observable<BikeListResponse>;
   CreateBike(data: CreateBikeInput): Observable<BikeResponse>;
   ChangeBikeStatus(data: {
     id: string;
@@ -33,21 +36,34 @@ export class BikeService implements OnModuleInit {
     @Inject(GRPC_PACKAGE.FLEET) private readonly client: ClientGrpc,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     this.fleetService = this.client.getService<BikeServiceClient>(
       GRPC_SERVICES.FLEET,
     );
+    await this.createBikeIndex();
+    await meiliClient.index('Bike').updateSettings({
+      searchableAttributes: ['chipId', 'id', 'supplier.name', 'station.name'],
+      filterableAttributes: ['status', 'supplier.id', 'station.id'],
+    });
+  }
+
+  async createBikeIndex() {
+    try {
+      await meiliClient.getIndex('Bike');
+    } catch {
+      await meiliClient.createIndex('Bike', { primaryKey: 'id' });
+    }
   }
 
   async createBike(data: CreateBikeInput) {
     return await firstValueFrom(this.fleetService.CreateBike(data));
   }
 
-  async updateBike(data: UpdateBikeInput & { id: string }) {
+  async updateBike(data: UpdateBikeDto) {
     return await firstValueFrom(this.fleetService.UpdateBike(data));
   }
 
-  async getAllBike(data: GetBikeInput) {
+  async getAllBike(data: GetBikeDto) {
     const response = await firstValueFrom(this.fleetService.GetAllBikes(data));
     return {
       ...response,
@@ -68,5 +84,30 @@ export class BikeService implements OnModuleInit {
       this.fleetService.GetBikesByIds({ ids }),
     );
     return response.data || [];
+  }
+
+  async autoComplete(query: string): Promise<BikeSearchResult> {
+    const result = await meiliClient.index('Bike').search(query, {
+      limit: 10,
+    });
+    return {
+      data: (result.hits as BikeResult[]) ?? [],
+    };
+  }
+
+  async searchBike(page: number, limit: number, query: string) {
+    const result = await meiliClient.index('Bike').search(query, {
+      limit,
+      offset: (page - 1) * limit,
+    });
+    return {
+      data: (result.hits as BikeResult[]) ?? [],
+      pagination: {
+        total: result.estimatedTotalHits || 0,
+        page,
+        limit,
+        totalPages: Math.ceil(result.estimatedTotalHits / limit),
+      },
+    };
   }
 }
