@@ -35,7 +35,7 @@ export class SupplierService
     });
     this.requestDedup.define('fetchSupplierById', {}, async (id: string) => {
       const key = `supplier:${id}`;
-      const cacheSupplier = await redisClient.get(key);
+      const cacheSupplier = await this.redisClient.get(key);
 
       if (cacheSupplier) return JSON.parse(cacheSupplier);
       const supplier = await prismaFleet.supplier.findUnique({
@@ -297,33 +297,17 @@ export class SupplierService
       };
     }
 
-    const redisKeys = supplierIds.map((id) => `supplier:${id}`);
-    const cachedSuppliers = await this.redisClient.mget(redisKeys);
-
-    const suppliers: SupplierModel[] = [];
-    const missingIds: string[] = [];
-
-    cachedSuppliers.forEach((item, index) => {
-      if (item) suppliers.push(JSON.parse(item));
-      else missingIds.push(supplierIds[index]);
-    });
-
-    if (missingIds.length > 0) {
-      const missingSuppliers = await prismaFleet.supplier.findMany({
-        where: { id: { in: missingIds } },
-      });
-
-      const pipeline = this.redisClient.pipeline();
-      missingSuppliers.forEach((sup) => {
-        suppliers.push(sup);
-        pipeline.set(`supplier:${sup.id}`, JSON.stringify(sup), 'EX', 3600);
-      });
-      await pipeline.exec();
-    }
-
-    const response = supplierIds.map((supplierId) =>
-      suppliers.find((supplier) => supplier.id === supplierId),
+    const suppliers = await Promise.all(
+      supplierIds.map((id) => (this.requestDedup as any).fetchSupplierById(id)),
     );
+
+    const supplierMap = new Map(
+      suppliers.filter((s) => s !== null).map((s) => [s.id, s]),
+    );
+
+    const response = supplierIds
+      .map((supplierId) => supplierMap.get(supplierId))
+      .filter((s) => s !== null);
 
     return {
       data: response,

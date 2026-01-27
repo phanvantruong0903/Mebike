@@ -172,34 +172,18 @@ export class BikeService
       };
     }
 
-    const redisKeys = bikeIds.map((id) => `bike:${id}`);
-    const bikeData = await this.redisClient.mget(redisKeys);
-
-    const bikes: BikeModel[] = [];
-    const missingIds: string[] = [];
-
-    bikeData.forEach((bike, index) => {
-      if (bike) bikes.push(JSON.parse(bike));
-      else missingIds.push(bikeIds[index]);
-    });
-
-    if (missingIds.length > 0) {
-      const missingBikes = await prismaFleet.bike.findMany({
-        where: { id: { in: missingIds } },
-        include: { station: true, supplier: true },
-      });
-
-      const pipeline = this.redisClient.pipeline();
-      missingBikes.forEach((bike) => {
-        pipeline.set(`bike:${bike.id}`, JSON.stringify(bike), 'EX', 3600);
-        bikes.push(bike);
-      });
-      await pipeline.exec();
-    }
-
-    const response = bikeIds.map((bikeId) =>
-      bikes.find((bike) => bike.id === bikeId),
+    const bikes = await Promise.all(
+      bikeIds.map((id) => (this.requestDedup as any).fetchBikeById(id)),
     );
+
+    const bikeMap = new Map(
+      bikes.filter((bike) => bike !== null).map((bike) => [bike.id, bike]),
+    );
+
+    const response = bikeIds
+      .map((bikeId) => bikeMap.get(bikeId))
+      .filter((bike) => bike !== null);
+
     return {
       data: response,
       total: result.estimatedTotalHits,

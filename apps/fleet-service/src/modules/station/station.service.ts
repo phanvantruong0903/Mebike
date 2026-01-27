@@ -167,12 +167,17 @@ export class StationService
       });
 
       const stationIds = stationSearch.hits.map((s) => s.id);
-      const stations = await this.getStationsByIds(stationIds);
+      const stations = await Promise.all(
+        stationIds.map((id) => (this.requestDedup as any).fetchStationById(id)),
+      );
+      const stationMap = new Map(
+        stations.filter((s) => s !== null).map((s) => [s.id, s]),
+      );
 
       const stationsWithCount = results
         .map((stationResult, index) => {
           const stationId = stationIds[index];
-          const station = stations.find((s) => s.id === stationId);
+          const station = stationMap.get(stationId);
 
           if (!station) return null;
 
@@ -226,8 +231,16 @@ export class StationService
     }
 
     const allStationIds = geoResult.map((item) => item[0]);
-    const stations = await this.getStationsByIds(allStationIds, status);
-    const stationMap = new Map(stations.map((s) => [s.id, s]));
+    const stations = await Promise.all(
+      allStationIds.map((id) =>
+        (this.requestDedup as any).fetchStationById(id),
+      ),
+    );
+    const stationMap = new Map(
+      stations
+        .filter((s) => s && (s.status === status || !status))
+        .map((s) => [s.id, s]),
+    );
 
     const filteredGeoResult = geoResult.filter(([id]) => stationMap.has(id));
     const total = filteredGeoResult.length;
