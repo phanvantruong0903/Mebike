@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -32,7 +33,10 @@ export class TransactionResolver {
     @Args('body') body: UpdateWithDrawStatusInput,
   ): Promise<WithdrawResponse> {
     try {
-      return await this.transactionService.updateWithdrawStatus(body);
+      return plainToInstance(
+        WithdrawResponse,
+        await this.transactionService.updateWithdrawStatus(body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -56,7 +60,10 @@ export class TransactionResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<TransactionResponse> {
     try {
-      return await this.transactionService.getTransactionDetail({ id }, user);
+      return plainToInstance(
+        TransactionResponse,
+        await this.transactionService.getTransactionDetail({ id }, user),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -93,11 +100,14 @@ export class TransactionResolver {
         data.accountId = user.accountId;
       }
 
-      return await this.transactionService.getAllTransaction({
-        page,
-        limit,
-        accountId: data.accountId,
-      });
+      return plainToInstance(
+        TransactionListResponse,
+        await this.transactionService.getAllTransaction({
+          page,
+          limit,
+          accountId: data.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -129,10 +139,13 @@ export class TransactionResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawResponse> {
     try {
-      return await this.transactionService.createWithdraw({
-        ...body,
-        accountId: user.accountId,
-      } as unknown as CreateWithDrawDto);
+      return plainToInstance(
+        WithdrawResponse,
+        await this.transactionService.createWithdraw({
+          ...body,
+          accountId: user.accountId,
+        } as unknown as CreateWithDrawDto),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -169,11 +182,14 @@ export class TransactionResolver {
         data.accountId = user.accountId;
       }
 
-      return await this.transactionService.getAllWithdraw({
-        page,
-        limit,
-        accountId: data.accountId,
-      });
+      return plainToInstance(
+        WithdrawListResponse,
+        await this.transactionService.getAllWithdraw({
+          page,
+          limit,
+          accountId: data.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -205,7 +221,10 @@ export class TransactionResolver {
     @CurrentUser() user: UserProfile,
   ): Promise<WithdrawResponse> {
     try {
-      return await this.transactionService.getWithdrawDetail(id, user);
+      return plainToInstance(
+        WithdrawResponse,
+        await this.transactionService.getWithdrawDetail(id, user),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;

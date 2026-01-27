@@ -1,9 +1,16 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  Float,
+  ID,
+  ObjectType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { Station } from '../../station';
 import { ReservationStatus } from '../../../../prisma/index';
 import { Bike } from '../../bike';
 import { UserProfile } from '../../user';
 import { Subscription } from '../../subscription';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class Reservation {
@@ -34,9 +41,11 @@ export class Reservation {
   @Field(() => ReservationStatus)
   status!: ReservationStatus;
 
-  @Field()
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  createdAt!: Date;
 
-  @Field()
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 }

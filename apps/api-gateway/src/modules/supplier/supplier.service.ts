@@ -43,19 +43,6 @@ export class SupplierService implements OnModuleInit {
     this.fleetService = this.client.getService<SupplierServiceClient>(
       GRPC_SERVICES.FLEET,
     );
-    await this.createSupplierIndex();
-    await meiliClient.index('Supplier').updateSettings({
-      searchableAttributes: ['name', 'id'],
-      filterableAttributes: ['status'],
-    });
-  }
-
-  async createSupplierIndex() {
-    try {
-      await meiliClient.getIndex('Supplier');
-    } catch {
-      await meiliClient.createIndex('Supplier', { primaryKey: 'id' });
-    }
   }
 
   async createSupplier(data: CreateSupplierInput) {
@@ -111,11 +98,17 @@ export class SupplierService implements OnModuleInit {
     return response.data || [];
   }
 
-  async autoComplete(query: string): Promise<SupplierSearchResult[]> {
+  async autoComplete(query: string): Promise<SupplierSearchResult> {
     const result = await meiliClient.index('Supplier').search(query, {
       limit: 10,
     });
-    return result.hits as SupplierSearchResult[];
+    const suppliers = (result.hits as Supplier[]) ?? [];
+    return {
+      data: suppliers.map((supplier) => ({
+        ...supplier,
+        bikes: [],
+      })),
+    };
   }
 
   async searchSupplier(
@@ -127,8 +120,12 @@ export class SupplierService implements OnModuleInit {
       limit,
       offset: (page - 1) * limit,
     });
+    const suppliers = (result.hits as Supplier[]) ?? [];
     return {
-      data: result.hits as Supplier[],
+      data: suppliers.map((supplier) => ({
+        ...supplier,
+        bikes: [],
+      })),
       pagination: {
         total: result.estimatedTotalHits || 0,
         page,

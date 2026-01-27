@@ -1,9 +1,10 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import {
   PaymentMethod,
   TransactionStatus,
   TransactionType,
 } from '../../../../prisma/index';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class Transaction {
@@ -28,9 +29,11 @@ export class Transaction {
   @Field()
   description!: string;
 
-  @Field()
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  createdAt!: Date;
 
-  @Field()
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 }

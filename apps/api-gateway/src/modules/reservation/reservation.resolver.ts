@@ -7,6 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { ReservationModel } from '@mebike/common';
 import {
@@ -49,10 +50,13 @@ export class ReservationResolver {
     @Args('body') body: CreateReservationInput,
   ): Promise<ReservationResponse> {
     try {
-      return await this.reservationService.createReservation({
-        ...body,
-        accountId: user.accountId,
-      });
+      return plainToInstance(
+        ReservationResponse,
+        await this.reservationService.createReservation({
+          ...body,
+          accountId: user.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -78,10 +82,13 @@ export class ReservationResolver {
     @Args('body') body: ActivateReservationInput,
   ): Promise<ReservationResponse> {
     try {
-      return await this.reservationService.activateReservation({
-        ...body,
-        accountId: user.accountId,
-      });
+      return plainToInstance(
+        ReservationResponse,
+        await this.reservationService.activateReservation({
+          ...body,
+          accountId: user.accountId,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -100,7 +107,10 @@ export class ReservationResolver {
   @Query(() => ReservationResponse, { name: GRAPHQL_NAME_RESERVATION.GET_ONE })
   async getReservation(@Args('id') id: string): Promise<ReservationResponse> {
     try {
-      return await this.reservationService.getReservation({ id });
+      return plainToInstance(
+        ReservationResponse,
+        await this.reservationService.getReservation({ id }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -131,11 +141,14 @@ export class ReservationResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
 
-      return await this.reservationService.getReservationList({
-        page,
-        limit,
-        search: data.search,
-      });
+      return plainToInstance(
+        ReservationListResponse,
+        await this.reservationService.getReservationList({
+          page,
+          limit,
+          search: data.search,
+        }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;

@@ -1,9 +1,10 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 import { EmergencyStatus } from '../../../../prisma/index';
 import { UserProfile } from '../../user';
 import { Bike } from '../../bike';
 import { Rental } from '../../rental';
 import { Station } from '../../station';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class Sos {
@@ -64,15 +65,19 @@ export class Sos {
   @Field(() => EmergencyStatus)
   status!: EmergencyStatus;
 
-  @Field(() => String)
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  createdAt!: Date;
 
-  @Field(() => String, { nullable: true })
-  startedAt?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  startedAt?: Date;
 
-  @Field(() => String, { nullable: true })
-  resolvedAt?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  resolvedAt?: Date;
 
-  @Field(() => String)
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 }

@@ -41,6 +41,8 @@ export class BikeController {
   ): Promise<ReturnType<typeof grpcResponse>> {
     try {
       const result = await this.baseHandler.updateLogic(data.id, data);
+      await this.bikeService.cacheBikeToRedis(result, 3600);
+
       return grpcResponse<BikeModel>(result, BIKE_MESSAGES.UPDATE_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {
@@ -99,16 +101,7 @@ export class BikeController {
         filter.supplierId = data.supplierId;
       }
 
-      const result = await this.baseHandler.getAllLogic(
-        data.page,
-        data.limit,
-        filter,
-        undefined,
-        {
-          station: true,
-          supplier: true,
-        },
-      );
+      const result = await this.bikeService.getAllBikes(data);
       return grpcPaginateResponse(result, BIKE_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

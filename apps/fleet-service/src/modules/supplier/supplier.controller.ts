@@ -1,7 +1,6 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import {
-  BaseGrpcHandler,
   GRPC_SERVICES,
   grpcResponse,
   throwGrpcError,
@@ -22,19 +21,7 @@ import { SupplierService } from './supllier.service';
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class SupplierController {
-  private readonly baseHandler: BaseGrpcHandler<
-    SupplierModel,
-    CreateSupplierDto,
-    UpdateSupplierDto
-  >;
-
-  constructor(private readonly supplierService: SupplierService) {
-    this.baseHandler = new BaseGrpcHandler(
-      this.supplierService,
-      CreateSupplierDto,
-      UpdateSupplierDto,
-    );
-  }
+  constructor(private readonly supplierService: SupplierService) {}
 
   @GrpcMethod(GRPC_SERVICES.FLEET, SUPPLIER_METHODS.UPDATE)
   async updateSupplier(
@@ -54,6 +41,14 @@ export class SupplierController {
     } catch (error) {
       if (error instanceof RpcException) {
         throw error;
+      }
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        (error as any).code === 'P2002'
+      ) {
+        throwGrpcError(409, SUPPLIER_MESSAGES.EXIST, [SUPPLIER_MESSAGES.EXIST]);
       }
       const err = error as Error;
       throw new RpcException(err?.message || SUPPLIER_MESSAGES.UPDATE_FAIL);
@@ -93,6 +88,14 @@ export class SupplierController {
       if (error instanceof RpcException) {
         throw error;
       }
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
+        throwGrpcError(409, SUPPLIER_MESSAGES.EXIST, [SUPPLIER_MESSAGES.EXIST]);
+      }
       const err = error as Error;
       throw new RpcException(err?.message || SUPPLIER_MESSAGES.CREATE_FAILED);
     }
@@ -103,11 +106,7 @@ export class SupplierController {
     data: GetSupplierDto,
   ): Promise<ReturnType<typeof grpcPaginateResponse>> {
     try {
-      const { page, limit, status } = data;
-      const filter: any = {};
-      if (status) filter.status = status;
-
-      const result = await this.baseHandler.getAllLogic(page, limit, filter);
+      const result = await this.supplierService.getAllSuppliers(data);
       return grpcPaginateResponse(result, SUPPLIER_MESSAGES.GET_ALL_SUCCESS);
     } catch (error) {
       if (error instanceof RpcException) {

@@ -50,19 +50,6 @@ export class StationService implements OnModuleInit {
     this.fleetService = this.client.getService<StationServiceClient>(
       GRPC_SERVICES.FLEET,
     );
-    await this.createStationIndex();
-    await meiliClient.index('Station').updateSettings({
-      searchableAttributes: ['name', 'address', 'id'],
-      filterableAttributes: ['status'],
-    });
-  }
-
-  async createStationIndex() {
-    try {
-      await meiliClient.getIndex('Station');
-    } catch {
-      await meiliClient.createIndex('Station', { primaryKey: 'id' });
-    }
   }
 
   async createStation(data: CreateStationInput) {
@@ -129,7 +116,7 @@ export class StationService implements OnModuleInit {
   async autoComplete(
     query: string,
     user?: UserProfile,
-  ): Promise<StationSearchResult[]> {
+  ): Promise<StationSearchResult> {
     let filter;
     if (user?.role === Role.ADMIN) {
       filter = undefined;
@@ -140,7 +127,7 @@ export class StationService implements OnModuleInit {
       limit: 10,
       filter,
     });
-    return result.hits as StationSearchResult[];
+    return { data: (result.hits as Station[]) ?? [] };
   }
 
   async searchStation(
@@ -161,7 +148,7 @@ export class StationService implements OnModuleInit {
       filter,
     });
     return {
-      data: result.hits as Station[],
+      data: (result.hits as Station[]) ?? [],
       pagination: {
         total: result.estimatedTotalHits || 0,
         page,

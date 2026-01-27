@@ -1,9 +1,17 @@
-import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  Float,
+  ID,
+  Int,
+  ObjectType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { Station } from '../../station';
 import { RentalStatus } from '../../../../prisma/index';
 import { Bike } from '../../bike';
 import { UserProfile } from '../../user';
 import { Subscription } from '../../subscription';
+import { Transform } from 'class-transformer';
 
 @ObjectType()
 export class Rental {
@@ -22,11 +30,13 @@ export class Rental {
   @Field(() => Station, { nullable: true })
   endStation?: Station;
 
-  @Field()
-  startTime!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  startTime!: Date;
 
-  @Field(() => String, { nullable: true })
-  endTime?: string;
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Transform(({ value }) => (value ? new Date(value) : null))
+  endTime?: Date;
 
   @Field(() => Int)
   duration!: number;
@@ -40,9 +50,11 @@ export class Rental {
   @Field(() => RentalStatus)
   status!: RentalStatus;
 
-  @Field()
-  createdAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  createdAt!: Date;
 
-  @Field()
-  updatedAt!: string;
+  @Field(() => GraphQLISODateTime)
+  @Transform(({ value }) => new Date(value))
+  updatedAt!: Date;
 }

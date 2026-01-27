@@ -83,6 +83,8 @@ import { join } from 'node:path';
               client: {
                 clientId: KAFKA_CLIENT_ID.AUTH_SERVICE,
                 brokers: brokers.split(','),
+                connectionTimeout: 10000,
+                authenticationTimeout: 10000,
               },
               consumer: {
                 groupId: KAFKA_GROUP_ID.AUTH_SERVICE,

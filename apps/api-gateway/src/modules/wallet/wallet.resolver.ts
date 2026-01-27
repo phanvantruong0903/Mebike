@@ -1,5 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Role,
@@ -28,7 +29,10 @@ export class WalletResolver {
     @Args('body') body: UpdateWalletStatusInput,
   ): Promise<WalletResponse> {
     try {
-      return await this.walletService.changeWalletStatus(body);
+      return plainToInstance(
+        WalletResponse,
+        await this.walletService.changeWalletStatus(body),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -62,7 +66,10 @@ export class WalletResolver {
         userId = user.accountId;
       }
 
-      return await this.walletService.getWallet({ accountId: userId });
+      return plainToInstance(
+        WalletResponse,
+        await this.walletService.getWallet({ accountId: userId }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
@@ -95,7 +102,10 @@ export class WalletResolver {
       const page = data?.page ?? 1;
       const limit = data?.limit ?? 10;
       const status = data?.status;
-      return await this.walletService.getAllWallet({ page, limit, status });
+      return plainToInstance(
+        WalletListResponse,
+        await this.walletService.getAllWallet({ page, limit, status }),
+      );
     } catch (error) {
       const err = error as any;
       const statusCode = err?.status || 500;
